@@ -1,108 +1,319 @@
-/* Utah Athletic design tokens. Single source of truth for color, type and spacing.
-   Values come from the Claude Design prototype (Nocturne system, UA teal accent). */
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
+/* Utah Athletic design tokens and base styles. Source: Nocturne design system from the Claude Design prototype. */
+/* Inter, self-hosted */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap;
   src: url('/fonts/inter-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap;
   src: url('/fonts/inter-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
+/* Nocturne — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
 :root {
-  --color-bg: #111318;
-  --color-surface: #1b1d24;
+  --color-bg: #161826;
+  --color-surface: #232532;
   --color-text: #e9e9ed;
+  --color-accent: #9184d9; 
+  --color-accent-2: #a7a1db; 
   --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
 
-  --color-accent: #78b7b3;
-  --color-accent-100: #eefaf9;
-  --color-accent-200: #d6f0ee;
-  --color-accent-300: #b5e1dd;
-  --color-accent-400: #95cdc8;
-  --color-accent-500: #78b7b3;
-  --color-accent-600: #5e9692;
-  --color-accent-700: #467471;
-  --color-accent-800: #305351;
-  --color-accent-900: #1f3534;
-
+  /* Tonal ramps — generated in OKLCH on one shared lightness scale, so the
+     same step of any role matches the others in visual value. */
+  --color-neutral-100: #f3f5fe;
+  --color-neutral-200: #e4e7f5;
   --color-neutral-300: #cfd3e5;
   --color-neutral-400: #b2b6ca;
   --color-neutral-500: #9397ab;
   --color-neutral-600: #75798c;
   --color-neutral-700: #595d6c;
   --color-neutral-800: #3f424d;
+  --color-neutral-900: #292b31;
 
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Inter', system-ui, sans-serif;
+  --color-accent-100: #f5f4ff;
+  --color-accent-200: #e7e5fe;
+  --color-accent-300: #d2cefd;
+  --color-accent-400: #b5abfc;
+  --color-accent-500: #968ae0;
+  --color-accent-600: #796cbf;
+  --color-accent-700: #5d5294;
+  --color-accent-800: #423a6a;
+  --color-accent-900: #2b2741;
+
+  --color-accent-2-100: #f5f4ff;
+  --color-accent-2-200: #e7e5fe;
+  --color-accent-2-300: #d2cefd;
+  --color-accent-2-400: #b5afe8;
+  --color-accent-2-500: #9690c9;
+  --color-accent-2-600: #7972a9;
+  --color-accent-2-700: #5c5783;
+  --color-accent-2-800: #423e5d;
+  --color-accent-2-900: #2b293a;
+
+  
+  --color-section: #262a60;
+  --color-section-glow: #353b80;
+  --color-section-ghost: #4c5397;
+
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-heading-weight: 500;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --space-1: 2.8px;
+  --space-2: 5.6px;
+  --space-3: 8.4px;
+  --space-4: 11.2px;
+  --space-6: 16.8px;
+  --space-8: 22.4px;
 
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 14px;
 
-  --gutter: clamp(16px, 4vw, 56px);
-  --max: 1200px;
+  /* Elevation — derived from the ground: soft ink-tinted shadows on a
+     light theme, a hairline edge + ambient darkness on a dark one. */
+  --shadow-sm: 0 0 0 1px #3f424d;
+  --shadow-md: 0 0 0 1px #595d6c, 0 6px 18px rgba(0,0,0,0.55);
+  --shadow-lg: 0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,0.65);
 }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); }
+
+.lighten{mix-blend-mode:lighten;background-color:transparent}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Components — built with the tokens above. Plain CSS
+   on plain HTML: no JavaScript, no build step. Each class is documented in
+   readme.md and demonstrated in foundations/ and components/.
+   ══════════════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; background: var(--color-bg); }
-body {
-  color: var(--color-text);
-  font: 400 15px/1.55 var(--font-body);
-  -webkit-font-smoothing: antialiased;
+body { margin: 0; font-size: 15px; line-height: 1.55; font-weight: 400; }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  line-height: 1.12; letter-spacing: -0.015em; margin: 0 0 var(--space-2);
 }
-h1, h2, h3, h4 {
-  font-family: var(--font-heading);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
-  margin: 0 0 0.4em;
+h1 { font-size: 42px; }
+h2 { font-size: 32px; }
+h3 { font-size: 25px; }
+h4 { font-size: 20px; }
+h5 { font-size: 16px; }
+h6 { font-size: 13px; }
+h6 { letter-spacing: 0.08em; text-transform: uppercase; }
+p { margin: 0 0 var(--space-3); }
+a { color: var(--color-accent); text-underline-offset: 3px; }
+img { display: block; max-width: 100%; }
+figure { margin: 0; }
+figcaption {
+  font-size: 11px; margin-top: var(--space-1);
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
-h1 { font-size: clamp(34px, 6vw, 64px); }
-h2 { font-size: clamp(26px, 4vw, 36px); }
-h3 { font-size: 20px; }
-p { margin: 0 0 0.75em; }
-a { color: var(--color-accent); text-decoration: none; }
-a:hover { color: var(--color-accent-300); }
-img { display: block; max-width: 100%; height: auto; }
-::selection { background: rgba(120, 183, 179, 0.3); }
+.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+:focus { outline: none; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
 
-.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
-.muted { color: var(--color-neutral-400); }
-.kicker {
-  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--color-accent);
-}
+/* — rules — */
+/* Rules fade to transparent at both ends instead of stopping cleanly — a
+   Nocturne signature. The ramp is 48px an end (one deck baseline unit),
+   painted from the same divider token. Freestanding rules fade; box
+   outlines, in-control separators, and short accent marks stay solid. */
 .hr {
-  height: 1px; border: 0; margin: 0;
-  background: linear-gradient(to right, transparent, var(--color-divider) 48px,
+  height: 1px; border: 0; margin: var(--space-4) 0;
+  background: linear-gradient(to right,
+    transparent, var(--color-divider) 48px,
     var(--color-divider) calc(100% - 48px), transparent);
 }
+
+/* — buttons — */
 .btn {
-  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-  font: 500 14px/1 var(--font-body); padding: 12px 18px; border-radius: var(--radius-md);
-  border: 1px solid var(--color-accent); color: var(--color-accent); background: transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; text-decoration: none;
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 14px; line-height: 1.2; color: var(--color-text); /* matches the .input's 14px —
+     the pair sits side by side in sign-up rows */
+  background: transparent; border: 1px solid transparent;
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  border-radius: var(--radius-md);
 }
-.btn:hover { background: rgba(120, 183, 179, 0.12); color: var(--color-accent); }
-.btn-solid { background: var(--color-accent); color: var(--color-bg); }
-.btn-solid:hover { background: var(--color-accent-400); color: var(--color-bg); }
+.btn svg { display: block; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+.btn-primary:active { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.btn-secondary { border-color: var(--color-divider); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
+.btn-ghost { color: var(--color-accent); padding-inline: var(--space-1); }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: 36px; height: 36px; padding: 0; }
+.btn-block { width: 100%; margin-top: var(--space-2); }
+
+/* — forms — */
+.field > label {
+  display: block; font-size: 12px; margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.input {
+  width: 100%; min-height: 36px; padding: 6px 10px; font: inherit;
+  font-size: 14px; color: var(--color-text); caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+textarea.input { min-height: 90px; resize: vertical; }
+.radio { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.radio input, .seg-opt input {
+  position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+}
+.radio .dot {
+  width: 16px; height: 16px; flex: none; border-radius: 50%;
+  border: 1.5px solid var(--color-divider);
+}
+.radio:hover .dot { border-color: var(--color-accent); }
+.radio input:checked + .dot {
+  border-color: var(--color-accent); background: var(--color-accent);
+  box-shadow: inset 0 0 0 4px var(--color-bg);
+}
+.radio input:focus-visible + .dot { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.seg {
+  display: inline-flex; overflow: hidden;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
+}
+.seg-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; font-size: 13px; cursor: pointer;
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt:has(input:checked) { color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+
+/* — cards — */
 .card {
-  background: var(--color-surface); border: 1px solid var(--color-divider);
-  border-radius: var(--radius-lg); padding: 20px;
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface);
 }
-.section { padding-block: clamp(48px, 8vw, 96px); }
-.table-wrap { overflow-x: auto; border: 1px solid var(--color-divider); border-radius: var(--radius-lg); }
-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
-th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--color-divider); vertical-align: top; }
-th { font-weight: 500; color: var(--color-neutral-400); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
-tr:last-child td { border-bottom: 0; }
+.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+.card-title {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 17px; line-height: 1.2;
+}
+.card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
+.card-meta {
+  display: flex; align-items: center; gap: 6px; font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+/* — tags — */
+.tag {
+  display: inline-flex; align-items: center; font-size: 11px;
+  letter-spacing: 0.02em; padding: 3px 10px;
+  border-radius: calc(var(--radius-md) * 0.75);
+}
+.tag-accent { background: var(--color-accent-800); color: var(--color-accent-100); }
+.tag-accent-2 { background: var(--color-accent-2-800); color: var(--color-accent-2-100); }
+.tag-neutral { background: var(--color-neutral-800); color: var(--color-neutral-100); }
+.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+
+/* — navigation — */
+.nav {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: none;
+}
+.nav-brand {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 18px; margin-right: auto;
+}
+.nav a { color: inherit; text-decoration: none; font-size: 14px; }
+.nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent); }
+
+/* — tables — */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+  text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  padding: var(--space-2); border-bottom: 1px solid transparent; /* keeps layout; the row paints the fading rule */
+}
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid transparent;
+}
+/* Row rules as row-level strips so the end-fade spans the row, not each cell. */
+.table thead tr {
+  background: linear-gradient(to right,
+    transparent, var(--color-divider) 48px,
+    var(--color-divider) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
+}
+.table tbody tr {
+  background: linear-gradient(to right,
+    transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 48px,
+    color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
+}
+.table tbody tr:hover {
+  /* the hover tint layers over the row rule, which keeps painting */
+  background:
+    linear-gradient(color-mix(in srgb, var(--color-text) 4%, transparent),
+                    color-mix(in srgb, var(--color-text) 4%, transparent)) no-repeat 0 0 / 100% 100%,
+    linear-gradient(to right,
+      transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 48px,
+      color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
+}
+
+/* — dialog — */
+.dialog-backdrop {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
+}
+.dialog {
+  width: min(440px, 100%); display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4); border-radius: var(--radius-lg);
+  background: var(--color-surface); box-shadow: var(--shadow-lg);
+}
+.dialog-title {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 20px;
+}
+.dialog-body { font-size: 14px; opacity: 0.85; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* ── Utah Athletic overrides: teal accent on a darker ground ── */
+:root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
+html,body{margin:0;background:var(--color-bg)}
+a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
+::selection{background:rgba(120,183,179,.3)}
+
+/* ── Hover/focus states from the prototype (inline styles need !important) ── */
+.dc0:hover{background:rgba(120,183,179,.12) !important}
+.dc1:hover{color:var(--color-accent-300) !important}
+.dc2:hover{background:rgba(120,183,179,.12) !important}
+.dc3:hover{background:rgba(233,233,237,.07) !important}
+.dc4:hover{background:rgba(120,183,179,.12) !important}
+.dc5:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-2px) !important}
+.dc6:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
+.dc7:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
+.dc8:hover{border-color:#78b7b3 !important}
+.dc9:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
+.dc10:focus{border-color:#78b7b3 !important}
+.dc11:focus{border-color:#78b7b3 !important}
+.dc12:focus{border-color:#78b7b3 !important}
+.dc13:hover{background:rgba(120,183,179,.16) !important}
+.dc14:focus{border-color:#78b7b3 !important}
+.dc15:focus{border-color:#78b7b3 !important}
+.dc16:focus{border-color:#78b7b3 !important}
+.dc17:hover{background:rgba(233,233,237,.07) !important}
+.dc18:hover{box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
+.dc19:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
+.dc20:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
+.dc21:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
+.dc22:hover{color:#b5e1dd !important}

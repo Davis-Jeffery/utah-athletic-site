@@ -1,77 +1,10 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import { ORDER, PROGRAMS, VIDEOS } from '../data/programs';
-import { img } from '../lib/images';
-import heroHome from '../assets/images/hero-home.jpg';
+import UAApp from '../components/UAApp.jsx';
+import { buildAssets } from '../lib/assets';
+
+const assets = await buildAssets();
 ---
-<Base title="Utah Athletic Soccer Club">
-  <section class="hero">
-    <Image src={heroHome} alt="" class="hero-bg" widths={[800, 1400, 2000]} sizes="100vw" loading="eager" />
-    <div class="hero-tint"></div>
-    <div class="wrap hero-inner">
-      <p class="kicker">The Utah Athletic pathway</p>
-      <h1>Every level.<br />One standard.</h1>
-      <p class="lead">From a four-year-old's first touch to national-platform football. Choose a level to see who it's for, where it competes, what it costs, and how to join.</p>
-    </div>
-  </section>
-
-  <section class="wrap programs">
-    {ORDER.map((k) => {
-      const p = PROGRAMS[k];
-      return (
-        <a class="program card" href={`/programs/${k}/`}>
-          <Image src={img(p.img)} alt="" widths={[480, 800]} sizes="(max-width: 700px) 100vw, 400px" class="program-img" />
-          <div class="program-body">
-            <span class="kicker">{p.num} · {p.kicker}</span>
-            <h3>{p.name}</h3>
-            <p class="muted">{p.line}</p>
-            <span class="ages">{p.ages} →</span>
-          </div>
-        </a>
-      );
-    })}
-  </section>
-
-  <section class="wrap section">
-    <p class="kicker">Inside Utah Athletic</p>
-    <h2>The docuseries</h2>
-    <div class="videos">
-      {VIDEOS.map((v) => (
-        <a class="video" href={v.url} target="_blank" rel="noopener">
-          <Image src={img(v.img)} alt="" widths={[480, 800]} sizes="(max-width: 700px) 100vw, 380px" />
-          <span class="len">▶ {v.len}</span>
-          <span class="vtitle">{v.title}</span>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <section class="wrap section cta">
-    <h2>Want to play for us?</h2>
-    <p class="muted">Request an invitation for a trial with Academy staff, or find the right level for your player.</p>
-    <a class="btn btn-solid" href="/programs/academy/#join">Request a trial</a>
-  </section>
+<Base title="Utah Athletic Soccer Club" preload={assets.heroHome}>
+  <UAApp client:load assets={assets} />
 </Base>
-
-<style>
-  .hero { position: relative; overflow: hidden; min-height: 70vh; display: flex; align-items: center; }
-  .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: grayscale(1) contrast(1.3) brightness(0.85); }
-  .hero-tint { position: absolute; inset: 0; background: linear-gradient(90deg, #111318 0%, rgba(17,19,24,.88) 30%, rgba(17,19,24,.45) 70%), linear-gradient(180deg, transparent 60%, #111318 100%); }
-  .hero-inner { position: relative; padding-top: 96px; padding-bottom: 96px; width: 100%; }
-  .lead { max-width: 480px; font-size: 17px; color: var(--color-neutral-300); }
-  .programs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; margin-top: -40px; position: relative; }
-  .program { padding: 0; overflow: hidden; color: var(--color-text); transition: border-color .2s; }
-  .program:hover { border-color: var(--color-accent); color: var(--color-text); }
-  .program-img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: grayscale(.4); }
-  .program-body { padding: 18px 20px 20px; }
-  .program-body h3 { margin-top: 6px; }
-  .ages { color: var(--color-accent); font-size: 14px; }
-  .videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; margin-top: 24px; }
-  .video { position: relative; display: block; border-radius: var(--radius-lg); overflow: hidden; color: var(--color-text); }
-  .video img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-  .len { position: absolute; top: 12px; left: 12px; font-size: 12px; background: rgba(17,19,24,.75); padding: 4px 8px; border-radius: var(--radius-sm); }
-  .vtitle { display: block; padding: 12px 2px 0; }
-  .cta { text-align: center; }
-  .cta p { max-width: 520px; margin: 0 auto 24px; }
-</style>
