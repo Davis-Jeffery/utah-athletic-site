@@ -160,7 +160,7 @@ const TEAMS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(age => {
   const w = Math.round(games * (0.45 + r() * 0.25)), d = Math.round((games - w) * 0.4), l = games - w - d;
   return { age, label: 'U' + age, league, format, players, facts: [{ k: 'Birth year', v: String(birth) }, { k: 'Squad', v: players.length + ' players' }, { k: 'Head coach', v: 'Coach Name' }, { k: '2025–26 record', v: w + 'W ' + d + 'D ' + l + 'L' }] };
 });
-const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
+const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['locations', 'Locations'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
 const MODES = [['expand', 'Expand'], ['zoom', 'Zoom'], ['curtain', 'Curtain']];
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 const EASE = 'cubic-bezier(.76,0,.24,1)';
@@ -370,6 +370,7 @@ class Component extends DCLogic {
       resetForm: () => this.setState({ sent: false }),
       successHead: s.tab === 'a' ? (pr.cta === 'Register' ? "You're registered." : "You're on the list.") : 'Message received.',
       successCopy: s.tab === 'a' ? 'Confirmation for ' + (pr.sessions[s.sess] || pr.sessions[0]).date + ' is on its way to your inbox.' : 'A ' + pr.name + ' director will reply within 48 hours.',
+      mapSrc: 'Utah Map.html?p=' + id,
       hasTeams: !!base.teams, noTeams: !base.teams,
       teamTabs: TEAMS.map((t, i) => { const on = (s.team || 0) === i; return { label: t.label, sub: t.league === 'Elite Academy League' ? 'EA' : t.league === 'RED X-League' ? 'X-League' : 'ECNL', border: on ? ACC : 'var(--color-divider)', bg: on ? 'rgba(120,183,179,.12)' : 'transparent', fg: on ? ACC : 'var(--color-text)', pick: () => this.pickTeam(i) }; }),
       team: TEAMS[s.team || 0],

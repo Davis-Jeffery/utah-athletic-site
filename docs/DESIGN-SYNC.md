@@ -4,7 +4,7 @@ The site was ported from the Claude Design prototype. When the design changes, d
 
 ## Steps
 
-1. **Export the design.** In Claude Design, download the design as a single standalone `.html` file (the same bundled file the published artifact uses). Save it anywhere, for example `~/Downloads/ua-design.html`.
+1. **Export the design.** From Claude Design, download the design handoff `.zip` (preferred: it has readable source, the map page and a README), or a single standalone `.html` file. Save it anywhere, for example `~/Downloads/ua-design.zip`.
 2. **Start a branch.**
    ```bash
    git checkout main && git pull
@@ -12,9 +12,9 @@ The site was ported from the Claude Design prototype. When the design changes, d
    ```
 3. **Extract it into the reference folder.**
    ```bash
-   npm run design:extract -- ~/Downloads/ua-design.html
+   npm run design:extract -- ~/Downloads/ua-design.zip
    ```
-   This overwrites `docs/design-reference/template.html` (markup), `page-script.js` (logic and content) and `assets/` (images).
+   This overwrites `docs/design-reference/template.html` (markup), `page-script.js` (logic and content), `extra/` (other prototype pages such as `Utah Map.html`, the handoff README and `nocturne.css`) and `assets/` (images).
 4. **See exactly what changed.**
    ```bash
    git diff --stat docs/design-reference
@@ -42,6 +42,7 @@ Line numbers drift, so search for the anchor text in each file.
 | `class Component` logic: `open`, `close`, `switchTo`, `renderVals` | `UAApp.jsx` class methods (same names) | `open(id)`, `renderVals()` |
 | Header and nav | `UAApp.jsx` render | `<header` |
 | Hero, program list, pyramid | `UAApp.jsx` render | `id="programs"`, `data-pyr` |
+| Locations section (`sec-locations`, was an iframe of `extra/Utah Map.html`) | `UAApp.jsx` render + `src/components/UtahMap.jsx`, styles in `src/styles/utah-map.css`, data in `src/data/locations.ts` | `sec-locations`, `const SITES` maps to `HUBS` |
 | Docuseries section | `UAApp.jsx` render | `id="inside"` |
 | Footer | `UAApp.jsx` render | `<footer` |
 | Transition mode dock | `UAApp.jsx` render (hidden unless `showModes`) | `showModes` |
@@ -72,11 +73,11 @@ Line numbers drift, so search for the anchor text in each file.
 - `<RecFormats />` inside `sec-leagues` for the Rec program, and `isRec` in `renderVals()`.
 - No em dashes in copy.
 
-## Adding a map (for example, field locations)
+## Locations map
 
-If the design adds a map section:
+Built (October 2026) from `extra/Utah Map.html` as a native component, per the handoff README.
 
-- Put the locations in a data file (`src/data/locations.ts`: name, address, lat/lng, which programs play there) rather than hardcoding them in the markup.
-- If the design shows a static map image, it can ship as an image in `src/assets/images/`.
-- For an interactive map, use an embed that needs no key (an OpenStreetMap iframe, or a Google Maps "embed a map" iframe per location), or a library like Leaflet with OpenStreetMap tiles. Google Maps JavaScript and Mapbox need an API key stored as a Vercel environment variable, never committed.
-- Add "Get directions" links (`https://www.google.com/maps/dir/?api=1&destination=<address>`) so parents can tap straight into their maps app.
+- Hubs, cities, zone colors and service counties: `src/data/locations.ts`. In the prototype these are `SITES`, `CITIES`, `TONES`, `SERVICE` and `FAR` at the top of the map script.
+- Geometry: `src/data/utah-geo.json`, cut from us-atlas at build time by `npm run geo:build` (the prototype fetched it from a CDN at runtime).
+- Changes from the prototype: the search label reads "Find your nearest field" for Rec and Futures (no tryouts); on phones the finder and hub cards scroll sideways above the map, and one finger scrolls the page while two fingers pan the map.
+- Still to do: the official city-to-hub assignment (zones are nearest-hub for now) and sending the matched hub with form submissions.

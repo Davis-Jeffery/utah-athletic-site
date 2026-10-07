@@ -1,570 +1,25 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-
-
-
-
-
-
-
-
-
-<script src="45b1ecd2-5c7c-43e5-bc74-6f6a54bb7e43"></script>
+<meta name="ext-resource-dependency" content="https://images.unsplash.com/photo-1745997645080-941f962f1392?fm=jpg&amp;q=70&amp;w=2400&amp;auto=format&amp;fit=crop" data-resource-id="hero-academy">
+<meta name="ext-resource-dependency" content="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?fm=jpg&amp;q=70&amp;w=2400&amp;auto=format&amp;fit=crop" data-resource-id="hero-club">
+<meta name="ext-resource-dependency" content="https://images.unsplash.com/photo-1680024436315-fb06267264b2?fm=jpg&amp;q=70&amp;w=2400&amp;auto=format&amp;fit=crop" data-resource-id="hero-rec">
+<meta name="ext-resource-dependency" content="https://images.unsplash.com/photo-1622659097509-4d56de14539e?fm=jpg&amp;q=70&amp;w=2400&amp;auto=format&amp;fit=crop" data-resource-id="hero-futures">
+<meta name="ext-resource-dependency" content="https://i.ytimg.com/vi/t9Se3i_CBwo/maxresdefault.jpg" data-resource-id="yt-t9Se3i_CBwo">
+<meta name="ext-resource-dependency" content="https://i.ytimg.com/vi/jJI_pFfA_xI/maxresdefault.jpg" data-resource-id="yt-jJI_pFfA_xI">
+<meta name="ext-resource-dependency" content="https://i.ytimg.com/vi/47JdWoQT9Lo/maxresdefault.jpg" data-resource-id="yt-47JdWoQT9Lo">
+<meta name="ext-resource-dependency" content="assets/badge-ecnl.png" data-resource-id="logo-ecnl">
+<meta name="ext-resource-dependency" content="assets/badge-ea-crop.png" data-resource-id="logo-ea">
+<template id="__bundler_thumbnail" data-bg-color="#111318"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#111318"/><polygon points="50,30 70,70 30,70" fill="none" stroke="#78b7b3" stroke-width="3"/></svg></template>
+<script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<style>/* Nocturne — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("963e4c60-7e4c-45eb-a9c7-49862e152bb0") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("8cf8e6e9-48b5-4e13-aa84-2940ebf834e6") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("b640ee3c-ec8d-4886-9ed2-c84158f6a633") format('woff2');
-  unicode-range: U+1F00-1FFF;
-}
-/* greek */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("f87eb5b4-d422-4744-baf6-b12cce05bb3b") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("ea8c67b8-b6b0-414d-b71d-622b795a48a6") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("1271e68d-662b-4e98-82e8-74c6c256b188") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("ceca9a84-85d5-48c2-bfe4-92b098cd14ee") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("963e4c60-7e4c-45eb-a9c7-49862e152bb0") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("8cf8e6e9-48b5-4e13-aa84-2940ebf834e6") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("b640ee3c-ec8d-4886-9ed2-c84158f6a633") format('woff2');
-  unicode-range: U+1F00-1FFF;
-}
-/* greek */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("f87eb5b4-d422-4744-baf6-b12cce05bb3b") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("ea8c67b8-b6b0-414d-b71d-622b795a48a6") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("1271e68d-662b-4e98-82e8-74c6c256b188") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("ceca9a84-85d5-48c2-bfe4-92b098cd14ee") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("963e4c60-7e4c-45eb-a9c7-49862e152bb0") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("8cf8e6e9-48b5-4e13-aa84-2940ebf834e6") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("b640ee3c-ec8d-4886-9ed2-c84158f6a633") format('woff2');
-  unicode-range: U+1F00-1FFF;
-}
-/* greek */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("f87eb5b4-d422-4744-baf6-b12cce05bb3b") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("ea8c67b8-b6b0-414d-b71d-622b795a48a6") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("1271e68d-662b-4e98-82e8-74c6c256b188") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("ceca9a84-85d5-48c2-bfe4-92b098cd14ee") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("963e4c60-7e4c-45eb-a9c7-49862e152bb0") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("8cf8e6e9-48b5-4e13-aa84-2940ebf834e6") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("b640ee3c-ec8d-4886-9ed2-c84158f6a633") format('woff2');
-  unicode-range: U+1F00-1FFF;
-}
-/* greek */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("f87eb5b4-d422-4744-baf6-b12cce05bb3b") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("ea8c67b8-b6b0-414d-b71d-622b795a48a6") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("1271e68d-662b-4e98-82e8-74c6c256b188") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("ceca9a84-85d5-48c2-bfe4-92b098cd14ee") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-
-:root {
-  --color-bg: #161826;
-  --color-surface: #232532;
-  --color-text: #e9e9ed;
-  --color-accent: #9184d9; /* review round 7 (Barron): the accent moves to
-     the product's blurple — OKLCH hue 289.2, the hue of the app's own Pro
-     accent (#9a8fe0, --om-accent-pro) — at the same lightness the steel
-     accent held (L 0.660, so the documented ratios survive) and chroma
-     in the product blurple's own range (its token sits at C 0.118; the
-     accent takes 0.125, from the old steel's 0.030):
-     the accent now reads as an accent rather than another neutral. */
-  --color-accent-2: #a7a1db; /* the machine-derived stand-in follows: same
-     hue, same L 0.734, chroma at the same 2:3 proportion it held */
-  --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
-
-  /* Tonal ramps — generated in OKLCH on one shared lightness scale, so the
-     same step of any role matches the others in visual value. */
-  --color-neutral-100: #f3f5fe;
-  --color-neutral-200: #e4e7f5;
-  --color-neutral-300: #cfd3e5;
-  --color-neutral-400: #b2b6ca;
-  --color-neutral-500: #9397ab;
-  --color-neutral-600: #75798c;
-  --color-neutral-700: #595d6c;
-  --color-neutral-800: #3f424d;
-  --color-neutral-900: #292b31;
-
-  --color-accent-100: #f5f4ff;
-  --color-accent-200: #e7e5fe;
-  --color-accent-300: #d2cefd;
-  --color-accent-400: #b5abfc;
-  --color-accent-500: #968ae0;
-  --color-accent-600: #796cbf;
-  --color-accent-700: #5d5294;
-  --color-accent-800: #423a6a;
-  --color-accent-900: #2b2741;
-
-  --color-accent-2-100: #f5f4ff;
-  --color-accent-2-200: #e7e5fe;
-  --color-accent-2-300: #d2cefd;
-  --color-accent-2-400: #b5afe8;
-  --color-accent-2-500: #9690c9;
-  --color-accent-2-600: #7972a9;
-  --color-accent-2-700: #5c5783;
-  --color-accent-2-800: #423e5d;
-  --color-accent-2-900: #2b293a;
-
-  /* Deck section-divider ground — review round 3: saturation as presence.
-     Dividers take a saturated deep indigo (hue 277, the neutral ramp's own
-     family; C 0.094 — written when the accent held C 0.030, before the
-     round-7 blurple raised it past the ground's) with a lighter bloom and
-     a ghost tint of the same hue, while the slide grounds stay
-     desaturated. Deck-scale fills only — not interface colors. */
-  --color-section: #262a60;
-  --color-section-glow: #353b80;
-  --color-section-ghost: #4c5397;
-
-  --font-heading: "Inter", system-ui, sans-serif;
-  --font-heading-weight: 500;
-  --font-body: "Inter", system-ui, sans-serif;
-
-  --space-1: 2.8px;
-  --space-2: 5.6px;
-  --space-3: 8.4px;
-  --space-4: 11.2px;
-  --space-6: 16.8px;
-  --space-8: 22.4px;
-
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
-
-  /* Elevation — derived from the ground: soft ink-tinted shadows on a
-     light theme, a hairline edge + ambient darkness on a dark one. */
-  --shadow-sm: 0 0 0 1px #3f424d;
-  --shadow-md: 0 0 0 1px #595d6c, 0 6px 18px rgba(0,0,0,0.55);
-  --shadow-lg: 0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,0.65);
-}
-
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body);
-}
-h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); }
-
-.lighten{mix-blend-mode:lighten;background-color:transparent}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   Components — built with the tokens above. Plain CSS
-   on plain HTML: no JavaScript, no build step. Each class is documented in
-   readme.md and demonstrated in foundations/ and components/.
-   ══════════════════════════════════════════════════════════════════════ */
-
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; font-size: 15px; line-height: 1.55; font-weight: 400; }
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  line-height: 1.12; letter-spacing: -0.015em; margin: 0 0 var(--space-2);
-}
-h1 { font-size: 42px; }
-h2 { font-size: 32px; }
-h3 { font-size: 25px; }
-h4 { font-size: 20px; }
-h5 { font-size: 16px; }
-h6 { font-size: 13px; }
-h6 { letter-spacing: 0.08em; text-transform: uppercase; }
-p { margin: 0 0 var(--space-3); }
-a { color: var(--color-accent); text-underline-offset: 3px; }
-img { display: block; max-width: 100%; }
-figure { margin: 0; }
-figcaption {
-  font-size: 11px; margin-top: var(--space-1);
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
-}
-.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
-:focus { outline: none; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
-
-/* — rules — */
-/* Rules fade to transparent at both ends instead of stopping cleanly — a
-   Nocturne signature. The ramp is 48px an end (one deck baseline unit),
-   painted from the same divider token. Freestanding rules fade; box
-   outlines, in-control separators, and short accent marks stay solid. */
-.hr {
-  height: 1px; border: 0; margin: var(--space-4) 0;
-  background: linear-gradient(to right,
-    transparent, var(--color-divider) 48px,
-    var(--color-divider) calc(100% - 48px), transparent);
-}
-
-/* — buttons — */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  cursor: pointer; text-decoration: none;
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 14px; line-height: 1.2; color: var(--color-text); /* matches the .input's 14px —
-     the pair sits side by side in sign-up rows */
-  background: transparent; border: 1px solid transparent;
-  padding: var(--space-2) calc(var(--space-3) * 1.2);
-  border-radius: var(--radius-md);
-}
-.btn svg { display: block; }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
-.btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
-.btn-primary:active { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
-.btn-secondary { border-color: var(--color-divider); }
-.btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
-.btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
-.btn-ghost { color: var(--color-accent); padding-inline: var(--space-1); }
-.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
-.btn-icon { width: 36px; height: 36px; padding: 0; }
-.btn-block { width: 100%; margin-top: var(--space-2); }
-
-/* — forms — */
-.field > label {
-  display: block; font-size: 12px; margin-bottom: 5px;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
-}
-.input {
-  width: 100%; min-height: 36px; padding: 6px 10px; font: inherit;
-  font-size: 14px; color: var(--color-text); caret-color: var(--color-accent);
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
-}
-.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
-.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
-textarea.input { min-height: 90px; resize: vertical; }
-.radio { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
-.radio input, .seg-opt input {
-  position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
-}
-.radio .dot {
-  width: 16px; height: 16px; flex: none; border-radius: 50%;
-  border: 1.5px solid var(--color-divider);
-}
-.radio:hover .dot { border-color: var(--color-accent); }
-.radio input:checked + .dot {
-  border-color: var(--color-accent); background: var(--color-accent);
-  box-shadow: inset 0 0 0 4px var(--color-bg);
-}
-.radio input:focus-visible + .dot { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-.seg {
-  display: inline-flex; overflow: hidden;
-  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
-}
-.seg-opt {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 12px; font-size: 13px; cursor: pointer;
-}
-.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
-.seg-opt:has(input:checked) { color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
-.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
-.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
-
-/* — cards — */
-.card {
-  display: flex; flex-direction: column; gap: var(--space-2);
-  padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface);
-}
-.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
-.card-title {
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 17px; line-height: 1.2;
-}
-.card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
-.card-meta {
-  display: flex; align-items: center; gap: 6px; font-size: 11px;
-  color: color-mix(in srgb, var(--color-text) 50%, transparent);
-}
-.elev-sm { box-shadow: var(--shadow-sm); }
-.elev-md { box-shadow: var(--shadow-md); }
-.elev-lg { box-shadow: var(--shadow-lg); }
-
-/* — tags — */
-.tag {
-  display: inline-flex; align-items: center; font-size: 11px;
-  letter-spacing: 0.02em; padding: 3px 10px;
-  border-radius: calc(var(--radius-md) * 0.75);
-}
-.tag-accent { background: var(--color-accent-800); color: var(--color-accent-100); }
-.tag-accent-2 { background: var(--color-accent-2-800); color: var(--color-accent-2-100); }
-.tag-neutral { background: var(--color-neutral-800); color: var(--color-neutral-100); }
-.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
-
-/* — navigation — */
-.nav {
-  display: flex; align-items: center; gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: none;
-}
-.nav-brand {
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 18px; margin-right: auto;
-}
-.nav a { color: inherit; text-decoration: none; font-size: 14px; }
-.nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent); }
-
-/* — tables — */
-.table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.table th {
-  text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
-  padding: var(--space-2); border-bottom: 1px solid transparent; /* keeps layout; the row paints the fading rule */
-}
-.table td {
-  padding: var(--space-2);
-  border-bottom: 1px solid transparent;
-}
-/* Row rules as row-level strips so the end-fade spans the row, not each cell. */
-.table thead tr {
-  background: linear-gradient(to right,
-    transparent, var(--color-divider) 48px,
-    var(--color-divider) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
-}
-.table tbody tr {
-  background: linear-gradient(to right,
-    transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 48px,
-    color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
-}
-.table tbody tr:hover {
-  /* the hover tint layers over the row rule, which keeps painting */
-  background:
-    linear-gradient(color-mix(in srgb, var(--color-text) 4%, transparent),
-                    color-mix(in srgb, var(--color-text) 4%, transparent)) no-repeat 0 0 / 100% 100%,
-    linear-gradient(to right,
-      transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 48px,
-      color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 48px), transparent) no-repeat bottom / 100% 1px;
-}
-
-/* — dialog — */
-.dialog-backdrop {
-  position: fixed; inset: 0; display: grid; place-items: center;
-  padding: var(--space-4);
-  background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
-}
-.dialog {
-  width: min(440px, 100%); display: flex; flex-direction: column; gap: var(--space-3);
-  padding: var(--space-4); border-radius: var(--radius-lg);
-  background: var(--color-surface); box-shadow: var(--shadow-lg);
-}
-.dialog-title {
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 20px;
-}
-.dialog-body { font-size: 14px; opacity: 0.85; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
-
-</style>
-<script src="ab3b7dc5-d11d-4b48-8f97-2f8e6f7e44c5"></script>
+<link rel="stylesheet" href="nocturne.css">
+<script src="./image-slot.js"></script>
 <style>
 :root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
 html,body{margin:0;background:var(--color-bg)}
@@ -575,7 +30,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 <div style="position:relative;overflow-x:hidden;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
 <div ref="{{ homeRef }}" style="transform:{{ homeTf }};transform-origin:{{ homeOrigin }};opacity:{{ homeOp }};filter:{{ homeFilter }};transition:{{ homeTrans }}">
   <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:32px;padding:14px clamp(20px,4vw,56px);background:rgba(17,19,24,.8);backdrop-filter:blur(14px)">
-    <a href="#" style="margin-right:auto;display:flex;align-items:center"><img src="e0e15da0-3391-4308-b072-970604251987" alt="Utah Athletic" style="height:40px;width:auto"></a>
+    <a href="#" style="margin-right:auto;display:flex;align-items:center"><img src="assets/ua-logo.avif" alt="Utah Athletic" style="height:40px;width:auto"></a>
     <nav style="display:flex;gap:26px;font-size:14px;flex-wrap:wrap">
       <a href="#programs" style="color:var(--color-text)">Programs</a>
       <a href="#inside" style="color:var(--color-neutral-400)">Inside UA</a>
@@ -583,18 +38,18 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
       <a href="#" style="color:var(--color-neutral-400)">Copa Athletic</a>
       <a href="#" style="color:var(--color-neutral-400)">News</a>
     </nav>
-    <button sc-camel-on-click="{{ openAcademy }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:11px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">Tryouts 2026 →</button>
+    <button onClick="{{ openAcademy }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:11px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">Tryouts 2026 →</button>
   </header>
   <div style="height:1px;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent)"></div>
 
   <div style="position:relative;overflow:hidden">
   <div style="position:absolute;inset:0;pointer-events:none">
-    <div style="position:absolute;inset:-4%;background-image:url(&quot;3b679788-bb91-4ad8-9406-708507b827fc&quot;);background-size:cover;background-position:center 55%;filter:grayscale(1) contrast(1.3) brightness(.85);transform:{{ heroBgTf }};transition:transform .6s ease"></div>
+    <div style="position:absolute;inset:-4%;background-image:url('https://images.unsplash.com/photo-1767916732786-a83902ffc25c?fm=jpg&q=70&w=2400&auto=format&fit=crop');background-size:cover;background-position:center 55%;filter:grayscale(1) contrast(1.3) brightness(.85);transform:{{ heroBgTf }};transition:transform .6s ease"></div>
     <div style="position:absolute;inset:0;background:#78b7b3;mix-blend-mode:color;opacity:.5"></div>
     <div style="position:absolute;inset:0;background:linear-gradient(90deg,#111318 0%,rgba(17,19,24,.88) 30%,rgba(17,19,24,.35) 62%,rgba(17,19,24,.55) 100%)"></div>
     <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,19,24,.6) 0%,transparent 25%,transparent 70%,#111318 100%)"></div>
   </div>
-  <section id="programs" sc-camel-on-mouse-move="{{ heroMove }}" sc-camel-on-mouse-leave="{{ heroLeave }}" style="position:relative;max-width:1440px;margin:0 auto;padding:clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:56px;align-items:center">
+  <section id="programs" onMouseMove="{{ heroMove }}" onMouseLeave="{{ heroLeave }}" style="position:relative;max-width:1440px;margin:0 auto;padding:clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:56px;align-items:center">
     <div style="position:absolute;right:8%;top:18%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(120,183,179,.16),transparent 65%);pointer-events:none;transform:{{ glowTf }};transition:transform .5s ease"></div>
     <div style="position:relative;display:flex;flex-direction:column;gap:26px">
       <div style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><span style="width:28px;height:1px;background:var(--color-accent)"></span>The Utah Athletic pathway</div>
@@ -602,7 +57,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
       <p style="margin:0;max-width:470px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">From a four-year-old's first touch to national-platform football. Choose a level to see who it's for, where it competes, what it costs, and how to join.</p>
       <div style="display:flex;flex-direction:column;max-width:520px">
         <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
-          <button sc-camel-on-mouse-enter="{{ r.enter }}" sc-camel-on-mouse-leave="{{ r.leave }}" sc-camel-on-click="{{ r.open }}" style="all:unset;cursor:pointer;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:12px;padding:15px 14px;border-radius:8px;background:{{ r.bg }};transition:background .25s">
+          <button onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onClick="{{ r.open }}" style="all:unset;cursor:pointer;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:12px;padding:15px 14px;border-radius:8px;background:{{ r.bg }};transition:background .25s">
             <span style="font-size:12px;color:{{ r.numColor }};font-variant-numeric:tabular-nums">{{ r.num }}</span>
             <span style="display:flex;flex-direction:column;gap:3px"><span style="font:500 21px/1.1 var(--font-heading);letter-spacing:-.02em">{{ r.name }}</span><span style="font-size:13px;color:var(--color-neutral-500)">{{ r.line }}</span></span>
             <span style="font-size:13px;color:{{ r.arrowColor }};transform:{{ r.arrowTf }};transition:all .25s">{{ r.ages }} →</span>
@@ -614,18 +69,18 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
     <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:20px">
       <div style="position:absolute;left:50%;top:50%;width:120%;height:120%;transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,rgba(17,19,24,.85) 0%,rgba(17,19,24,.55) 40%,transparent 70%);pointer-events:none"></div>
       <div data-pyr="1" style="position:relative;width:min(100%,600px);aspect-ratio:600 / 480;filter:drop-shadow(0 24px 48px rgba(0,0,0,.6));transform:{{ tiltTf }};transition:transform .45s cubic-bezier(.2,.8,.2,1)">
-        <svg sc-camel-view-box="0 0 600 480" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+        <svg viewBox="0 0 600 480" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
           <defs>
             <linearGradient id="uaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78b7b3" stop-opacity=".42"></stop><stop offset="1" stop-color="#78b7b3" stop-opacity=".08"></stop></linearGradient>
             <linearGradient id="uaRest" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1d24" stop-opacity=".88"></stop><stop offset="1" stop-color="#111318" stop-opacity=".82"></stop></linearGradient>
-            <filter id="uaGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur sc-camel-std-deviation="9"></feGaussianBlur></filter>
+            <filter id="uaGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"></feGaussianBlur></filter>
           </defs>
           <polygon points="300,0 600,480 0,480" fill="#78b7b3" opacity=".22" filter="url(#uaGlow)"></polygon>
           <polygon points="{{ glowPts }}" fill="#78b7b3" opacity="{{ glowOp }}" filter="url(#uaGlow)" style="transition:opacity .3s"></polygon>
-          <polygon points="300,0 393.75,150 206.25,150" sc-camel-on-mouse-enter="{{ sl.academy.enter }}" sc-camel-on-mouse-leave="{{ sl.academy.leave }}" sc-camel-on-click="{{ sl.academy.open }}" fill="{{ sl.academy.fill }}" stroke="{{ sl.academy.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.academy.op }};transform:{{ sl.academy.tf }};transition:{{ sl.academy.trans }}"></polygon>
-          <polygon points="196.9,165 403.1,165 496.9,315 103.1,315" sc-camel-on-mouse-enter="{{ sl.club.enter }}" sc-camel-on-mouse-leave="{{ sl.club.leave }}" sc-camel-on-click="{{ sl.club.open }}" fill="{{ sl.club.fill }}" stroke="{{ sl.club.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.club.op }};transform:{{ sl.club.tf }};transition:{{ sl.club.trans }}"></polygon>
-          <polygon points="93.75,330 297,330 297,480 0,480" sc-camel-on-mouse-enter="{{ sl.rec.enter }}" sc-camel-on-mouse-leave="{{ sl.rec.leave }}" sc-camel-on-click="{{ sl.rec.open }}" fill="{{ sl.rec.fill }}" stroke="{{ sl.rec.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.rec.op }};transform:{{ sl.rec.tf }};transition:{{ sl.rec.trans }}"></polygon>
-          <polygon points="303,330 506.25,330 600,480 303,480" sc-camel-on-mouse-enter="{{ sl.futures.enter }}" sc-camel-on-mouse-leave="{{ sl.futures.leave }}" sc-camel-on-click="{{ sl.futures.open }}" fill="{{ sl.futures.fill }}" stroke="{{ sl.futures.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.futures.op }};transform:{{ sl.futures.tf }};transition:{{ sl.futures.trans }}"></polygon>
+          <polygon points="300,0 393.75,150 206.25,150" onMouseEnter="{{ sl.academy.enter }}" onMouseLeave="{{ sl.academy.leave }}" onClick="{{ sl.academy.open }}" fill="{{ sl.academy.fill }}" stroke="{{ sl.academy.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.academy.op }};transform:{{ sl.academy.tf }};transition:{{ sl.academy.trans }}"></polygon>
+          <polygon points="196.9,165 403.1,165 496.9,315 103.1,315" onMouseEnter="{{ sl.club.enter }}" onMouseLeave="{{ sl.club.leave }}" onClick="{{ sl.club.open }}" fill="{{ sl.club.fill }}" stroke="{{ sl.club.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.club.op }};transform:{{ sl.club.tf }};transition:{{ sl.club.trans }}"></polygon>
+          <polygon points="93.75,330 297,330 297,480 0,480" onMouseEnter="{{ sl.rec.enter }}" onMouseLeave="{{ sl.rec.leave }}" onClick="{{ sl.rec.open }}" fill="{{ sl.rec.fill }}" stroke="{{ sl.rec.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.rec.op }};transform:{{ sl.rec.tf }};transition:{{ sl.rec.trans }}"></polygon>
+          <polygon points="303,330 506.25,330 600,480 303,480" onMouseEnter="{{ sl.futures.enter }}" onMouseLeave="{{ sl.futures.leave }}" onClick="{{ sl.futures.open }}" fill="{{ sl.futures.fill }}" stroke="{{ sl.futures.stroke }}" stroke-width="1.5" style="cursor:pointer;opacity:{{ sl.futures.op }};transform:{{ sl.futures.tf }};transition:{{ sl.futures.trans }}"></polygon>
         </svg>
         <sc-for list="{{ labels }}" as="l" hint-placeholder-count="4">
           <div style="position:absolute;left:{{ l.x }};top:{{ l.y }};transform:translate(-50%,-50%) {{ l.lift }};display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center;white-space:nowrap;opacity:{{ l.op }};transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .5s">
@@ -664,7 +119,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
       <h2 style="margin:0;font:500 clamp(40px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em">Want to play for us?</h2>
       <p style="margin:0;max-width:520px;font-size:17px;color:var(--color-neutral-300)">Request an invitation for a trial with Academy staff, or find the right level for your player.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <button sc-camel-on-click="{{ openAcademy }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 15px/1 var(--font-body);padding:14px 20px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">Apply to Academy →</button>
+        <button onClick="{{ openAcademy }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 15px/1 var(--font-body);padding:14px 20px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">Apply to Academy →</button>
         <a href="#programs" style="border:1px solid var(--color-divider);color:var(--color-text);font:500 15px/1 var(--font-body);padding:14px 20px;border-radius:8px">Explore all programs</a>
       </div>
     </div>
@@ -678,16 +133,16 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 <div style="position:fixed;left:20px;bottom:20px;z-index:50;display:flex;align-items:center;gap:4px;padding:5px;border-radius:10px;background:rgba(27,29,36,.92);backdrop-filter:blur(10px);box-shadow:var(--shadow-md);opacity:{{ dockOp }};pointer-events:{{ dockPe }};transition:opacity .3s">
   <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-500);padding:0 8px">Transition</span>
   <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
-    <button sc-camel-on-click="{{ m.pick }}" style="cursor:pointer;border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.fg }};font:500 13px/1 var(--font-body);padding:8px 12px;border-radius:7px">{{ m.label }}</button>
+    <button onClick="{{ m.pick }}" style="cursor:pointer;border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.fg }};font:500 13px/1 var(--font-body);padding:8px 12px;border-radius:7px">{{ m.label }}</button>
   </sc-for>
 </div>
 
 <sc-if value="{{ ovOn }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;z-index:100;background:var(--color-accent-800);clip-path:{{ ov.clip }};transform:{{ ov.tf }};opacity:{{ ov.op }};transition:{{ ov.trans }}">
-    <div ref="{{ scrollRef }}" sc-camel-on-scroll="{{ onOvScroll }}" style="position:absolute;inset:0;overflow-y:auto;background:var(--color-bg);opacity:{{ ov.cop }};transition:opacity .35s ease">
+    <div ref="{{ scrollRef }}" onScroll="{{ onOvScroll }}" style="position:absolute;inset:0;overflow-y:auto;background:var(--color-bg);opacity:{{ ov.cop }};transition:opacity .35s ease">
       <div style="position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:16px;padding:10px clamp(16px,3vw,40px);background:rgba(17,19,24,.88);backdrop-filter:blur(14px);flex-wrap:wrap">
-        <button sc-camel-on-click="{{ close }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);padding:6px 14px 6px 8px;border-radius:8px;font:500 14px/1 var(--font-body)" style-hover="background:rgba(233,233,237,.07)">
-          <svg sc-camel-view-box="0 0 600 480" width="34" height="27">
+        <button onClick="{{ close }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);padding:6px 14px 6px 8px;border-radius:8px;font:500 14px/1 var(--font-body)" style-hover="background:rgba(233,233,237,.07)">
+          <svg viewBox="0 0 600 480" width="34" height="27">
             <polygon points="300,0 393.75,150 206.25,150" fill="{{ mini.academy }}"></polygon>
             <polygon points="196.9,165 403.1,165 496.9,315 103.1,315" fill="{{ mini.club }}"></polygon>
             <polygon points="93.75,330 297,330 297,480 0,480" fill="{{ mini.rec }}"></polygon>
@@ -697,10 +152,10 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
         </button>
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-right:auto">
           <sc-for list="{{ switcher }}" as="w" hint-placeholder-count="4">
-            <button sc-camel-on-click="{{ w.go }}" style="cursor:pointer;border:1px solid {{ w.border }};background:{{ w.bg }};color:{{ w.fg }};padding:8px 12px;border-radius:7px;font:500 13px/1 var(--font-body);transition:all .2s">{{ w.name }}</button>
+            <button onClick="{{ w.go }}" style="cursor:pointer;border:1px solid {{ w.border }};background:{{ w.bg }};color:{{ w.fg }};padding:8px 12px;border-radius:7px;font:500 13px/1 var(--font-body);transition:all .2s">{{ w.name }}</button>
           </sc-for>
         </div>
-        <button sc-camel-on-click="{{ goJoin }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:10px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">{{ p.cta }} →</button>
+        <button onClick="{{ goJoin }}" style="cursor:pointer;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:10px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.12)">{{ p.cta }} →</button>
       </div>
 
       <div style="transform:{{ contentTf }};opacity:{{ contentOp }};transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .3s">
@@ -721,11 +176,11 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
               <sc-if value="{{ isAcademy }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:12px;padding-bottom:12px">
                   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 12px 10px;border-radius:14px;background:rgba(27,29,36,.85);backdrop-filter:blur(10px);box-shadow:0 0 0 1px var(--color-accent-800),0 10px 30px rgba(0,0,0,.4)">
-                    <image-slot id="badge-ecnl" shape="rounded" radius="10" fit="contain" placeholder="ECNL logo" style="width:88px;height:88px" src="6a8a6891-77fd-40fa-8b24-c684923d6c4e"></image-slot>
+                    <image-slot id="badge-ecnl" shape="rounded" radius="10" fit="contain" placeholder="ECNL logo" style="width:88px;height:88px"></image-slot>
                     <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-300)">ECNL</span>
                   </div>
                   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 12px 10px;border-radius:14px;background:rgba(27,29,36,.85);backdrop-filter:blur(10px);box-shadow:0 0 0 1px var(--color-accent-800),0 10px 30px rgba(0,0,0,.4)">
-                    <image-slot id="badge-ea" shape="rounded" radius="10" fit="contain" placeholder="EA logo" style="width:88px;height:88px" src="5bb5b607-515c-4648-a5c4-365d66bfb6fb"></image-slot>
+                    <image-slot id="badge-ea" shape="rounded" radius="10" fit="contain" placeholder="EA logo" style="width:88px;height:88px"></image-slot>
                     <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-300)">Elite Academy</span>
                   </div>
                 </div>
@@ -756,7 +211,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
         <nav style="position:sticky;top:57px;z-index:9;background:rgba(17,19,24,.92);backdrop-filter:blur(12px)">
           <div style="max-width:1360px;margin:0 auto;padding:0 clamp(20px,4vw,56px);display:flex;gap:2px;overflow-x:auto">
             <sc-for list="{{ secs }}" as="sc" hint-placeholder-count="8">
-              <button sc-camel-on-click="{{ sc.go }}" style="all:unset;cursor:pointer;padding:15px 12px 13px;font-size:13px;white-space:nowrap;color:{{ sc.fg }};box-shadow:inset 0 -2px 0 {{ sc.bar }};transition:color .2s,box-shadow .2s">{{ sc.label }}</button>
+              <button onClick="{{ sc.go }}" style="all:unset;cursor:pointer;padding:15px 12px 13px;font-size:13px;white-space:nowrap;color:{{ sc.fg }};box-shadow:inset 0 -2px 0 {{ sc.bar }};transition:color .2s,box-shadow .2s">{{ sc.label }}</button>
             </sc-for>
           </div>
           <div style="height:1px;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent)"></div>
@@ -798,15 +253,20 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
             </div>
           </section>
 
+          <section id="sec-locations" style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
+            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">03 · Locations</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">Where we train</h2></div>
+            <iframe src="{{ mapSrc }}" title="Training locations map" loading="lazy" style="display:block;width:100%;height:clamp(560px,68vh,680px);border:0;border-radius:14px;background:#111318;color-scheme:dark;box-shadow:0 24px 60px rgba(0,0,0,.45)"></iframe>
+          </section>
+
           <section id="sec-season" style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
-            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">03 · The year</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">Season overview</h2></div>
+            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">04 · The year</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">Season overview</h2></div>
             <div style="overflow-x:auto"><div style="min-width:760px;display:flex;flex-direction:column;gap:10px">
               <div style="display:grid;grid-template-columns:repeat(12,1fr)">
                 <sc-for list="{{ months }}" as="m" hint-placeholder-count="12"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-500);padding:0 0 8px 8px;border-left:1px solid var(--color-divider)">{{ m }}</span></sc-for>
               </div>
               <div style="position:relative;height:72px">
                 <sc-for list="{{ phases }}" as="ph" hint-placeholder-count="5">
-                  <button sc-camel-on-click="{{ ph.pick }}" sc-camel-on-mouse-enter="{{ ph.pick }}" style="position:absolute;top:0;bottom:0;left:{{ ph.left }};width:{{ ph.width }};cursor:pointer;border:1px solid {{ ph.border }};border-radius:8px;background:{{ ph.bg }};color:{{ ph.fg }};padding:0 12px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:5px;overflow:hidden;box-shadow:0 0 0 2px var(--color-bg);transition:all .25s">
+                  <button onClick="{{ ph.pick }}" onMouseEnter="{{ ph.pick }}" style="position:absolute;top:0;bottom:0;left:{{ ph.left }};width:{{ ph.width }};cursor:pointer;border:1px solid {{ ph.border }};border-radius:8px;background:{{ ph.bg }};color:{{ ph.fg }};padding:0 12px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:5px;overflow:hidden;box-shadow:0 0 0 2px var(--color-bg);transition:all .25s">
                     <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.75">{{ ph.range }}</span>
                     <span style="font:500 15px/1 var(--font-heading);white-space:nowrap">{{ ph.label }}</span>
                   </button>
@@ -821,7 +281,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 
           <section id="sec-schedule" style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
             <div style="display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap">
-              <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">04 · Commitment</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">A typical week</h2></div>
+              <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">05 · Commitment</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">A typical week</h2></div>
               <div style="display:flex;gap:18px;font-size:12px;color:var(--color-neutral-400)">
                 <span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;border:1px solid var(--color-accent)"></span>Training</span>
                 <span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:var(--color-accent-700)"></span>Match</span>
@@ -845,17 +305,17 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 
           <section id="sec-cost" style="padding:64px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px">
             <div style="display:flex;flex-direction:column;gap:20px">
-              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">05 · Investment</span>
+              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">06 · Investment</span>
               <sc-if value="{{ hasGroups }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
                   <sc-for list="{{ groupTabs }}" as="g" hint-placeholder-count="2">
-                    <button sc-camel-on-click="{{ g.pick }}" style="cursor:pointer;border:1px solid {{ g.border }};background:{{ g.bg }};color:{{ g.fg }};font:500 13px/1 var(--font-body);padding:8px 12px;border-radius:8px;transition:all .2s">{{ g.label }}</button>
+                    <button onClick="{{ g.pick }}" style="cursor:pointer;border:1px solid {{ g.border }};background:{{ g.bg }};color:{{ g.fg }};font:500 13px/1 var(--font-body);padding:8px 12px;border-radius:8px;transition:all .2s">{{ g.label }}</button>
                   </sc-for>
                 </div>
               </sc-if>
               <div style="display:inline-flex;align-self:flex-start;border:1px solid var(--color-divider);border-radius:8px;overflow:hidden">
-                <button sc-camel-on-click="{{ billFull }}" style="cursor:pointer;border:0;padding:9px 14px;font:500 13px/1 var(--font-body);background:transparent;color:{{ billFullFg }};box-shadow:inset 0 0 0 1px {{ billFullRing }}">Pay in full</button>
-                <button sc-camel-on-click="{{ billSplit }}" style="cursor:pointer;border:0;padding:9px 14px;font:500 13px/1 var(--font-body);background:transparent;color:{{ billSplitFg }};box-shadow:inset 0 0 0 1px {{ billSplitRing }}">{{ p.installLabel }}</button>
+                <button onClick="{{ billFull }}" style="cursor:pointer;border:0;padding:9px 14px;font:500 13px/1 var(--font-body);background:transparent;color:{{ billFullFg }};box-shadow:inset 0 0 0 1px {{ billFullRing }}">Pay in full</button>
+                <button onClick="{{ billSplit }}" style="cursor:pointer;border:0;padding:9px 14px;font:500 13px/1 var(--font-body);background:transparent;color:{{ billSplitFg }};box-shadow:inset 0 0 0 1px {{ billSplitRing }}">{{ p.installLabel }}</button>
               </div>
               <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
                 <span style="font:500 clamp(80px,10vw,144px)/.9 var(--font-heading);letter-spacing:-.06em;color:var(--color-accent);font-variant-numeric:tabular-nums">{{ price }}</span>
@@ -872,7 +332,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
           </section>
 
           <section id="sec-staff" style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
-            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">06 · Staff</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">Directors &amp; coaches</h2></div>
+            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">07 · Staff</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">Directors &amp; coaches</h2></div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:12px">
               <sc-for list="{{ p.directors }}" as="dr" hint-placeholder-count="2">
                 <div style="display:grid;grid-template-columns:140px 1fr;gap:20px;padding:14px;border-radius:8px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
@@ -897,7 +357,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
           </section>
 
           <section id="sec-players" style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
-            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">07 · Players</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">{{ p.playersHead }}</h2></div>
+            <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">08 · Players</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">{{ p.playersHead }}</h2></div>
             <sc-if value="{{ noTeams }}" hint-placeholder-val="{{ false }}">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
               <sc-for list="{{ p.players }}" as="pl" hint-placeholder-count="6">
@@ -916,7 +376,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
               <div style="display:flex;flex-direction:column;gap:24px">
                 <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:2px">
                   <sc-for list="{{ teamTabs }}" as="tt" hint-placeholder-count="10">
-                    <button sc-camel-on-click="{{ tt.pick }}" style="flex:none;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:76px;padding:10px 14px;border-radius:8px;border:1px solid {{ tt.border }};background:{{ tt.bg }};transition:all .2s" style-hover="border-color:#78b7b3">
+                    <button onClick="{{ tt.pick }}" style="flex:none;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:76px;padding:10px 14px;border-radius:8px;border:1px solid {{ tt.border }};background:{{ tt.bg }};transition:all .2s" style-hover="border-color:#78b7b3">
                       <span style="font:500 18px/1 var(--font-heading);letter-spacing:-.02em;color:{{ tt.fg }}">{{ tt.label }}</span>
                       <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-500)">{{ tt.sub }}</span>
                     </button>
@@ -946,7 +406,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
                       </div>
                       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
                         <sc-for list="{{ pg.players }}" as="pl" hint-placeholder-count="4">
-                          <button sc-camel-on-click="{{ pl.open }}" style="all:unset;cursor:pointer;position:relative;aspect-ratio:3 / 4;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,#1a1d23 0 10px,#1f2229 10px 20px);box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s" style-hover="transform:translateY(-4px);box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45)">
+                          <button onClick="{{ pl.open }}" style="all:unset;cursor:pointer;position:relative;aspect-ratio:3 / 4;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,#1a1d23 0 10px,#1f2229 10px 20px);box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s" style-hover="transform:translateY(-4px);box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45)">
                             <span style="position:absolute;top:10px;left:10px;font:500 10px/1 ui-monospace,Menlo,monospace;color:var(--color-neutral-600);text-transform:uppercase">Photo</span>
                             <span style="position:absolute;right:10px;top:4px;font:500 54px/1 var(--font-heading);letter-spacing:-.05em;color:var(--color-accent);opacity:.85">{{ pl.num }}</span>
                             <div style="position:absolute;left:0;right:0;bottom:0;padding:12px;background:linear-gradient(transparent,rgba(17,19,24,.96) 40%);display:flex;flex-direction:column;gap:4px">
@@ -965,29 +425,29 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 
           <section id="sec-join" style="padding:64px 0 96px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px">
             <div style="display:flex;flex-direction:column;gap:20px">
-              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">08 · Join</span>
+              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">09 · Join</span>
               <h2 style="margin:0;font:500 clamp(48px,6vw,96px)/.95 var(--font-heading);letter-spacing:-.05em">{{ p.joinHead }}</h2>
               <p style="margin:0;max-width:460px;font-size:17px;line-height:1.6;color:var(--color-neutral-300)">{{ p.joinCopy }}</p>
             </div>
             <div style="border-radius:14px;background:var(--color-surface);box-shadow:var(--shadow-md);overflow:hidden">
               <div style="display:grid;grid-template-columns:1fr 1fr">
-                <button sc-camel-on-click="{{ tabA }}" style="all:unset;cursor:pointer;text-align:center;padding:16px;font-size:14px;color:{{ tabAFg }};box-shadow:inset 0 -2px 0 {{ tabABar }}">{{ p.tabLabel }}</button>
-                <button sc-camel-on-click="{{ tabB }}" style="all:unset;cursor:pointer;text-align:center;padding:16px;font-size:14px;color:{{ tabBFg }};box-shadow:inset 0 -2px 0 {{ tabBBar }}">Request info</button>
+                <button onClick="{{ tabA }}" style="all:unset;cursor:pointer;text-align:center;padding:16px;font-size:14px;color:{{ tabAFg }};box-shadow:inset 0 -2px 0 {{ tabABar }}">{{ p.tabLabel }}</button>
+                <button onClick="{{ tabB }}" style="all:unset;cursor:pointer;text-align:center;padding:16px;font-size:14px;color:{{ tabBFg }};box-shadow:inset 0 -2px 0 {{ tabBBar }}">Request info</button>
               </div>
               <sc-if value="{{ showSuccess }}" hint-placeholder-val="{{ false }}">
                 <div style="padding:52px 28px;display:flex;flex-direction:column;align-items:flex-start;gap:14px">
                   <span style="width:44px;height:44px;border-radius:50%;border:1px solid var(--color-accent);color:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:20px">✓</span>
                   <span style="font:500 32px/1.05 var(--font-heading);letter-spacing:-.03em">{{ successHead }}</span>
                   <span style="font-size:15px;line-height:1.6;color:var(--color-neutral-400)">{{ successCopy }}</span>
-                  <button sc-camel-on-click="{{ resetForm }}" style="cursor:pointer;margin-top:6px;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);padding:10px 16px;border-radius:8px;font:500 14px/1 var(--font-body)">Submit another</button>
+                  <button onClick="{{ resetForm }}" style="cursor:pointer;margin-top:6px;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);padding:10px 16px;border-radius:8px;font:500 14px/1 var(--font-body)">Submit another</button>
                 </div>
               </sc-if>
               <sc-if value="{{ showReg }}" hint-placeholder-val="{{ true }}">
-                <form sc-camel-on-submit="{{ submit }}" style="padding:24px;display:flex;flex-direction:column;gap:16px">
+                <form onSubmit="{{ submit }}" style="padding:24px;display:flex;flex-direction:column;gap:16px">
                   <span style="font-size:12px;color:var(--color-neutral-400)">{{ p.sessionLabel }}</span>
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
                     <sc-for list="{{ sessions }}" as="tr" hint-placeholder-count="3">
-                      <button type="button" sc-camel-on-click="{{ tr.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:13px;border-radius:8px;background:{{ tr.bg }};box-shadow:inset 0 0 0 1px {{ tr.ring }};transition:all .2s">
+                      <button type="button" onClick="{{ tr.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:13px;border-radius:8px;background:{{ tr.bg }};box-shadow:inset 0 0 0 1px {{ tr.ring }};transition:all .2s">
                         <span style="font:500 16px/1.1 var(--font-heading);color:{{ tr.fg }}">{{ tr.date }}</span>
                         <span style="font-size:12px;color:var(--color-neutral-300)">{{ tr.time }}</span>
                         <span style="font-size:12px;color:var(--color-neutral-500)">{{ tr.ages }} · {{ tr.loc }}</span>
@@ -995,21 +455,21 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
                     </sc-for>
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Player name<input required="" placeholder="First and last" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
-                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Birth year / age<sc-raw-select style="min-height:40px;padding:8px 10px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px"><sc-for list="{{ p.years }}" as="yr" hint-placeholder-count="4"><option>{{ yr }}</option></sc-for></sc-raw-select></label>
-                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Parent email<input required="" type="email" placeholder="you@email.com" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Player name<input required placeholder="First and last" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Birth year / age<select style="min-height:40px;padding:8px 10px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px"><sc-for list="{{ p.years }}" as="yr" hint-placeholder-count="4"><option>{{ yr }}</option></sc-for></select></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Parent email<input required type="email" placeholder="you@email.com" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Current club<input placeholder="Optional" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
                   </div>
                   <button type="submit" style="cursor:pointer;background:rgba(120,183,179,.08);border:1px solid var(--color-accent);color:var(--color-accent);font:500 15px/1 var(--font-body);padding:15px;border-radius:8px" style-hover="background:rgba(120,183,179,.16)">{{ p.cta }} · {{ sessionPick }}</button>
                 </form>
               </sc-if>
               <sc-if value="{{ showInfo }}" hint-placeholder-val="{{ false }}">
-                <form sc-camel-on-submit="{{ submit }}" style="padding:24px;display:flex;flex-direction:column;gap:12px">
+                <form onSubmit="{{ submit }}" style="padding:24px;display:flex;flex-direction:column;gap:12px">
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Your name<input required="" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
-                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Email<input required="" type="email" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Your name<input required style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Email<input required type="email" style="min-height:40px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
                   </div>
-                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Player birth year / age<sc-raw-select style="min-height:40px;padding:8px 10px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px"><sc-for list="{{ p.years }}" as="yr" hint-placeholder-count="4"><option>{{ yr }}</option></sc-for></sc-raw-select></label>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Player birth year / age<select style="min-height:40px;padding:8px 10px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px"><sc-for list="{{ p.years }}" as="yr" hint-placeholder-count="4"><option>{{ yr }}</option></sc-for></select></label>
                   <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Questions<textarea rows="4" placeholder="Tell us about your player" style="padding:10px 12px;font:400 14px/1.5 var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none;resize:vertical" style-focus="border-color:#78b7b3"></textarea></label>
                   <button type="submit" style="cursor:pointer;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);font:500 15px/1 var(--font-body);padding:15px;border-radius:8px" style-hover="background:rgba(233,233,237,.07)">Send · we reply within 48 hours</button>
                 </form>
@@ -1022,11 +482,11 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
           <div style="max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:24px">
             <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
               <h3 style="margin:0;font:500 clamp(30px,3.4vw,46px)/1 var(--font-heading);letter-spacing:-.035em">Explore the pathway</h3>
-              <button sc-camel-on-click="{{ close }}" style="cursor:pointer;background:transparent;border:0;color:var(--color-accent);font:500 14px/1 var(--font-body)">↑ Back to the pyramid</button>
+              <button onClick="{{ close }}" style="cursor:pointer;background:transparent;border:0;color:var(--color-accent);font:500 14px/1 var(--font-body)">↑ Back to the pyramid</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
               <sc-for list="{{ others }}" as="o" hint-placeholder-count="3">
-                <button sc-camel-on-click="{{ o.go }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:8px;background:var(--color-bg);box-shadow:var(--shadow-sm);transition:box-shadow .25s,transform .25s" style-hover="box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4);transform:translateY(-3px)">
+                <button onClick="{{ o.go }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:8px;background:var(--color-bg);box-shadow:var(--shadow-sm);transition:box-shadow .25s,transform .25s" style-hover="box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4);transform:translateY(-3px)">
                   <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent)">{{ o.num }} · {{ o.ages }}</span>
                   <span style="font:500 38px/1 var(--font-heading);letter-spacing:-.04em">{{ o.name }}</span>
                   <span style="font-size:14px;color:var(--color-neutral-400)">{{ o.line }}</span>
@@ -1039,13 +499,13 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
       </div>
     </div>
     <sc-if value="{{ mOn }}" hint-placeholder-val="{{ false }}">
-      <div sc-camel-on-click="{{ mClose }}" style="position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,40px);background:rgba(10,11,16,.74);backdrop-filter:blur(8px);opacity:{{ mOp }};transition:opacity .25s ease">
-        <div sc-camel-on-click="{{ stop }}" style="position:relative;width:100%;max-width:1080px;max-height:100%;overflow-y:auto;border-radius:14px;background:var(--color-surface);box-shadow:var(--shadow-lg),0 0 0 1px var(--color-accent-800);transform:{{ mTf }};transition:transform .4s cubic-bezier(.2,.8,.2,1)">
+      <div onClick="{{ mClose }}" style="position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,40px);background:rgba(10,11,16,.74);backdrop-filter:blur(8px);opacity:{{ mOp }};transition:opacity .25s ease">
+        <div onClick="{{ stop }}" style="position:relative;width:100%;max-width:1080px;max-height:100%;overflow-y:auto;border-radius:14px;background:var(--color-surface);box-shadow:var(--shadow-lg),0 0 0 1px var(--color-accent-800);transform:{{ mTf }};transition:transform .4s cubic-bezier(.2,.8,.2,1)">
           <div style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(27,29,36,.92);backdrop-filter:blur(10px)">
             <span style="margin-right:auto;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-400)">{{ m.teamLabel }} · Player profile</span>
-            <button sc-camel-on-click="{{ mPrev }}" aria-label="Previous player" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:15px" style-hover="border-color:#78b7b3;color:#78b7b3">←</button>
-            <button sc-camel-on-click="{{ mNext }}" aria-label="Next player" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:15px" style-hover="border-color:#78b7b3;color:#78b7b3">→</button>
-            <button sc-camel-on-click="{{ mClose }}" aria-label="Close" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:17px" style-hover="border-color:#78b7b3;color:#78b7b3">×</button>
+            <button onClick="{{ mPrev }}" aria-label="Previous player" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:15px" style-hover="border-color:#78b7b3;color:#78b7b3">←</button>
+            <button onClick="{{ mNext }}" aria-label="Next player" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:15px" style-hover="border-color:#78b7b3;color:#78b7b3">→</button>
+            <button onClick="{{ mClose }}" aria-label="Close" style="cursor:pointer;width:36px;height:36px;border-radius:8px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:17px" style-hover="border-color:#78b7b3;color:#78b7b3">×</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:28px;padding:8px clamp(16px,3vw,32px) 28px">
             <div style="position:relative;aspect-ratio:4 / 5;max-height:440px;border-radius:10px;overflow:hidden;background:repeating-linear-gradient(135deg,#1a1d23 0 12px,#1f2229 12px 24px)">
@@ -1124,7 +584,7 @@ a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accen
 </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script="" data-props="{&quot;transition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;expand&quot;,&quot;zoom&quot;,&quot;curtain&quot;],&quot;default&quot;:&quot;expand&quot;,&quot;tsType&quot;:&quot;'expand'|'zoom'|'curtain'&quot;,&quot;section&quot;:&quot;Interaction&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.5,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Interaction&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Interaction&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;transition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;expand&quot;,&quot;zoom&quot;,&quot;curtain&quot;],&quot;default&quot;:&quot;expand&quot;,&quot;tsType&quot;:&quot;'expand'|'zoom'|'curtain'&quot;,&quot;section&quot;:&quot;Interaction&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.5,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Interaction&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Interaction&quot;}}">
 const MONTHS = ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'];
 const R = (id, url) => (window.__resources && window.__resources[id]) || url;
 const YT = id => R('yt-' + id, 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg');
@@ -1286,7 +746,7 @@ const TEAMS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(age => {
   const w = Math.round(games * (0.45 + r() * 0.25)), d = Math.round((games - w) * 0.4), l = games - w - d;
   return { age, label: 'U' + age, league, format, players, facts: [{ k: 'Birth year', v: String(birth) }, { k: 'Squad', v: players.length + ' players' }, { k: 'Head coach', v: 'Coach Name' }, { k: '2025–26 record', v: w + 'W ' + d + 'D ' + l + 'L' }] };
 });
-const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
+const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['locations', 'Locations'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
 const MODES = [['expand', 'Expand'], ['zoom', 'Zoom'], ['curtain', 'Curtain']];
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 const EASE = 'cubic-bezier(.76,0,.24,1)';
@@ -1496,6 +956,7 @@ class Component extends DCLogic {
       resetForm: () => this.setState({ sent: false }),
       successHead: s.tab === 'a' ? (pr.cta === 'Register' ? "You're registered." : "You're on the list.") : 'Message received.',
       successCopy: s.tab === 'a' ? 'Confirmation for ' + (pr.sessions[s.sess] || pr.sessions[0]).date + ' is on its way to your inbox.' : 'A ' + pr.name + ' director will reply within 48 hours.',
+      mapSrc: 'Utah Map.html?p=' + id,
       hasTeams: !!base.teams, noTeams: !base.teams,
       teamTabs: TEAMS.map((t, i) => { const on = (s.team || 0) === i; return { label: t.label, sub: t.league === 'Elite Academy League' ? 'EA' : t.league === 'RED X-League' ? 'X-League' : 'ECNL', border: on ? ACC : 'var(--color-divider)', bg: on ? 'rgba(120,183,179,.12)' : 'transparent', fg: on ? ACC : 'var(--color-text)', pick: () => this.pickTeam(i) }; }),
       team: TEAMS[s.team || 0],
@@ -1510,14 +971,5 @@ class Component extends DCLogic {
   }
 }
 </script>
-
-
-<div id="__claude_design_branding"><style>#__claude_design_branding{position:fixed;right:16px;bottom:16px;z-index:2147483646;display:flex;align-items:center;gap:7px;height:30px;padding:0 5px 0 10px;border-radius:999px;font-family:"Anthropic Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:12.5px;font-weight:400;line-height:1;letter-spacing:normal;text-transform:none;color:#141413;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 0 0 .5px rgba(31,30,29,.14),0 2px 10px rgba(0,0,0,.09)}
-#__claude_design_branding *{box-sizing:border-box;margin:0}
-#__claude_design_branding a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
-#__claude_design_branding a:hover span{text-decoration:underline}
-#__claude_design_branding svg{flex:none}
-#__claude_design_branding a svg{color:#D97757}
-#__claude_design_branding button{width:20px;height:20px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:currentColor;opacity:.55;border:0;background:none;cursor:pointer;flex:none;font:inherit;transition:opacity .14s}
-#__claude_design_branding button:hover{opacity:1;background:rgba(127,127,127,.22)}
-@media print{#__claude_design_branding{display:none}}</style><a href="https://claude.com/product/design" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 20 21" fill="none" aria-hidden="true"><path fill="currentColor" d="M9.99902 0C15.5258 0.000170936 19.999 4.50643 19.999 10.0547C19.999 11.7656 19.5863 12.9976 18.7861 13.8203C17.9924 14.6362 16.9465 14.9138 15.9854 15.0078C15.05 15.0993 14.0097 15.0262 13.2549 15.0186C12.8524 15.0145 12.5177 15.0267 12.2441 15.0703C11.9682 15.1144 11.8143 15.1813 11.7305 15.2432C11.4745 15.4322 11.3353 15.7121 11.2656 16.1602C11.2303 16.3875 11.2168 16.6362 11.209 16.9131C11.2017 17.1715 11.1986 17.4893 11.1807 17.7705C11.1469 18.2975 11.0495 19.0865 10.4199 19.5908C9.7846 20.0996 8.88652 20.1057 7.85449 19.877C7.36399 19.7682 6.88652 19.6232 6.42578 19.4453C2.66989 17.9949 0.000187748 14.3414 0 10.0547C0 4.50643 4.47223 0.000171048 9.99902 0ZM9.99902 1.60547C5.36781 1.60564 1.60547 5.38391 1.60547 10.0547C1.60566 13.6582 3.84823 16.7296 7.00391 17.9482C7.39027 18.0974 7.79085 18.2184 8.20215 18.3096C9.1375 18.5169 9.384 18.3633 9.41602 18.3379C9.4524 18.3087 9.54558 18.1915 9.5791 17.668C9.5947 17.4239 9.59473 17.1786 9.60352 16.8672C9.61179 16.5742 9.62831 16.2435 9.67969 15.9131C9.78359 15.2455 10.0474 14.4906 10.7764 13.9521C11.1479 13.6778 11.5842 13.5493 11.9912 13.4844C12.4007 13.4191 12.8434 13.4088 13.2705 13.4131C14.1753 13.4222 15.0071 13.4905 15.8291 13.4102C16.6257 13.3322 17.2249 13.1235 17.6357 12.7012C18.0401 12.2855 18.3935 11.5261 18.3936 10.0547C18.3936 5.38391 14.6302 1.60564 9.99902 1.60547ZM5.11621 9.86719C5.86386 9.91468 6.45486 10.5348 6.45508 11.2939C6.45506 12.0838 5.81519 12.7245 5.02539 12.7246C4.28481 12.7246 3.67573 12.1617 3.60254 11.4404L3.59473 11.2939L3.60156 11.1533C3.66942 10.4596 4.23282 9.91186 4.93359 9.86719H5.11621ZM14.9814 7.19141C15.729 7.23889 16.3199 7.85919 16.3203 8.61816C16.3203 9.40801 15.6804 10.0487 14.8906 10.0488C14.1501 10.0487 13.5409 9.48586 13.4678 8.76465L13.46 8.61816L13.4668 8.47754C13.5348 7.78403 14.0983 7.23618 14.7988 7.19141H14.9814ZM6.4541 4.93457C7.20161 4.9822 7.79275 5.60231 7.79297 6.36133C7.79288 7.151 7.15291 7.7917 6.36328 7.79199C5.62274 7.79199 5.01369 7.22903 4.94043 6.50781L4.93262 6.36133L4.93945 6.2207C5.00731 5.52698 5.5707 4.97922 6.27148 4.93457H6.4541ZM11.3867 3.59668C12.1343 3.64419 12.7253 4.26436 12.7256 5.02344C12.7256 5.81326 12.0857 6.45393 11.2959 6.4541C10.5553 6.4541 9.94622 5.89123 9.87305 5.16992L9.86523 5.02344L9.87207 4.88281C9.93996 4.18912 10.5033 3.64133 11.2041 3.59668H11.3867Z"></path></svg><span>Made with Claude Design</span></a><button type="button" aria-label="Dismiss" onclick="this.parentElement.remove()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div></body></html>
+</body>
+</html>

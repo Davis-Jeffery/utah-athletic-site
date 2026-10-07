@@ -4,6 +4,9 @@ import React from 'react';
 import { PROGRAMS as RAW_PROGRAMS, ORDER, MONTHS, PYRAMID_POINTS as PTS, VIDEOS as RAW_VIDEOS } from '../data/programs';
 import RecFormats from './RecFormats.jsx';
 
+// The map (d3 + geometry) loads only in the browser, after the page is up.
+const UtahMap = React.lazy(() => import('./UtahMap.jsx'));
+
 let P = RAW_PROGRAMS;
 let VIDS = RAW_VIDEOS;
 
@@ -64,7 +67,7 @@ const TEAMS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(age => {
   const w = Math.round(games * (0.45 + r() * 0.25)), d = Math.round((games - w) * 0.4), l = games - w - d;
   return { age, label: 'U' + age, league, format, players, facts: [{ k: 'Birth year', v: String(birth) }, { k: 'Squad', v: players.length + ' players' }, { k: 'Head coach', v: 'Coach Name' }, { k: '2025–26 record', v: w + 'W ' + d + 'D ' + l + 'L' }] };
 });
-const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
+const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['locations', 'Locations'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
 const MODES = [['expand', 'Expand'], ['zoom', 'Zoom'], ['curtain', 'Curtain']];
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 const EASE = 'cubic-bezier(.76,0,.24,1)';
@@ -94,6 +97,7 @@ export default class UAApp extends React.Component {
   }
   silently(fn) { this._silent = true; try { fn(); } finally { this._silent = false; } }
   componentDidMount() {
+    this.setState({ mounted: true });
     if (this.state.active) document.body.style.overflow = 'hidden';
     this.onPop = () => {
       const id = (location.pathname.match(/^\/programs\/(\w+)\/?$/) || [])[1];
@@ -264,7 +268,7 @@ export default class UAApp extends React.Component {
     const mini = {}; ORDER.forEach(k => { mini[k] = k === id ? ACC : 'rgba(233,233,237,.22)'; });
     const glowId = hv || null;
     return {
-      sl, labels, rows, p, phases, sessions, mini, groupTabs, hasGroups: groupTabs.length > 0, statRows, heroAges: base.ages, isAcademy: id === 'academy', isRec: id === 'rec',
+      sl, labels, rows, p, phases, sessions, mini, groupTabs, hasGroups: groupTabs.length > 0, statRows, heroAges: base.ages, isAcademy: id === 'academy', isRec: id === 'rec', activeId: id,
       glowPts: (glowId ? PTS[glowId] : PTS.academy).map(q => q.join(',')).join(' '), glowOp: glowId ? 0.35 : 0,
       pyrHint: hv ? 'Click to open ' + P[hv].name : 'Hover a level · click to explore',
       tiltTf: tiltOn ? 'perspective(1400px) rotateY(' + (s.tilt.x * 14).toFixed(2) + 'deg) rotateX(' + (-s.tilt.y * 10).toFixed(2) + 'deg)' : 'none',
@@ -724,10 +728,25 @@ export default class UAApp extends React.Component {
                     </div>
                     {V.isRec ? <RecFormats /> : null}
                   </section>
+                  <section id="sec-locations" style={{padding: "64px 0", display: "flex", flexDirection: "column", gap: "32px"}}>
+                    <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
+                      <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
+                        03 · Locations
+                      </span>
+                      <h2 style={{margin: "0", font: "500 clamp(38px,4.4vw,64px)/1 var(--font-heading)", letterSpacing: "-.04em"}}>
+                        Where we train
+                      </h2>
+                    </div>
+                    {this.state.mounted ? (
+                      <React.Suspense fallback={<div className="uamap-placeholder" />}>
+                        <UtahMap key={V.activeId} program={V.activeId} />
+                      </React.Suspense>
+                    ) : <div className="uamap-placeholder" />}
+                  </section>
                   <section id="sec-season" style={{padding: "64px 0", display: "flex", flexDirection: "column", gap: "32px"}}>
                     <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
                       <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                        03 · The year
+                        04 · The year
                       </span>
                       <h2 style={{margin: "0", font: "500 clamp(38px,4.4vw,64px)/1 var(--font-heading)", letterSpacing: "-.04em"}}>
                         Season overview
@@ -778,7 +797,7 @@ export default class UAApp extends React.Component {
                     <div style={{display: "flex", justifyContent: "space-between", alignItems: "end", gap: "20px", flexWrap: "wrap"}}>
                       <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
                         <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                          04 · Commitment
+                          05 · Commitment
                         </span>
                         <h2 style={{margin: "0", font: "500 clamp(38px,4.4vw,64px)/1 var(--font-heading)", letterSpacing: "-.04em"}}>
                           A typical week
@@ -827,7 +846,7 @@ export default class UAApp extends React.Component {
                   <section id="sec-cost" style={{padding: "64px 0", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "48px"}}>
                     <div style={{display: "flex", flexDirection: "column", gap: "20px"}}>
                       <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                        05 · Investment
+                        06 · Investment
                       </span>
                       {(hasGroups) ? (
                         <>
@@ -880,7 +899,7 @@ export default class UAApp extends React.Component {
                   <section id="sec-staff" style={{padding: "64px 0", display: "flex", flexDirection: "column", gap: "32px"}}>
                     <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
                       <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                        06 · Staff
+                        07 · Staff
                       </span>
                       <h2 style={{margin: "0", font: "500 clamp(38px,4.4vw,64px)/1 var(--font-heading)", letterSpacing: "-.04em"}}>
                         Directors & coaches
@@ -929,7 +948,7 @@ export default class UAApp extends React.Component {
                   <section id="sec-players" style={{padding: "64px 0", display: "flex", flexDirection: "column", gap: "32px"}}>
                     <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
                       <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                        07 · Players
+                        08 · Players
                       </span>
                       <h2 style={{margin: "0", font: "500 clamp(38px,4.4vw,64px)/1 var(--font-heading)", letterSpacing: "-.04em"}}>
                         {p.playersHead}
@@ -1054,7 +1073,7 @@ export default class UAApp extends React.Component {
                   <section id="sec-join" style={{padding: "64px 0 96px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "48px"}}>
                     <div style={{display: "flex", flexDirection: "column", gap: "20px"}}>
                       <span style={{fontSize: "12px", letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-accent)"}}>
-                        08 · Join
+                        09 · Join
                       </span>
                       <h2 style={{margin: "0", font: "500 clamp(48px,6vw,96px)/.95 var(--font-heading)", letterSpacing: "-.05em"}}>
                         {p.joinHead}

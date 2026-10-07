@@ -1,19 +1,19 @@
-/* Utah Athletic design tokens and base styles. Source: Nocturne design system from the Claude Design prototype. */
-/* Inter, self-hosted */
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap;
-  src: url('/fonts/inter-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap;
-  src: url('/fonts/inter-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-
 /* Nocturne — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   --color-bg: #161826;
   --color-surface: #232532;
   --color-text: #e9e9ed;
-  --color-accent: #9184d9; 
-  --color-accent-2: #a7a1db; 
+  --color-accent: #9184d9; /* review round 7 (Barron): the accent moves to
+     the product's blurple — OKLCH hue 289.2, the hue of the app's own Pro
+     accent (#9a8fe0, --om-accent-pro) — at the same lightness the steel
+     accent held (L 0.660, so the documented ratios survive) and chroma
+     in the product blurple's own range (its token sits at C 0.118; the
+     accent takes 0.125, from the old steel's 0.030):
+     the accent now reads as an accent rather than another neutral. */
+  --color-accent-2: #a7a1db; /* the machine-derived stand-in follows: same
+     hue, same L 0.734, chroma at the same 2:3 proportion it held */
   --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
 
   /* Tonal ramps — generated in OKLCH on one shared lightness scale, so the
@@ -48,7 +48,12 @@
   --color-accent-2-800: #423e5d;
   --color-accent-2-900: #2b293a;
 
-  
+  /* Deck section-divider ground — review round 3: saturation as presence.
+     Dividers take a saturated deep indigo (hue 277, the neutral ramp's own
+     family; C 0.094 — written when the accent held C 0.030, before the
+     round-7 blurple raised it past the ground's) with a lighter bloom and
+     a ghost tint of the same hue, while the slide grounds stay
+     desaturated. Deck-scale fills only — not interface colors. */
   --color-section: #262a60;
   --color-section-glow: #353b80;
   --color-section-ghost: #4c5397;
@@ -287,37 +292,3 @@ textarea.input { min-height: 90px; resize: vertical; }
 .dialog-body { font-size: 14px; opacity: 0.85; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
 
-/* ── Utah Athletic overrides: teal accent on a darker ground ── */
-:root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
-html,body{margin:0;background:var(--color-bg)}
-a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
-::selection{background:rgba(120,183,179,.3)}
-
-/* ── Hover/focus states from the prototype (inline styles need !important) ── */
-.dc0:hover{background:rgba(120,183,179,.12) !important}
-.dc1:hover{color:var(--color-accent-300) !important}
-.dc2:hover{background:rgba(120,183,179,.12) !important}
-.dc3:hover{background:rgba(233,233,237,.07) !important}
-.dc4:hover{background:rgba(120,183,179,.12) !important}
-.dc5:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-2px) !important}
-.dc6:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
-.dc7:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
-.dc8:hover{border-color:#78b7b3 !important}
-.dc9:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
-.dc10:focus{border-color:#78b7b3 !important}
-.dc11:focus{border-color:#78b7b3 !important}
-.dc12:focus{border-color:#78b7b3 !important}
-.dc13:hover{background:rgba(120,183,179,.16) !important}
-.dc14:focus{border-color:#78b7b3 !important}
-.dc15:focus{border-color:#78b7b3 !important}
-.dc16:focus{border-color:#78b7b3 !important}
-.dc17:hover{background:rgba(233,233,237,.07) !important}
-.dc18:hover{box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
-.dc19:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc20:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc21:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc22:hover{color:#b5e1dd !important}
-
-/* Space held for the locations map while it loads */
-.uamap-placeholder { height: clamp(560px, 68vh, 680px); border-radius: 14px; background: linear-gradient(160deg, #171920, #0d0f13); box-shadow: inset 0 0 0 1px rgba(233,233,237,.1); }
-@media (max-width: 720px) { .uamap-placeholder { height: 560px; } }
