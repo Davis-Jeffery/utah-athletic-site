@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html style="background:#111318;color-scheme:dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Utah Athletic — Locations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+:root{--acc:#78b7b3;--acc3:#b5e1dd;--acc8:#2a4442;--bg:#111318;--surf:#1b1d24;--surf2:#15171d;--line:rgba(233,233,237,.1);--mute:#8b8d98;--ink:#e9e9ed}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc)}a:hover{color:var(--acc3)}
+.frame{height:100%;box-sizing:border-box;padding:12px;border-radius:14px;background:linear-gradient(160deg,#171920,#0d0f13);box-shadow:inset 0 0 0 1px var(--line)}
+.wrap{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:12px;height:100%}
+.list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0}
+.find{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:10px;background:var(--surf);box-shadow:0 0 0 1px var(--line)}
+.find label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.find input{all:unset;box-sizing:border-box;width:100%;height:40px;padding:0 12px;border-radius:8px;background:var(--bg);box-shadow:0 0 0 1px var(--line);font-size:14px;color:var(--ink);transition:box-shadow .2s}
+.find input::placeholder{color:#5f616b}
+.find input:focus{box-shadow:0 0 0 1px var(--acc),0 0 16px rgba(120,183,179,.2)}
+.res{font-size:13px;line-height:1.45;color:var(--mute);min-height:19px}
+.res b{font-weight:500;color:var(--acc3)}
+.site{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:10px;background:var(--surf);box-shadow:0 0 0 1px var(--line);transition:box-shadow .25s,background .25s}
+.site:hover{box-shadow:0 0 0 1px var(--acc8)}
+.site:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.site.on{background:linear-gradient(120deg,rgba(120,183,179,.14),transparent 70%),var(--surf);box-shadow:0 0 0 1px var(--acc),0 0 24px rgba(120,183,179,.18)}
+.site .k{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.site .k i{width:10px;height:10px;border-radius:3px}
+.site .n{font-weight:500;font-size:21px;letter-spacing:-.03em;line-height:1.1}
+.site .c{font-size:12.5px;line-height:1.5;color:var(--mute);text-wrap:pretty}
+.map{position:relative;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 60% 35%,rgba(120,183,179,.08),transparent 60%),var(--surf2);box-shadow:0 0 0 1px var(--line);min-height:0}
+svg{display:block;width:100%;height:100%;cursor:grab}svg:active{cursor:grabbing}
+.ctrls{position:absolute;right:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ctrls button{cursor:pointer;height:34px;min-width:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:rgba(17,19,24,.85);backdrop-filter:blur(8px);color:var(--ink);font:500 12px/1 Inter,system-ui,sans-serif;transition:border-color .2s,color .2s}
+.ctrls button:hover{border-color:var(--acc);color:var(--acc)}
+.ctrls button.on{border-color:var(--acc);color:var(--acc);background:rgba(120,183,179,.12)}
+.ctrls button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.attr{position:absolute;left:12px;bottom:10px;font-size:10px;color:#5f616b}
+.pin .ring{fill:none;stroke:var(--acc);transform-box:fill-box;transform-origin:center;animation:pulse 2.4s cubic-bezier(.2,.8,.2,1) infinite}
+.pin,.city{cursor:pointer}
+.zone{transition:fill-opacity .3s}
+.pin .lab,.city{transition:opacity .25s}
+@keyframes pulse{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+@media (max-width:720px){.wrap{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.list{flex-direction:row;overflow-x:auto}.find,.site{flex:none;width:220px}}
+</style>
+</head>
+<body>
+<div class="frame">
+<div class="wrap">
+  <div class="list" id="list">
+    <div class="find">
+      <label for="q">Find your tryout location</label>
+      <input id="q" list="cities" placeholder="Enter your city" autocomplete="off">
+      <datalist id="cities"></datalist>
+      <div class="res" id="res">Every city is matched to its nearest hub.</div>
+    </div>
+  </div>
+  <div class="map">
+    <svg id="svg" viewBox="0 0 800 640" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of Utah training locations and service areas"></svg>
+    <div class="ctrls">
+      <button id="vFront">Wasatch Front</button>
+      <button id="vState">All of Utah</button>
+      <button id="zIn" aria-label="Zoom in">+</button>
+      <button id="zOut" aria-label="Zoom out">−</button>
+    </div>
+    <div class="attr">Map data: U.S. Census Bureau via us-atlas</div>
+  </div>
+</div>
+</div>
+<script>
+const SITES = {
+  academy: [
+    { id: 'north', label: 'North Academy', city: 'Murray', ll: [-111.8879, 40.6669], side: 1 },
+    { id: 'south', label: 'South Academy', city: 'Orem', ll: [-111.6946, 40.2969], side: 1 }],
+  club: [
+    { id: 'north', label: 'North Club', city: 'Draper / Sandy', ll: [-111.851, 40.545], side: 1 },
+    { id: 'west', label: 'West Club', city: 'Saratoga Springs', ll: [-111.9047, 40.3491], side: -1 },
+    { id: 'south', label: 'South Club', city: 'Orem', ll: [-111.6946, 40.2969], side: 1 }],
+  rec: [{ id: 'hub', label: 'Primary Hub', city: 'Saratoga Springs / Lehi', ll: [-111.878, 40.372], side: 1 }],
+  futures: [{ id: 'hub', label: 'Futures Hub', city: 'Saratoga Springs / Lehi', ll: [-111.878, 40.372], side: 1 }]
+};
+const TONES = ['#78b7b3', '#d6f0ee', '#4f8a86'];
+const CITIES = [['Ogden',-111.9738,41.223],['Layton',-111.9711,41.0602],['Clearfield',-112.0261,41.1108],['Syracuse',-112.0647,41.0894],['Kaysville',-111.9386,41.0352],['Farmington',-111.8874,40.9805],['Centerville',-111.8722,40.918],['Bountiful',-111.8808,40.8894],['North Salt Lake',-111.9069,40.8486],['Salt Lake City',-111.891,40.7608],['Magna',-112.1016,40.7091],['West Valley City',-112.0011,40.6916],['Millcreek',-111.8755,40.6869],['Holladay',-111.8247,40.6688],['Taylorsville',-111.9388,40.6677],['Murray',-111.8879,40.6669],['Kearns',-111.9963,40.66],['Park City',-111.498,40.6461],['Cottonwood Heights',-111.8102,40.6197],['Midvale',-111.8999,40.6111],['West Jordan',-111.9391,40.6097],['Sandy',-111.8389,40.5649],['South Jordan',-111.9297,40.5622],['Tooele',-112.2983,40.5308],['Draper',-111.8638,40.5247],['Riverton',-111.9391,40.5219],['Herriman',-112.033,40.5141],['Heber City',-111.4132,40.507],['Bluffdale',-111.9388,40.4897],['Alpine',-111.7777,40.4533],['Highland',-111.7949,40.4252],['Cedar Hills',-111.7585,40.4141],['Lehi',-111.8508,40.3916],['American Fork',-111.7958,40.3769],['Pleasant Grove',-111.7385,40.3641],['Saratoga Springs',-111.9047,40.3491],['Lindon',-111.7208,40.3433],['Eagle Mountain',-112.0069,40.3141],['Vineyard',-111.7469,40.2972],['Orem',-111.6946,40.2969],['Provo',-111.6585,40.2338],['Springville',-111.6107,40.1652],['Mapleton',-111.5785,40.1302],['Spanish Fork',-111.6549,40.1149],['Payson',-111.732,40.0444]];
+const FAR = [['Logan', -111.8338, 41.737], ['Moab', -109.5498, 38.5733], ['St. George', -113.5684, 37.0965], ['Cedar City', -113.0619, 37.6775]];
+const SERVICE = ['49057', '49029', '49011', '49035', '49045', '49043', '49051', '49049'];
+const prog = new URLSearchParams(location.search).get('p') || 'academy';
+const sites = SITES[prog] || SITES.academy;
+sites.forEach((s, i) => s.tone = TONES[i]);
+const W = 800, H = 640;
+const svg = d3.select('#svg'), defs = svg.append('defs');
+const gr = defs.append('radialGradient').attr('id', 'glow');
+gr.append('stop').attr('offset', '0').attr('stop-color', '#78b7b3').attr('stop-opacity', .35);
+gr.append('stop').attr('offset', '1').attr('stop-color', '#78b7b3').attr('stop-opacity', 0);
+const world = svg.append('g'), over = svg.append('g');
+let active = null, proj, zoom, tf = d3.zoomIdentity, cities = [], picked = null;
+const list = document.getElementById('list'), res = document.getElementById('res');
+
+fetch('https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/counties-10m.json').then(r => r.json()).then(us => {
+  const states = topojson.feature(us, us.objects.states).features;
+  const utah = states.find(f => f.id === '49');
+  const counties = topojson.feature(us, us.objects.counties).features.filter(f => String(f.id).startsWith('49'));
+  const service = counties.filter(f => SERVICE.includes(String(f.id)));
+  proj = d3.geoMercator().fitExtent([[60, 40], [W - 60, H - 40]], utah);
+  const path = d3.geoPath(proj);
+  const sp = sites.map(s => proj(s.ll));
+  cities = CITIES.map(([name, lon, lat]) => { const p = proj([lon, lat]); let bi = 0, bd = 1e9; sp.forEach((q, i) => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < bd) { bd = d; bi = i; } }); return { name, ll: [lon, lat], site: sites[bi] }; });
+  sites.forEach(s => s.serves = cities.filter(c => c.site === s).map(c => c.name));
+  buildList();
+
+  world.append('g').selectAll('path').data(states.filter(f => f.id !== '49')).join('path')
+    .attr('d', path).attr('fill', '#14161b').attr('stroke', 'rgba(233,233,237,.05)').attr('vector-effect', 'non-scaling-stroke');
+  world.append('path').datum(utah).attr('d', path).attr('fill', '#1d2027');
+  const clip = defs.append('clipPath').attr('id', 'svc');
+  service.forEach(f => clip.append('path').attr('d', path(f)));
+  const vor = sites.length > 1 ? d3.Delaunay.from(sp).voronoi([-400, -400, W + 400, H + 400]) : null;
+  const cell = i => vor ? 'M' + vor.cellPolygon(i).join('L') + 'Z' : 'M-400,-400H1200V1040H-400Z';
+  const zg = world.append('g').attr('clip-path', 'url(#svc)');
+  zg.selectAll('path').data(sites).join('path').attr('class', 'zone').attr('d', (d, i) => cell(i))
+    .attr('fill', d => d.tone).attr('fill-opacity', .2).on('click', (e, d) => focusSite(d.id));
+  if (vor) zg.append('path').attr('d', vor.render()).attr('fill', 'none').attr('stroke', '#e9e9ed').attr('stroke-opacity', .35).attr('stroke-width', 1).attr('stroke-dasharray', '4 4').attr('vector-effect', 'non-scaling-stroke');
+  world.append('g').selectAll('path').data(counties).join('path')
+    .attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(233,233,237,.09)').attr('stroke-width', .7).attr('vector-effect', 'non-scaling-stroke');
+  world.append('g').selectAll('path').data(service).join('path')
+    .attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(120,183,179,.45)').attr('stroke-width', 1).attr('vector-effect', 'non-scaling-stroke');
+  world.append('path').datum(utah).attr('d', path).attr('fill', 'none').attr('stroke', '#78b7b3').attr('stroke-width', 1.4).attr('vector-effect', 'non-scaling-stroke');
+
+  const farG = over.append('g');
+  FAR.forEach(([n, lon, lat]) => {
+    const g = farG.append('g').attr('class', 'ref').datum({ ll: [lon, lat] });
+    g.append('circle').attr('r', 2.5).attr('fill', '#8b8d98');
+    g.append('text').attr('x', 7).attr('y', 4).attr('fill', '#8b8d98').attr('font-size', 11).text(n);
+  });
+  const cg = over.append('g');
+  cities.forEach(c => {
+    const g = cg.append('g').attr('class', 'city').datum(c).on('click', () => pickCity(c.name));
+    g.append('circle').attr('r', 3).attr('fill', c.site.tone).attr('stroke', '#111318').attr('stroke-width', 1);
+    g.append('text').attr('x', 6).attr('y', 3.5).attr('fill', '#b9bbc4').attr('font-size', 10).attr('paint-order', 'stroke').attr('stroke', '#15171d').attr('stroke-width', 3).text(c.name);
+  });
+  const mark = over.append('g').attr('id', 'mark').style('opacity', 0);
+  mark.append('circle').attr('r', 9).attr('fill', 'none').attr('stroke', '#e9e9ed').attr('stroke-width', 1.5);
+  mark.append('circle').attr('r', 3.5).attr('fill', '#e9e9ed');
+  const pinG = over.append('g');
+  sites.forEach(s => {
+    const g = pinG.append('g').attr('class', 'pin').datum(s).on('click', () => focusSite(s.id));
+    g.append('circle').attr('r', 34).attr('fill', 'url(#glow)');
+    g.append('circle').attr('class', 'ring').attr('r', 10).style('stroke', s.tone);
+    g.append('circle').attr('r', 6).attr('fill', '#111318').attr('stroke', s.tone).attr('stroke-width', 2);
+    g.append('circle').attr('r', 2.6).attr('fill', s.tone);
+    const lab = g.append('g').attr('class', 'lab');
+    const tx = s.side > 0 ? 16 : -16, anchor = s.side > 0 ? 'start' : 'end';
+    lab.append('text').attr('x', tx).attr('y', -3).attr('text-anchor', anchor).attr('fill', s.tone).attr('font-size', 10.5).attr('letter-spacing', '.14em').text(s.label.toUpperCase());
+    lab.append('text').attr('x', tx).attr('y', 14).attr('text-anchor', anchor).attr('fill', '#e9e9ed').attr('font-size', 15).attr('font-weight', 500).text(s.city);
+    const bb = lab.node().getBBox();
+    lab.insert('rect', 'text').attr('x', bb.x - 9).attr('y', bb.y - 7).attr('width', bb.width + 18).attr('height', bb.height + 14).attr('rx', 7)
+      .attr('fill', 'rgba(17,19,24,.92)').attr('stroke', s.tone).attr('stroke-opacity', .5);
+  });
+
+  zoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[-200, -200], [W + 200, H + 200]])
+    .filter(e => (e.type !== 'wheel' || e.ctrlKey) && !e.button)
+    .on('zoom', e => { tf = e.transform; world.attr('transform', tf); place(); });
+  svg.call(zoom).on('dblclick.zoom', null);
+  place();
+  setTimeout(() => goFront(1400), 500);
+});
+
+function buildList() {
+  const dl = document.getElementById('cities');
+  cities.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { const o = document.createElement('option'); o.value = c.name; dl.appendChild(o); });
+  sites.forEach(s => {
+    const b = document.createElement('button'); b.className = 'site'; b.dataset.id = s.id;
+    const shown = s.serves.filter(n => !s.city.includes(n)).slice(0, 5), more = s.serves.length - shown.length - (s.serves.some(n => s.city.includes(n)) ? 1 : 0);
+    b.innerHTML = '<span class="k"><i style="background:' + s.tone + ';box-shadow:0 0 8px ' + s.tone + '"></i><span style="color:' + s.tone + '">' + s.label + '</span></span><span class="n">' + s.city + '</span><span class="c">Serving ' + shown.join(', ') + (more > 0 ? ' + ' + more + ' more' : '') + '</span>';
+    b.onclick = () => focusSite(s.id);
+    b.onmouseenter = () => highlight(s.id);
+    b.onmouseleave = () => highlight(active);
+    list.appendChild(b);
+  });
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => { const c = cities.find(x => x.name.toLowerCase() === q.value.trim().toLowerCase()); if (c) pickCity(c.name); });
+  q.addEventListener('keydown', e => { if (e.key !== 'Enter') return; const v = q.value.trim().toLowerCase(); const c = cities.find(x => x.name.toLowerCase().startsWith(v)); if (c) { q.value = c.name; pickCity(c.name); } else res.innerHTML = 'Not on our list yet — contact us and we’ll point you to the right hub.'; });
+}
+function place() {
+  over.selectAll('.ref').attr('transform', d => 'translate(' + tf.apply(proj(d.ll)) + ')');
+  over.selectAll('.city').attr('transform', d => 'translate(' + tf.apply(proj(d.ll)) + ')')
+    .style('opacity', d => tf.k < 3 ? 0 : (d.name === picked || sites.every(s => { const a = tf.apply(proj(s.ll)), b = tf.apply(proj(d.ll)); return Math.hypot(a[0] - b[0], a[1] - b[1]) > 46; })) ? 1 : 0)
+    .style('pointer-events', tf.k < 3 ? 'none' : 'auto');
+  over.selectAll('.city text').style('display', tf.k < 4.5 ? 'none' : null);
+  over.selectAll('.pin').attr('transform', d => 'translate(' + tf.apply(proj(d.ll)) + ')');
+  const c = cities.find(x => x.name === picked);
+  if (c) d3.select('#mark').attr('transform', 'translate(' + tf.apply(proj(c.ll)) + ')');
+}
+function fitBox(pts, pad) {
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = Math.min(60, pad * Math.min(W / (x1 - x0), H / (y1 - y0)));
+  return d3.zoomIdentity.translate(W / 2, H / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
+}
+const frontT = () => fitBox(sites.map(s => proj(s.ll)).concat([proj([-111.95, 40.8]), proj([-111.66, 40.2])]), .6);
+const fly = (t, ms) => svg.transition().duration(ms || 900).ease(d3.easeCubicInOut).call(zoom.transform, t);
+function goFront(ms) { active = null; highlight(null); fly(frontT(), ms); setView('front'); }
+function goState() { active = null; highlight(null); fly(d3.zoomIdentity); setView('state'); }
+function focusSite(id, at) {
+  const s = sites.find(x => x.id === id); active = id; highlight(id); setView(null);
+  const p = proj(at || s.ll), k = Math.min(60, frontT().k * 1.5);
+  fly(d3.zoomIdentity.translate(W / 2, H / 2).scale(k).translate(-p[0], -p[1]));
+}
+function pickCity(name) {
+  const c = cities.find(x => x.name === name); picked = name;
+  document.getElementById('q').value = name;
+  res.innerHTML = name + ' → <b>' + c.site.label + '</b> · ' + c.site.city;
+  d3.select('#mark').style('opacity', 1);
+  const a = proj(c.ll), b = proj(c.site.ll);
+  focusSite(c.site.id, [proj.invert([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2])].map(p => p)[0]);
+}
+function highlight(id) {
+  document.querySelectorAll('.site').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  world.selectAll('.zone').attr('fill-opacity', d => !id ? .2 : d.id === id ? .34 : .08);
+  over.selectAll('.pin .lab').style('opacity', d => !id || d.id === id ? 1 : .35);
+}
+function setView(v) { document.getElementById('vFront').classList.toggle('on', v === 'front'); document.getElementById('vState').classList.toggle('on', v === 'state'); }
+document.getElementById('vFront').onclick = () => goFront();
+document.getElementById('vState').onclick = goState;
+document.getElementById('zIn').onclick = () => svg.transition().duration(350).call(zoom.scaleBy, 1.6);
+document.getElementById('zOut').onclick = () => svg.transition().duration(350).call(zoom.scaleBy, 1 / 1.6);
+</script>
+</body>
+</html>

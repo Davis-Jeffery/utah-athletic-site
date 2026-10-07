@@ -4,11 +4,15 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 
 ## How this repo works
 
-- **Content lives in `src/data/`.** Prices, dates, copy, schedules and staff are in `programs.ts`; rec play formats are in `rec-formats.ts`. Change content there, not in page markup.
-- **Images** go in `src/assets/images/` and are referenced from data files by file name without extension (see `src/lib/images.ts`). Astro optimizes them at build time.
-- **Design tokens** are in `src/styles/global.css`. Use the CSS variables; don't hardcode colors.
-- **Pages:** `src/pages/index.astro` (home) and `src/pages/programs/[slug].astro` (Academy, Club, Rec, Futures).
-- `docs/` is internal and never published. `docs/rec-program-plan.md` holds rec program decisions. `docs/design-reference/` holds the original Claude Design prototype (template + page script) for porting.
+- **The site is one React island**, `src/components/UAApp.jsx` (ported from the Claude Design prototype in `docs/design-reference/`). It renders the pyramid home page and opens each program as an overlay with the expand transition. Opening a program pushes `/programs/<key>/`; back/forward and Escape work.
+- **Every program has a real static URL** (`src/pages/programs/[slug].astro`) that renders the app with that program already open, for sharing and search.
+- **Content lives in `src/data/`.** Prices, dates, copy, schedules and staff are in `programs.ts`; rec play formats are in `rec-formats.ts` (rendered by `RecFormats.jsx` inside the Rec program's Competition section). Change content there, not in component markup.
+- **Locations map** (`src/components/UtahMap.jsx`, section `03 · Locations` in every program page): hubs, cities and service counties live in `src/data/locations.ts`; Utah geometry is `src/data/utah-geo.json` (regenerate with `npm run geo:build`). The map is lazy-loaded so the home page stays light.
+- **Images** go in `src/assets/images/` and are referenced from data files by file name without extension. `src/lib/assets.ts` optimizes them to WebP at build time and passes URLs to the app.
+- **Styles:** design tokens and the hover/focus rules (`.dcN` classes) are in `src/styles/global.css`. Component styling is inline in `UAApp.jsx`, matching the prototype. Use the CSS variables; don't hardcode new colors.
+- **Transition modes:** `expand` is the default. `zoom` and `curtain` also exist; pass `transition="zoom"` to `UAApp`, or `showModes` to show the picker dock while testing.
+- `docs/` is internal and never published. `docs/rec-program-plan.md` holds rec program decisions.
+- **Design updates:** follow `docs/DESIGN-SYNC.md`. Run `npm run design:extract -- <handoff.zip or export.html>`, diff `docs/design-reference`, and port only what changed using the map in that doc.
 
 ## Deploying
 
@@ -21,8 +25,11 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 - No em dashes in any copy. Use periods, commas or colons instead.
 - Keep copy short and parent-friendly. Ages are written U5, U9 to U12, etc.
 
-## Current work
+## Open work
 
-- Port the full prototype design (animated hero, program pyramid, transitions) from `docs/design-reference/` into Astro components. Keep it fast: plain CSS and small client scripts, no runtime React unless a component truly needs it.
+- Registration and info forms show a success message but don't submit anywhere yet. Wire them to LeagueApps (link out) or a form service.
+- Academy roster/player data is generated placeholder data from the prototype (`TEAMS` in `UAApp.jsx`). Replace with real rosters or hide before launch.
+- Header links Staff, Copa Athletic and News are placeholders.
 - Rec page: formats for U5 to U9 are defined; U10+ still to be decided.
-- Registration links (LeagueApps) are placeholders. Add `registerUrl` to each program in `programs.ts`.
+- Map hubs use nearest-hub zones. Replace with the club's official city-to-hub assignment when available, and pass the matched hub into the join forms.
+- `UAApp.jsx` is one large file from the port. Split it into components (Home, Pyramid, ProgramOverlay, sections) as you touch it.

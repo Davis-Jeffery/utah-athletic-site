@@ -5,3 +5,6 @@ dist/
 .env
 .env.*
 .DS_Store
+
+# Extracted design images (regenerate with npm run design:extract)
+docs/design-reference/assets/
