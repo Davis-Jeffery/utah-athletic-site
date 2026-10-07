@@ -11,6 +11,7 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 - **Styles:** design tokens and the hover/focus rules (`.dcN` classes) are in `src/styles/global.css`. Component styling is inline in `UAApp.jsx`, matching the prototype. Use the CSS variables; don't hardcode new colors.
 - **Transition modes:** `expand` is the default. `zoom` and `curtain` also exist; pass `transition="zoom"` to `UAApp`, or `showModes` to show the picker dock while testing.
 - `docs/` is internal and never published. `docs/rec-program-plan.md` holds rec program decisions.
+- **Design updates:** follow `docs/DESIGN-SYNC.md`. Run `npm run design:extract -- <export.html>`, diff `docs/design-reference`, and port only what changed using the map in that doc.
 
 ## Deploying
 
