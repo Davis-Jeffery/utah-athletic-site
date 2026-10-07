@@ -15,6 +15,7 @@
     "@astrojs/react": "^7.0.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vercel/analytics": "^2.0.1",
     "astro": "^7.3.6",
     "d3-delaunay": "^6.0.4",
     "d3-ease": "^3.0.1",
