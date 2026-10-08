@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "design:extract": "node scripts/extract-design.mjs",
-    "geo:build": "node scripts/build-utah-geo.mjs && node scripts/build-world-geo.mjs"
+    "geo:build": "node scripts/build-utah-geo.mjs && node scripts/build-world-geo.mjs",
+    "sanity:import": "node --env-file-if-exists=.env --experimental-strip-types --no-warnings scripts/sanity-import.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",
@@ -28,6 +29,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@sanity/client": "^8.9.0",
     "topojson-client": "^3.1.0",
     "us-atlas": "^3.0.1",
     "world-atlas": "^2.0.2"

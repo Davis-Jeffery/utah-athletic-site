@@ -8,7 +8,7 @@ import { structure, FIXED_TYPES } from './structure';
 export default defineConfig({
   name: 'default',
   title: 'Utah Athletic',
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID!,
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID || '03wnsd9x',
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
 
   plugins: [

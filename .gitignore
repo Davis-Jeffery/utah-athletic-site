@@ -8,3 +8,7 @@ dist/
 
 # Extracted design images (regenerate with npm run design:extract)
 docs/design-reference/assets/
+
+# Sanity import output
+.sanity-import/
+!.env.example
