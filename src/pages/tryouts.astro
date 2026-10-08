@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SiteHeader from '../components/SiteHeader.jsx';
+import SiteFooter from '../components/SiteFooter.jsx';
+import TryoutsApp from '../components/TryoutsApp.jsx';
+import { loadSite } from '../lib/content';
+import { buildAssets } from '../lib/assets';
+import { TRYOUTS_LABEL } from '../data/site';
+
+const data = await loadSite();
+const A = await buildAssets();
+// Only what the filters need, so the page stays light.
+const tryData = {
+  programs: data.programs.map(({ id, name, ages, kind, invite, registerUrl, regions }) => ({ id, name, ages, kind, invite, registerUrl, regions })),
+  regions: data.regions, tryouts: data.tryouts, seasons: data.seasons, builtOn: data.builtOn,
+};
+---
+<Base title={`${TRYOUTS_LABEL} | Utah Athletic`} description="Every Utah Athletic tryout date, time and field by region and level. Register in a couple of taps." preload={A['collage-c14@lg']}>
+  <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+    <SiteHeader current="tryouts" logo={data.logo} sticky={false} />
+    <PageHero kicker={TRYOUTS_LABEL} photo={A['collage-c14@lg']}>
+      <h1 style="margin:0;font:500 clamp(46px,7vw,104px)/.92 var(--font-heading);letter-spacing:-.05em;text-wrap:balance">Find your <span style="color:#78b7b3">tryout.</span></h1>
+      <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Pick your region and level. Every date, time and field in one place. Register in a couple of taps.</p>
+    </PageHero>
+    <TryoutsApp client:load data={tryData} />
+    <SiteFooter note="Registration is handled in Ollie." />
+  </div>
+</Base>

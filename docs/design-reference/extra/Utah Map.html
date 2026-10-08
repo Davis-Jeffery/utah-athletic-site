@@ -162,7 +162,9 @@ fetch('https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/counties-10m.json').then(r =>
     .on('zoom', e => { tf = e.transform; world.attr('transform', tf); place(); });
   svg.call(zoom).on('dblclick.zoom', null);
   place();
-  setTimeout(() => goFront(1400), 500);
+  const r0 = new URLSearchParams(location.search).get('r');
+  const s0 = r0 ? (sites.find(x => x.id === r0) || (sites.length === 1 ? sites[0] : null)) : null;
+  setTimeout(() => s0 ? focusSite(s0.id) : goFront(1400), 500);
 });
 
 function buildList() {

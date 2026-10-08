@@ -293,31 +293,57 @@ html,body{margin:0;background:var(--color-bg)}
 a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
 ::selection{background:rgba(120,183,179,.3)}
 
-/* ── Hover/focus states from the prototype (inline styles need !important) ── */
-.dc0:hover{background:rgba(120,183,179,.12) !important}
-.dc1:hover{color:var(--color-accent-300) !important}
-.dc2:hover{background:rgba(120,183,179,.12) !important}
-.dc3:hover{background:rgba(233,233,237,.07) !important}
-.dc4:hover{background:rgba(120,183,179,.12) !important}
-.dc5:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-2px) !important}
-.dc6:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
-.dc7:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
-.dc8:hover{border-color:#78b7b3 !important}
-.dc9:hover{transform:translateY(-4px) !important;box-shadow:0 0 0 1px #78b7b3,0 14px 34px rgba(0,0,0,.45) !important}
-.dc10:focus{border-color:#78b7b3 !important}
-.dc11:focus{border-color:#78b7b3 !important}
-.dc12:focus{border-color:#78b7b3 !important}
-.dc13:hover{background:rgba(120,183,179,.16) !important}
-.dc14:focus{border-color:#78b7b3 !important}
-.dc15:focus{border-color:#78b7b3 !important}
-.dc16:focus{border-color:#78b7b3 !important}
-.dc17:hover{background:rgba(233,233,237,.07) !important}
-.dc18:hover{box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px) !important}
-.dc19:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc20:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc21:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
-.dc22:hover{color:#b5e1dd !important}
+/* ── Hover and focus states from the design ──
+   Components style themselves inline (matching the prototype markup); hover states can't be
+   inline, so they're these classes. Inline styles win over classes, hence !important. */
+.hv-t08:hover{background:rgba(120,183,179,.08) !important}
+.hv-t10:hover{background:rgba(120,183,179,.1) !important}
+.hv-t12:hover{background:rgba(120,183,179,.12) !important}
+.hv-t14:hover{background:rgba(120,183,179,.14) !important}
+.hv-t16:hover{background:rgba(120,183,179,.16) !important}
+.hv-t18:hover{background:rgba(120,183,179,.18) !important;transform:translateY(-2px)}
+.hv-t26:hover{background:rgba(120,183,179,.26) !important}
+.hv-ghost:hover{background:rgba(233,233,237,.07) !important}
+.hv-faint:hover{background:rgba(233,233,237,.04) !important}
+.hv-border:hover{border-color:#78b7b3 !important}
+.hv-outline:hover{border-color:#78b7b3 !important;color:#78b7b3 !important}
+.hv-link:hover{color:#b5e1dd !important}
+.hv-white:hover{color:var(--color-text) !important}
+.hv-lift:hover{box-shadow:0 0 0 1px #78b7b3,0 10px 30px rgba(0,0,0,.4) !important;transform:translateY(-3px)}
+.hv-lift-sm:hover{box-shadow:0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.4) !important;transform:translateY(-2px)}
+.hv-row:hover{box-shadow:0 0 0 1px var(--color-accent-800),var(--shadow-sm) !important}
+.hv-zoom:hover{transform:scale(1.04)}
+.hv-event:hover{transform:translateY(-4px);box-shadow:0 0 0 1px var(--ev-accent),0 18px 40px rgba(0,0,0,.45) !important}
+.hv-event-sm:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--ev-accent),0 14px 34px rgba(0,0,0,.45) !important}
+.hv-video:hover{color:var(--color-accent-300) !important}
 
-/* Space held for the locations map while it loads */
+/* Form fields (inputs, selects, textareas) */
+.ua-input{width:100%;min-height:42px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none}
+.ua-input:focus,.ua-input:focus-visible{border-color:#78b7b3}
+textarea.ua-input{min-height:120px;line-height:1.5;resize:vertical}
+select.ua-input{padding:8px 10px}
+
+/* Header: on narrow screens the nav drops to its own scrolling row */
+@media (max-width: 900px){
+  .site-header{flex-wrap:wrap;row-gap:10px !important}
+  .site-nav{order:3;width:100%;flex-wrap:nowrap !important;overflow-x:auto;padding-bottom:2px;gap:20px !important}
+  .site-nav a{white-space:nowrap}
+}
+@media (max-width: 520px){ .site-tryouts{display:none !important} }
+
+/* Program page top bar: keep it one row on small screens */
+@media (max-width: 960px){ .ov-switcher{display:none !important} }
+@media (max-width: 720px){ .ov-esc{display:none !important} .ov-cta{display:none !important} }
+
+/* Pages that arrive from the pyramid's Professional tier zoom in */
+@keyframes ua-page-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+.page-zoom-in{animation:ua-page-in .8s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion: reduce){ .page-zoom-in{animation:none} }
+
+/* Space held for the maps while they load */
 .uamap-placeholder { height: clamp(560px, 68vh, 680px); border-radius: 14px; background: linear-gradient(160deg, #171920, #0d0f13); box-shadow: inset 0 0 0 1px rgba(233,233,237,.1); }
 @media (max-width: 720px) { .uamap-placeholder { height: 560px; } }
+
+/* Network map: pulsing ring on each club */
+.netmap-ring{fill:none;stroke:#78b7b3;transform-box:fill-box;transform-origin:center;animation:netmap-pulse 2.4s cubic-bezier(.2,.8,.2,1) infinite}
+@keyframes netmap-pulse{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.8);opacity:0}}

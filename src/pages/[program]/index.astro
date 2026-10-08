@@ -1,0 +1,18 @@
+---
+// Program overview (/academy/ etc.). Renders the app with the program already open;
+// closing it animates back to the pyramid without a page load.
+import Base from '../../layouts/Base.astro';
+import UAApp from '../../components/app/UAApp.jsx';
+import { ORDER } from '../../data/site';
+import { loadSite } from '../../lib/content';
+
+export function getStaticPaths() {
+  return ORDER.map((program) => ({ params: { program } }));
+}
+
+const data = await loadSite();
+const p = data.programs.find((x) => x.id === Astro.params.program)!;
+---
+<Base title={`${p.name} | Utah Athletic`} description={p.tagline} preload={p.img}>
+  <UAApp client:load data={data} initial={{ program: p.id, region: null }} />
+</Base>

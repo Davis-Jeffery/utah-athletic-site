@@ -1,0 +1,24 @@
+---
+// Program region tab (/academy/north/ etc.). Every program has a page for every region:
+// active, coming soon (register interest) or not offered (points to the nearest region).
+import Base from '../../layouts/Base.astro';
+import UAApp from '../../components/app/UAApp.jsx';
+import { ORDER, REGION_ORDER } from '../../data/site';
+import { loadSite } from '../../lib/content';
+
+export function getStaticPaths() {
+  return ORDER.flatMap((program) => REGION_ORDER.map((region) => ({ params: { program, region } })));
+}
+
+const data = await loadSite();
+const p = data.programs.find((x) => x.id === Astro.params.program)!;
+const r = data.regions.find((x) => x.id === Astro.params.region)!;
+const st = p.regions[r.id];
+const description = st.status === 'active'
+  ? `${p.name} in the ${r.label} region (${r.area}): staff, tryouts and contacts.`
+  : st.status === 'soon' ? `${p.name} launches in the ${r.label} region in ${st.season}. Register interest.`
+    : `${p.name} isn't offered in the ${r.label} region. Find the nearest hub.`;
+---
+<Base title={`${r.label} ${p.name} | Utah Athletic`} description={description} preload={p.img}>
+  <UAApp client:load data={data} initial={{ program: p.id, region: r.id }} />
+</Base>

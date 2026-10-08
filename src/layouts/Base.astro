@@ -6,11 +6,13 @@ interface Props {
   title: string;
   description?: string;
   preload?: string;
+  bodyClass?: string;
 }
 const {
   title,
   description = 'Utah Athletic Soccer Club: Academy, Club, Recreation and Futures programs for Utah players.',
   preload,
+  bodyClass,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -19,17 +21,31 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#111318" />
     <Analytics />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
     <link rel="icon" href="/logo-ua.avif" />
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
     {preload && <link rel="preload" href={preload} as="image" />}
   </head>
-  <body>
+  <body class={bodyClass}>
     <slot />
+    <script is:inline>
+      // The header's Tryouts button opens on the visitor's remembered region.
+      (function () {
+        var r = (document.cookie.match(/(?:^|; )ua_region=(north|south|west)/) || [])[1];
+        if (!r) return;
+        document.querySelectorAll('a[data-tryouts-link]').forEach(function (a) {
+          // Links inside React islands update themselves after hydration.
+          if (!a.closest('astro-island') && a.getAttribute('href') === '/tryouts/') a.setAttribute('href', '/tryouts/?region=' + r);
+        });
+      })();
+    </script>
   </body>
 </html>

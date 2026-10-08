@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="nocturne.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+:root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
+html,body{margin:0;background:var(--color-bg)}
+a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
+::selection{background:rgba(120,183,179,.3)}
+</style>
+</helmet>
+<div style="position:relative;min-height:100vh;overflow-x:hidden;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+  <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:32px;padding:14px clamp(20px,4vw,56px);background:rgba(17,19,24,.8);backdrop-filter:blur(14px)">
+    <a href="Utah Athletic Programs.dc.html" style="margin-right:auto;display:flex;align-items:center"><img src="assets/ua-logo.avif" alt="Utah Athletic" style="height:40px;width:auto"></a>
+    <nav style="display:flex;gap:26px;font-size:14px;flex-wrap:wrap">
+      <a href="Utah Athletic Programs.dc.html#programs" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Programs</a>
+      <a href="Athletic Network.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Network</a>
+      <a href="Utah Athletic Programs.dc.html#inside" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Inside UA</a>
+      <a href="#" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">News</a>
+      <a href="Tryouts.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Tryouts</a>
+      <a href="Events.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Tournaments &amp; Events</a>
+      <a href="Contact Us.dc.html" style="color:var(--color-text)">Contact</a>
+    </nav>
+    <a href="Utah Athletic Programs.dc.html#programs" style="border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:11px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.1);color:var(--color-accent-300)">Find your level</a>
+  </header>
+
+  <section style="position:relative;overflow:hidden">
+    <div style="position:absolute;right:-10%;top:-40%;width:720px;height:720px;border-radius:50%;background:radial-gradient(circle,rgba(120,183,179,.16),transparent 65%);pointer-events:none"></div>
+    <div style="position:relative;max-width:1360px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,4vw,56px) 40px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><span style="width:28px;height:1px;background:var(--color-accent)"></span>Contact us</div>
+      <h1 style="margin:0;max-width:900px;font:500 clamp(48px,6.4vw,96px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">Talk to the people <span style="color:#78b7b3">who run the program.</span></h1>
+      <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Send a question to our main office, or direct it to a regional Managing Director or Director of Coaching. We reply within 48 hours.</p>
+    </div>
+  </section>
+
+  <div style="max-width:1360px;margin:0 auto;padding:16px clamp(20px,4vw,56px) 104px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:clamp(24px,4vw,56px);align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:10px;padding:22px;border-radius:12px;background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)">
+        <span style="display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><i class="ph ph-envelope-simple" style="font-size:16px"></i>Main office</span>
+        <a href="mailto:info@utahathletic.com" style="font:500 clamp(22px,2.4vw,30px)/1.1 var(--font-heading);letter-spacing:-.02em;color:var(--color-text)" style-hover="color:#78b7b3">info@utahathletic.com</a>
+        <span style="font-size:13px;color:var(--color-neutral-400)">General questions, registration, billing and media.</span>
+      </div>
+      <span style="padding:14px 2px 2px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Regional leadership</span>
+      <sc-for list="{{ regions }}" as="rg" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:18px 20px;border-radius:12px;background:var(--color-surface);box-shadow:{{ rg.ring }};transition:box-shadow .3s">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+            <span style="font:500 22px/1 var(--font-heading);letter-spacing:-.03em">{{ rg.label }}</span>
+            <span style="font-size:12px;color:var(--color-neutral-500)">{{ rg.area }}</span>
+          </div>
+          <sc-for list="{{ rg.leads }}" as="ld" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding-top:10px;background:linear-gradient(to right,var(--color-divider),var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+              <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-300)">{{ ld.role }}</span><span style="font-size:15px">{{ ld.name }}</span></span>
+              <a href="{{ ld.mail }}" style="font-size:13px">{{ ld.email }}</a>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border-radius:16px;background:var(--color-surface);box-shadow:var(--shadow-md),0 0 0 1px var(--color-divider);overflow:hidden">
+      <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:56px 32px;display:flex;flex-direction:column;align-items:flex-start;gap:14px">
+          <span style="width:48px;height:48px;border-radius:50%;border:1px solid var(--color-accent);color:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:22px"><i class="ph ph-check"></i></span>
+          <span style="font:500 34px/1.05 var(--font-heading);letter-spacing:-.03em">Message sent.</span>
+          <span style="font-size:15px;line-height:1.6;color:var(--color-neutral-400)">{{ sentCopy }}</span>
+          <button onClick="{{ reset }}" style="cursor:pointer;margin-top:6px;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);padding:10px 16px;border-radius:8px;font:500 14px/1 var(--font-body)">Send another</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ submit }}" style="padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font:500 26px/1.1 var(--font-heading);letter-spacing:-.03em">Send a message</span><span style="font-size:13px;color:var(--color-neutral-400)">To: <span style="color:var(--color-accent-300)">{{ toLine }}</span></span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Your name<input required style="min-height:42px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Email<input required type="email" placeholder="you@email.com" style="min-height:42px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Phone<input type="tel" placeholder="Optional" style="min-height:42px;padding:8px 12px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Topic<select style="min-height:42px;padding:8px 10px;font:400 14px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px"><option>General question</option><option>Tryouts &amp; player trials</option><option>Registration &amp; billing</option><option>Coaching opportunities</option><option>Partnerships &amp; media</option></select></label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12px;color:var(--color-neutral-400)">Program</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ programs }}" as="pg" hint-placeholder-count="5">
+                <button type="button" onClick="{{ pg.pick }}" style="cursor:pointer;padding:9px 13px;border-radius:8px;border:1px solid {{ pg.border }};background:{{ pg.bg }};color:{{ pg.fg }};font:500 13px/1 var(--font-body);transition:all .2s">{{ pg.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12px;color:var(--color-neutral-400)">Do you want to reach a specific regional leader?</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px">
+              <sc-for list="{{ regionOpts }}" as="ro" hint-placeholder-count="4">
+                <button type="button" onClick="{{ ro.pick }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:11px 13px;border-radius:8px;border:1px solid {{ ro.border }};background:{{ ro.bg }};color:{{ ro.fg }};text-align:left;transition:all .2s"><span style="font:500 14px/1 var(--font-body)">{{ ro.label }}</span><span style="font-size:11px;color:var(--color-neutral-500)">{{ ro.sub }}</span></button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ hasRegion }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:12px;color:var(--color-neutral-400)">Which leader?</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ leaderOpts }}" as="lo" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ lo.pick }}" style="cursor:pointer;padding:9px 13px;border-radius:8px;border:1px solid {{ lo.border }};background:{{ lo.bg }};color:{{ lo.fg }};font:500 13px/1 var(--font-body);transition:all .2s">{{ lo.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Message<textarea required rows="5" placeholder="How can we help?" style="padding:10px 12px;font:400 14px/1.5 var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none;resize:vertical" style-focus="border-color:#78b7b3"></textarea></label>
+          <button type="submit" style="cursor:pointer;background:rgba(120,183,179,.08);border:1px solid var(--color-accent);color:var(--color-accent);font:500 15px/1 var(--font-body);padding:16px;border-radius:8px" style-hover="background:rgba(120,183,179,.16)">Send message →</button>
+        </form>
+      </sc-if>
+    </div>
+  </div>
+
+  <footer style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:28px clamp(20px,4vw,56px);font-size:13px;color:var(--color-neutral-500)">
+    <span>© 2026 Utah Athletic · Part of Athletic Global</span>
+    <div style="display:flex;gap:20px"><a href="https://www.instagram.com/utahathletic.soccer/" style="color:var(--color-neutral-400)">Instagram</a></div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const REGIONS = [['north', 'North', 'Salt Lake County'], ['south', 'South', 'Utah County'], ['west', 'West', 'West Utah County']];
+const PROGRAMS = [['academy', 'Academy'], ['club', 'Club'], ['rec', 'Recreation'], ['futures', 'Futures'], ['', 'Not sure yet']];
+const LEADERS = [['md', 'Managing Director'], ['doc', 'Director of Coaching'], ['any', 'Either']];
+const ACC = '#78b7b3';
+const pill = on => ({ border: on ? ACC : 'var(--color-divider)', bg: on ? 'rgba(120,183,179,.12)' : 'transparent', fg: on ? ACC : 'var(--color-neutral-300)' });
+class Component extends DCLogic {
+  state = { region: null, program: '', leader: 'md', sent: false };
+  componentDidMount() {
+    const q = new URLSearchParams(location.search), r = q.get('region'), p = q.get('program');
+    const ck = (document.cookie.match(/(?:^|; )ua_region=(\w+)/) || [])[1];
+    const reg = REGIONS.some(x => x[0] === r) ? r : null;
+    this.setState({ region: reg, program: PROGRAMS.some(x => x[0] === p) ? p : '', preRegion: reg || (REGIONS.some(x => x[0] === ck) ? ck : null) });
+  }
+  renderVals() {
+    const s = this.state, rm = REGIONS.find(x => x[0] === s.region), ld = LEADERS.find(x => x[0] === s.leader);
+    const toLine = rm ? (s.leader === 'any' ? rm[1] + ' regional leadership' : ld[1] + ', ' + rm[1] + ' region') + ' · ' + (s.leader === 'doc' ? 'coaching.' : '') + rm[0] + '@utahathletic.com' : 'Main office · info@utahathletic.com';
+    return {
+      regions: REGIONS.map(([k, l, a]) => ({ label: l, area: a, ring: s.region === k ? '0 0 0 1px #78b7b3,0 12px 30px rgba(0,0,0,.35)' : 'var(--shadow-sm)',
+        leads: [{ role: 'Managing Director', name: 'Director Name', email: k + '@utahathletic.com' }, { role: 'Director of Coaching', name: 'Director Name', email: 'coaching.' + k + '@utahathletic.com' }].map(x => ({ ...x, mail: 'mailto:' + x.email })) })),
+      programs: PROGRAMS.map(([k, l]) => ({ label: l, ...pill(s.program === k), pick: () => this.setState({ program: k }) })),
+      regionOpts: [[null, 'No', 'General office'], ...REGIONS].map(([k, l, a]) => ({ label: k ? l : 'No', sub: k ? a : 'Main office', ...pill(s.region === k), pick: () => this.setState({ region: k }) })),
+      leaderOpts: LEADERS.map(([k, l]) => ({ label: l, ...pill(s.leader === k), pick: () => this.setState({ leader: k }) })),
+      hasRegion: !!rm, toLine, sent: s.sent, open: !s.sent,
+      sentCopy: (rm ? 'The ' + rm[1] + ' regional team' : 'Our main office') + ' will reply within 48 hours.',
+      submit: e => { e.preventDefault(); this.setState({ sent: true }); }, reset: () => this.setState({ sent: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

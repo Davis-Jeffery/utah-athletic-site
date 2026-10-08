@@ -1,0 +1,90 @@
+# Futures program. Copy, staff, dates and the Ollie link below are placeholders until the club supplies them.
+# Season sign-up dates live in src/content/seasons.yaml.
+order: 4
+num: '04'
+name: Futures
+tier: Tier 03 · Elevated rec
+ages: U5–U8
+kicker: Elevated rec
+line: Rec League + 2× training
+kind: season
+registerUrl: https://ollie.example/utah-athletic/futures-signup
+
+img: hero-futures
+photos:
+  who: collage-c08
+  cta: collage-c02
+  core: collage-c06
+  dev: [collage-c07, collage-c04, collage-c10, collage-c01]
+
+tagline: 'An elevated rec experience for our youngest players: two staff-led trainings a week, plus Saturday rec games.'
+forHead: First touches, done right.
+intro: Futures pairs the fun and flexibility of rec with two weekly sessions led by Utah Athletic coaches, building the habits, coordination and love of the game every great player starts with.
+
+leagues:
+  - { name: UA Rec League, level: Saturday games, d: 'Futures players play their Saturday games in our rec program.' }
+  - { name: Futures curriculum, level: 2× weekly training, d: 'Staff-led sessions on ball mastery, 1v1 and small-sided play.' }
+
+cost: 395
+unit: per season
+costNote: Includes rec registration. Sibling discount available.
+includes:
+  - 2 staff-led trainings a week
+  - Saturday rec games (registration included)
+  - Futures training kit
+  - Progress card each season
+
+commit: 2× + game
+commitNote: Sessions are 60 minutes. Two 10-week seasons, fall and spring.
+
+# Season phases. from/to are month positions on the Aug–Jul axis (0 = Aug, 12 = end of Jul).
+phases:
+  - { from: 0, to: 3, label: Fall season, d: 'Two trainings a week plus Saturday rec games.' }
+  - { from: 3, to: 7, label: Winter skills, d: 'Optional indoor ball-mastery sessions.' }
+  - { from: 7, to: 10, label: Spring season, d: 'Two trainings a week plus Saturday rec games.' }
+  - { from: 10, to: 12, label: Summer camps, d: 'Futures day camps with Academy players as helpers.' }
+
+week:
+  - { day: Mon, items: [] }
+  - { day: Tue, items: [{ time: 5:00–6:00P, label: Futures training, kind: training }] }
+  - { day: Wed, items: [] }
+  - { day: Thu, items: [{ time: 5:00–6:00P, label: Futures training, kind: training }] }
+  - { day: Fri, items: [] }
+  - { day: Sat, items: [{ time: AM, label: Rec game, kind: match }] }
+  - { day: Sun, items: [] }
+
+development:
+  - { t: Technical, d: 'Ball mastery first: hundreds of touches every session.' }
+  - { t: Tactical, d: 'Play-based learning of space, direction and teammates.' }
+  - { t: Physical, d: 'Fundamental movement: run, jump, balance, coordinate.' }
+  - { t: Mental, d: 'Love of the game, focus and listening in a team setting.' }
+
+# Column in the "Compare programs" table. null = not included.
+compare:
+  training: 2×
+  coaching: Licensed UA coaches
+  competition: UA Rec League
+  yearRound: null
+  evaluations: Progress card
+  strength: null
+  film: null
+  mental: null
+  next: Club
+
+directors:
+  - { name: Director Name, role: Futures Director, bio: 'Designs the Futures curriculum and leads our youngest-player program.' }
+coaches:
+  - { name: Coach Name, role: U5–U6 lead }
+  - { name: Coach Name, role: U7–U8 lead }
+  - { name: Coach Name, role: Futures coach }
+
+joinCopy: Spots are limited per age group. Register for a session or ask us a question.
+cta: Register
+sessionLabel: Choose a session
+years: [U5, U6, U7, U8]
+
+# Where the program runs. Futures runs alongside Rec.
+regions:
+  north: { status: soon, season: Spring 2027, hub: Draper / Sandy }
+  south: { status: none }
+  west: { status: active, hub: Saratoga Springs / Lehi, feeDelta: 0 }

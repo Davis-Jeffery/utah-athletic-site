@@ -41,7 +41,9 @@ function fromHandoff(dir) {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
   const files = walk(dir);
-  const main = files.find((f) => f.endsWith('.dc.html'));
+  // Several pages can ship as .dc.html; the programs page is the main one.
+  const dcs = files.filter((f) => f.endsWith('.dc.html'));
+  const main = dcs.find((f) => /Programs\.dc\.html$/.test(f)) || dcs[0];
   if (!main) throw new Error('No *.dc.html file found in the handoff.');
   const root = path.dirname(main);
   splitScript(fs.readFileSync(main, 'utf8'));

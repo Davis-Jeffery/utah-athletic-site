@@ -1,0 +1,90 @@
+# Recreation program. Copy, staff, dates and the Ollie link below are placeholders until the club supplies them.
+# Season sign-up dates live in src/content/seasons.yaml. Play formats by age are in src/data/rec-formats.ts.
+order: 3
+num: '03'
+name: Recreation
+tier: Tier 03 · Community
+ages: U5–U14
+kicker: Community
+line: UA Rec League
+kind: season
+registerUrl: https://ollie.example/utah-athletic/rec-signup
+
+img: hero-rec
+photos:
+  who: collage-c06
+  cta: collage-c04
+  core: collage-c08
+  dev: [collage-c10, collage-c01, collage-c06, collage-c04]
+
+tagline: Local, well-coached and built for fun. One practice and one game a week. Where every player starts.
+forHead: Everyone plays.
+intro: 'Community soccer done properly: volunteer coaches backed by our staff, short-sided games, and sessions designed around enjoyment and fundamentals.'
+
+leagues:
+  - { name: UA Rec League, level: Community league, d: 'Local Saturday games in short-sided formats by age.' }
+  - { name: Jamboree days, level: Season festival, d: 'End-of-season festival with games, skills challenges and awards.' }
+
+cost: 165
+unit: per season
+costNote: Sibling discount available. Scholarships on request.
+includes:
+  - 1 practice + 1 game a week
+  - Team jersey and socks
+  - Coach training and session plans
+  - End-of-season jamboree
+
+commit: 1× + game
+commitNote: Two 10-week seasons, fall and spring. Saturday games are local.
+
+# Season phases. from/to are month positions on the Aug–Jul axis (0 = Aug, 12 = end of Jul).
+phases:
+  - { from: 0, to: 3, label: Fall season, d: 'Ten weeks of practices and Saturday games, ending with a jamboree.' }
+  - { from: 3, to: 7, label: Off season, d: 'Optional winter skills clinics.' }
+  - { from: 7, to: 10, label: Spring season, d: 'Ten weeks of practices and Saturday games.' }
+  - { from: 10, to: 12, label: Summer camps, d: 'Optional week-long day camps run by our staff.' }
+
+week:
+  - { day: Mon, items: [] }
+  - { day: Tue, items: [] }
+  - { day: Wed, items: [{ time: 5:30–6:30P, label: Team practice, kind: training }] }
+  - { day: Thu, items: [] }
+  - { day: Fri, items: [] }
+  - { day: Sat, items: [{ time: AM, label: Rec game, kind: match }] }
+  - { day: Sun, items: [] }
+
+development:
+  - { t: Technical, d: 'Lots of touches: dribbling, striking and receiving through games.' }
+  - { t: Tactical, d: 'Simple principles of space, support and teamwork, learned in small-sided play.' }
+  - { t: Physical, d: 'Agility, balance and coordination through fun movement.' }
+  - { t: Mental, d: 'Enjoyment, confidence and good sporting behavior.' }
+
+# Column in the "Compare programs" table. null = not included.
+compare:
+  training: 1×
+  coaching: Volunteer coaches
+  competition: UA Rec League
+  yearRound: null
+  evaluations: null
+  strength: null
+  film: null
+  mental: null
+  next: Club
+
+directors:
+  - { name: Director Name, role: Recreation Director, bio: 'Runs the rec league, coach education and the community program.' }
+coaches:
+  - { name: Coach Name, role: Coach educator }
+  - { name: Coach Name, role: Field coordinator }
+  - { name: Volunteer coaches, role: 40+ parent coaches }
+
+joinCopy: Registration is open. Pick a session, add your player, done in two minutes.
+cta: Register
+sessionLabel: Choose a session
+years: [U5, U6, U7, U8, U9, U10, U11, U12, U13, U14]
+
+# Where the program runs. feeDelta is added to the cost in that region.
+regions:
+  north: { status: soon, season: Spring 2027, hub: Draper / Sandy }
+  south: { status: none }
+  west: { status: active, hub: Saratoga Springs / Lehi, feeDelta: 0 }

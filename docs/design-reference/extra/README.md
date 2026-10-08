@@ -1,86 +1,94 @@
-# Handoff: Utah Athletic — Programs Redesign
+# Handoff: Utah Athletic site update → Astro
 
-## Overview
-Dark, interactive redesign of utathletic-academy.com. The home page presents the club's program pyramid (Academy → Club → Recreation + Futures). Clicking a layer expands it into a full-screen program page with: who it's for, leagues, **locations map**, season/year overview, commitment, investment, staff, players (Academy: team tabs U9–U18 + player profile modal), and join/tryout forms. A persistent back control returns to the pyramid; other programs are reachable from the bottom of each program page.
+## How to use this
+Drop this folder into the root of the existing Astro repo (e.g. `/design_handoff_utah_athletic`) and tell Claude Code:
 
-## About the Design Files
-The files in this bundle are **design references created in HTML** — prototypes showing intended look and behavior, not production code to ship. Recreate them in the target codebase's environment (e.g. Next.js/React, Astro, Webflow) using its patterns. If no codebase exists yet, a React framework (Next.js) with CSS variables for tokens is recommended.
+> Implement the Utah Athletic redesign described in `design_handoff_utah_athletic/README.md` in this Astro project. Use the HTML files in `design/` as the visual reference. Follow the existing project's conventions; create content collections for programs, regions, tryouts and events as specified.
 
-## Fidelity
-**High-fidelity.** Colors, type, spacing, and interactions are final. Copy, names, stats, staff, prices other than those listed below, and most photos are **filler**.
+The files in `design/` are **design references built in HTML** (they open in a browser — open `design/Utah Athletic Programs.dc.html`). They are not production code. Recreate them as Astro pages/components; do not ship the `.dc.html` files, `support.js` or `image-slot.js`.
 
-## Files
-- `Utah Athletic Programs.dc.html` — the full site prototype (home + 4 program pages). Opens in a browser; requires `support.js`, `image-slot.js`, `nocturne.css` alongside.
-- `Utah Map.html` — the interactive locations map, embedded per program via `<iframe src="Utah Map.html?p=academy|club|rec|futures">`. In production, build it as a native component (not an iframe).
-- `nocturne.css` — design tokens.
-- `assets/` — logos and badges.
+**Fidelity: high.** Colours, type, spacing, layout and interactions are final. Copy, names, dates, venues, staff, Ollie links and event URLs are **placeholders** unless noted.
 
-## Screens / Views
+---
 
-### 1. Home — Pyramid
-- Full-bleed hero photo (grayscale, contrast 1.3, brightness .85, `mix-blend-mode: lighten`) with dark gradient fade.
-- Headline with "One standard." in teal `#78b7b3`.
-- **Pyramid** (SVG, viewBox 600×480): 3 rows — Academy (top), Club (middle), Recreation + Futures side by side (bottom).
-  - Rest fill: vertical gradient `#1b1d24` (.88) → `#111318` (.82); stroke `rgba(120,183,179,.5)`; hovered stroke `.75`.
-  - Hover/active fill: teal gradient (`#uaFill`); teal blurred glow polygon behind (opacity .22).
-  - Drop shadow `0 24px 48px rgba(0,0,0,.6)` and radial dark halo behind for legibility over photo.
-  - Labels: kicker in `--color-accent-300`, ages in `--color-neutral-300`. Hint text "Hover a level…" `--color-neutral-300`.
-  - Intro: rows stagger in bottom-up (~140ms per row).
-- Click a layer → open transition: the layer expands to fill the screen (also prototyped: camera zoom, curtain slide-up).
+## Routes
+| Route | Reference | Notes |
+|---|---|---|
+| `/` | `Utah Athletic Programs.dc.html` (home state) | Hero collage + pyramid, Tryouts near you, Tournaments strip, Where the pathway leads, Inside UA |
+| `/academy`, `/club`, `/rec`, `/futures` | same file, program state (Overview tab) | Shared template driven by the program record |
+| `/[program]/[region]` (`north` · `south` · `west`) | same file, region tab | Deep-linkable. Prototype uses `#/academy/north` hashes — use real routes |
+| `/tryouts` | `Tryouts.dc.html` | `?region=&level=` query params |
+| `/events` | `Events.dc.html` | |
+| `/network` | `Athletic Network.dc.html` + `Network Map.html` | |
+| `/contact` | `Contact Us.dc.html` | `?region=&program=` prefill |
 
-### 2. Program page (shared template ×4)
-Sticky section nav (scroll-spy) with numbered sections:
-1. Who it's for
-2. Where we play — league cards. Academy cards show ECNL and EA logos top-right (72px tall, contain).
-3. **Locations — "Where we train"** (see Map below)
-4. The year — season timeline
-5. Commitment
-6. Investment — tabs, U9–U11 first (default), then U12–U18
-7. Staff
-8. Players
-9. Join — register / tryout / info forms (tabbed)
+Top nav (all pages): Programs · Network · Tryouts · Tournaments & Events · Contact, plus region indicator (home/program pages) and **Tryouts 2027 →** button linking `/tryouts?region=<remembered>`.
 
-Header: full-bleed program photo with teal color overlay (`#78b7b3`, `mix-blend-mode: color`, .55), grayscale. Academy header has ECNL + EA badges (outlined card, 88px logo, caption below).
+## Content collections (single source of truth)
+Model these as Astro content collections (`src/content/…`) so staff can add/edit without code changes. Seed data is in `design/tryouts-data.js` and `design/events-data.js`.
 
-**Academy specifics**
-- Stacked stat blocks (U9–U11 on top):
-  - U9–U11: Highest Tier RED X-League Divisions · $2,700 · 3×/week
-  - U12–U18: ECNL · Elite Academy League · $3,400 · 4–5×/week
-- **Player spotlight**: team tabs U9…U18 (sub-label X-League / EA / ECNL). Team header: league · format (7v7/9v9/11v11), birth year, squad size, head coach, record. Roster grouped GK / DEF / MID / FWD in 3:4 cards (number, name, position). Roster fades/slides on tab change (180ms out, .3s in).
-- **Player modal**: backdrop blur 8px; panel max-width 1080px, scale/translate in (.4s cubic-bezier(.2,.8,.2,1)). Sticky header with prev/next/close. Portrait + large number; bio chips (born, height, foot, hometown, class of); season stats grid (6 cells; GK variant shows clean sheets/saves/save %); aspirations quote; season goals with progress bars; attribute bars; 3 highlight video tiles. Keyboard: ←/→ step players, Esc closes.
+- **programs** — `id` (academy|club|rec|futures), name, tier label, ages, tagline, intro, `kind` (`tryout` | `season`), `invite` (bool, Academy only), **`registerUrl` (Ollie link — lives here only, never typed into pages)**, status per region: `{ north|south|west: { status: active | soon | none, season?, hub, feeDelta? } }`, development model copy, comparison-table values.
+- **regions** — id, label, area, Managing Director, Director of Coaching, email.
+- **tryouts** — one entry per event: program, region, venue ref, date, time, age group, gender. Register button = `programs[program].registerUrl`.
+- **venues** — name, address (map link = Google Maps search URL).
+- **seasons** (Rec/Futures) — Session 1 Nov–Dec, Session 2 Jan–Mar; start date, sign-up note.
+- **events** — name, tagline, start, end, regOpen, regClose, location, format, ages, external `url`, logo, `brand { bg, bg2, ink, accent, mono }`. **Status is computed from dates**: before regOpen → *Coming*; regOpen–regClose → *Registration open*; regClose–end → *Registration closed*; after end → *Past*. Sort: open, coming, closed, past.
 
-### 3. Locations Map (`Utah Map.html`)
-- Data: real geometry from `us-atlas@3` counties-10m TopoJSON (U.S. Census), d3-geo Mercator fitted to Utah. Do not hand-draw.
-- Hubs:
-  - Academy: North Academy — Murray; South Academy — Orem
-  - Club: North — Draper/Sandy; West — Saratoga Springs; South — Orem
-  - Recreation & Futures: Primary Hub — Saratoga Springs/Lehi
-- **Service zones**: 8 Wasatch Front counties (Weber 49057, Morgan 49029, Davis 49011, Salt Lake 49035, Tooele 49045, Summit 49043, Wasatch 49051, Utah 49049) split into nearest-hub Voronoi cells, clipped to those counties. Fill opacity .2 (hovered .34, others .08); dashed boundaries. **Replace with the club's official city→hub assignment when available.**
-- Zone tones (teal ramp): `#78b7b3`, `#d6f0ee`, `#4f8a86`.
-- Left panel: "Find your tryout location" city input (datalist, ~45 cities) → result "City → Hub · Location", flies map to midpoint and marks the city. Hub cards list cities served.
-- Controls: Wasatch Front / All of Utah / + / −; drag to pan; ctrl+wheel zoom. Opens on full state, flies to Wasatch Front after 500ms (1.4s ease-in-out). City dots appear at zoom > 3, labels at > 4.5.
-- Container: dark frame `linear-gradient(160deg,#171920,#0d0f13)`, radius 14px, shadow `0 24px 60px rgba(0,0,0,.45)`.
+Tryout data appears in 3 places from the same collection: `/tryouts` table, each program's region tab (first 4 rows + "All [region] tryouts →"), and the home "Tryouts near you" (next event per level for the remembered region).
 
-## Interactions & Behavior
-- Program open/close animation ~600–800ms, cubic-bezier(.2,.8,.2,1). Esc closes program page.
-- Hover states: teal border/glow; buttons outlined (never filled).
-- Focus: `outline: 2px solid #78b7b3; outline-offset: 2px`.
-- Forms are front-end only in the prototype. Recommended backend: form → Zapier/Make → Airtable (player DB) + confirmation email + routing sheet (program × age × hub → coach & director emails). Each submission should include program, age group, and hub (from map match).
+## Region memory
+Cookie `ua_region` (1 year, path `/`) + `?region=` param. Picking a region anywhere sets it; Club/Rec and `/tryouts` open on it. Use a small client island for the header region menu and the Tryouts filters.
 
-## State
-- `active` program, `busy` (transition lock), `sec` (scroll-spy), investment `grp`, join `tab`, `team` index, `player` index (modal), `mIn` (modal anim).
-- Map: active hub, picked city, zoom transform.
+## Pages — key specs
 
-## Design Tokens
-- Background `#111318`, surface `#1b1d24`, text `#e9e9ed`, muted `#8b8d98`, divider `rgba(233,233,237,.1)`.
-- Brand: black, white (as `#e9e9ed`), **teal `#78b7b3`** (accent-300 `#b5e1dd`, accent-800 `#2a4442`).
-- Type: Inter, headings weight 500, tight letter-spacing (−.03 to −.05em); kickers 11–12px uppercase, .12–.14em tracking.
-- Radii 7–14px; shadows per `nocturne.css` `--shadow-sm/md/lg`.
-- Icons: Phosphor.
+### Home
+- **Hero background: rotating photo collage** — 6×3 grid, 4px gaps, 11 tiles of mixed spans; each tile crossfades (1.4s opacity + 7s scale 1.08→1) to its next photo; one tile advances every 1.7s in shuffled order; paused when tab hidden. Photos `assets/collage/c01–c20.jpg`, treated `grayscale(1) contrast(1.2) brightness(.82)` + teal colour layer (`#78b7b3`, `mix-blend-mode: color`, .5) + left-to-right dark gradient for legibility. Respect `prefers-reduced-motion` (show static grid).
+- Headline "Every level. **One standard.**" (second line `#78b7b3`).
+- **Pyramid** (SVG): Professional / Athletic Global (top, no price/age/tryout — links `/network`), Academy, Club, Recreation + Futures. Click → full-screen program transition.
+- **Tryouts near you** — 4 cards (one per level) for the remembered region.
+- **Tournaments strip** — 4 cards from the events collection, sub-brand gradient top + status badge, link out.
+
+### Program page (shared)
+Sticky sub-nav: Overview · North · South · West.
+- **Hero**: program photo (Academy: `assets/academy-hero-team.png`), kicker `Tier 0X · …` followed by an outlined **Age groups** pill; huge title; tagline; **status row** (status: *Accepting player trial applications* / *Open tryouts*; Next open tryout; Tryout registration) + button that jumps to the tryout/trial section. Academy: Next tryout **May 2027**, Registration **Opens, Jan. 1, 2027**; Academy & Club currently *Accepting player trial applications*.
+- **01 Who it's for** — text left, photo right with hard angled left edge (`clip-path: polygon(16% 0,100% 0,100% 100%,0 100%)`), square right, no radius, full colour, height matches text column (min 260px). No cards.
+- **CTA band** "Do you have **what it takes?**" — slim, photo bg, button to trial/tryout form.
+- **02 Development — "We develop the complete player."** Orbit diagram: centre player photo, 4 principle circles (Technical, Tactical, Physical, Mental) on diagonals; hover shows title, click opens modal with deeper explanation + photo; legend list on the left with tags and one-line descriptions; "x / 4 explored" counter.
+- **03 Competition** — league cards (ECNL / EA logos top-right on Academy).
+- **Where we train** — statewide hub map (`Utah Map.html`, d3 + us-atlas, Voronoi service zones in teal ramp, city search).
+- **06 Compare programs** — table Futures · Rec · Club · Academy; current program column widest, teal outline + "Viewing". Rows: Training/week (2× · 1× · 3× · 4–5×), Licensed coaching, Competition, Year-round (Club & Academy: "Tryouts & team placement every May"), Player evaluations, Strength & conditioning (Academy only: 1×/week year-round), Film & video review (Academy: 2×/month), Mental performance seminars (Academy: 2×/month), Next step. **No pricing anywhere on Academy.** Club/Rec show "Fees by region" below.
+- Leadership; Regions overview.
+- **Region tab**: regional lead → coaching staff → Tryouts (posted dates from collection + trial application/registration form) → Fees (Club/Rec only) → "Want to contact our leaders?" CTA → `/contact?region=&program=`. Status `soon` (e.g. West Academy, Fall 2027) shows a Coming state with regional lead + interest form, never a 404.
+- Player spotlight and regional venue section are **removed**.
+
+### /tryouts
+Sticky filter bar (Region segmented + Level segmented incl. All, + "Showing: North · Academy · 6 sessions" badge, 2px teal bottom line). Hero with photo bg. Results grouped by level; rows wrap into cards on mobile: Age group · Gender · Date · Time · Location (map link) · **Register** (44px min). Rec/Futures show season session cards instead. Academy shows "Request an invitation to trial" form routed by region. Supporting cards: What to bring, Missed your date? (private trial), Regional contact.
+
+### /events
+Hero with photo; status filter chips with counts; card grid (sub-brand panel, logo slot, monogram watermark, status badge, dates/location/format/ages, external button whose label follows status); "Bring your club" + "Sponsor an event" blocks; horizontal highlight reel.
+
+### /contact
+Main office email; regional leadership cards; form with Topic, Program, "Reach a specific regional leader?" (No / North / South / West) → "Which leader?" (MD / DoC / Either) and a live "To:" line.
+
+## Design tokens
+- bg `#111318`, surface `#1b1d24`, text `#e9e9ed`, muted `#8b8d98`, divider `rgba(233,233,237,.1)`.
+- Brand: black, white (`#e9e9ed`), teal `#78b7b3` (300 `#b5e1dd`, 800 `#305351`). Full ramp in `design/nocturne.css` + the `:root` block in each page's `<style>`.
+- Inter, headings weight 500, tight tracking (−.03 to −.06em). Kickers 11–12px uppercase .12–.16em.
+- Buttons are **outlined** (1px teal), never filled. Focus: `2px solid #78b7b3`, offset 2px. Min tap target 44px.
+- Radii 8–14px. Rules fade to transparent at the ends. Icons: Phosphor.
+- Photos: site-wide treatment is grayscale + teal colour layer; exceptions: "Who it's for" photo is full colour.
+
+## Forms / integrations
+Forms are front-end only in the prototype. Recommended: form → Zapier/Make → Airtable (player DB) + confirmation email + routing sheet (program × age × region → coach & director emails). Registration buttons go to Ollie via `programs.registerUrl`.
 
 ## Assets
-- `assets/ua-logo.avif` — Utah Athletic logo (client-provided).
-- `assets/badge-ecnl.png`, `assets/badge-ea-crop.png` (+ webp) — league logos (client-provided; ECNL source is low-res 58×83 — get vector).
-- Hero/program photos: Unsplash placeholders (hotlinked in prototype) — replace with club photography, ≥2000px wide.
-- Docuseries thumbnails: YouTube (t9Se3i_CBwo, jJI_pFfA_xI, 47JdWoQT9Lo).
-- Map geometry: us-atlas (U.S. Census Bureau).
+- `assets/ua-logo.avif` — club logo.
+- `assets/collage/c01–c20.jpg` — club photography (home collage, Tryouts/Events heroes, highlight reel).
+- `assets/academy-hero-team.png` — Academy hero.
+- `assets/badge-ecnl.png`, `assets/badge-ea-crop.png` — league logos (ECNL source is low-res; get vector).
+- Other program heroes / section photos are Unsplash placeholders (hot-linked) — replace with club photography.
+- Event logos: not supplied — slots shown on cards.
+- Map geometry: us-atlas (U.S. Census Bureau) via CDN.
+
+## Placeholders to replace before launch
+Ollie URLs (`ollie.example`), all tryout dates/venues/times, event details/colours/URLs (`example.com`), staff names & emails, Rec/Futures session dates, program copy marked as filler.

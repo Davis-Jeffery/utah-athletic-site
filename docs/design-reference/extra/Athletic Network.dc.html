@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="nocturne.css">
+<script src="./image-slot.js"></script>
+<style>
+:root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
+html,body{margin:0;background:var(--color-bg)}
+a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
+::selection{background:rgba(120,183,179,.3)}
+</style>
+</helmet>
+<div style="position:relative;overflow-x:hidden;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);opacity:{{ pageOp }};transform:{{ pageTf }};transition:opacity .6s ease,transform .8s cubic-bezier(.2,.8,.2,1)">
+  <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:32px;padding:14px clamp(20px,4vw,56px);background:rgba(17,19,24,.8);backdrop-filter:blur(14px)">
+    <a href="Utah Athletic Programs.dc.html" style="margin-right:auto;display:flex;align-items:center"><img src="assets/ua-logo.avif" alt="Utah Athletic" style="height:40px;width:auto"></a>
+    <nav style="display:flex;gap:26px;font-size:14px;flex-wrap:wrap">
+      <a href="Utah Athletic Programs.dc.html#programs" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Programs</a>
+      <a href="Athletic Network.dc.html" style="color:var(--color-text)">Network</a>
+      <a href="Utah Athletic Programs.dc.html#inside" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Inside UA</a>
+      <a href="#" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Staff</a>
+      <a href="#" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Copa Athletic</a>
+      <a href="#" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">News</a>
+      <a href="Tryouts.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Tryouts</a>
+      <a href="Events.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Tournaments &amp; Events</a>
+      <a href="Contact Us.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Contact</a>
+    </nav>
+    <a href="Utah Athletic Programs.dc.html#programs" style="border:1px solid var(--color-accent);color:var(--color-accent);font:500 14px/1 var(--font-body);padding:11px 16px;border-radius:8px" style-hover="background:rgba(120,183,179,.1);color:var(--color-accent-300)">Find your level</a>
+  </header>
+
+  <section style="position:relative;min-height:min(78vh,720px);display:flex;align-items:flex-end;overflow:hidden">
+    <div style="position:absolute;inset:0;mix-blend-mode:lighten;opacity:.55">
+      <image-slot id="network-hero" fit="cover" placeholder="Network photography — supplied by Athletic Global" style="width:100%;height:100%"></image-slot>
+    </div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,19,24,.5) 0%,rgba(17,19,24,.2) 35%,#111318 100%),radial-gradient(ellipse at 15% 100%,rgba(120,183,179,.18),transparent 55%);pointer-events:none"></div>
+    <div style="position:relative;width:100%;max-width:1360px;margin:0 auto;padding:0 clamp(20px,4vw,56px) 64px;display:flex;flex-direction:column;gap:22px">
+      <a href="Utah Athletic Programs.dc.html#programs" style="align-self:flex-start;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--color-neutral-300);border:1px solid var(--color-divider);padding:8px 12px;border-radius:8px;background:rgba(17,19,24,.6);backdrop-filter:blur(8px)" style-hover="border-color:#78b7b3;color:#78b7b3">← The pathway</a>
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><span style="width:28px;height:1px;background:var(--color-accent)"></span>Athletic Global</div>
+      <h1 style="margin:0;max-width:980px;font:500 clamp(48px,6.6vw,104px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">One network. <span style="color:#78b7b3">A route to the professional game.</span></h1>
+      <p style="margin:0;max-width:600px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Athletic Global is building a network of affiliate academies and professional clubs that share one methodology. Utah Athletic is part of it today, alongside RC Vichy Athletic in France. More academies are in development.</p>
+      <span style="align-self:flex-start;font:500 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-400);border:1px dashed var(--color-neutral-600);border-radius:5px;padding:5px 7px">Placeholder · vision copy to be supplied</span>
+    </div>
+  </section>
+
+  <div style="max-width:1360px;margin:0 auto;padding:0 clamp(20px,4vw,56px)">
+    <section style="padding:72px 0 64px;display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">01 · The network</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">What exists, and what's being built</h2></div>
+        <div style="display:flex;gap:18px;font-size:12px;color:var(--color-neutral-400)">
+          <span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:rgba(120,183,179,.18);box-shadow:0 0 0 1px #78b7b3"></span>Today</span>
+          <span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;border:1px dashed var(--color-neutral-500)"></span>In development</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:stretch">
+        <div style="flex:2 1 560px;min-width:0;padding:12px;border-radius:14px;background:linear-gradient(160deg,#171920,#0d0f13);box-shadow:inset 0 0 0 1px var(--color-divider),0 24px 60px rgba(0,0,0,.45)">
+          <iframe src="Network Map.html" title="Athletic Global network map" loading="lazy" style="display:block;width:100%;height:clamp(380px,52vh,520px);border:0;border-radius:10px;background:#111318;color-scheme:dark"></iframe>
+        </div>
+        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:10px;background:linear-gradient(120deg,rgba(120,183,179,.12),transparent 70%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)">
+            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">Today · Academy</span>
+            <span style="font:500 21px/1.1 var(--font-heading);letter-spacing:-.03em">Utah Athletic</span>
+            <span style="font-size:13px;color:var(--color-neutral-400)">Utah, USA · Futures through Academy</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:10px;background:linear-gradient(120deg,rgba(120,183,179,.12),transparent 70%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)">
+            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">Today · Professional</span>
+            <span style="font:500 21px/1.1 var(--font-heading);letter-spacing:-.03em">RC Vichy Athletic</span>
+            <span style="font-size:13px;color:var(--color-neutral-400)">Vichy, France · Partnership</span>
+          </div>
+          <sc-for list="{{ slots }}" as="sl" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:10px;border:1px dashed var(--color-neutral-600)">
+              <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-500)">In development</span>
+              <span style="font:500 18px/1.1 var(--font-heading);letter-spacing:-.02em;color:var(--color-neutral-300)">{{ sl.name }}</span>
+              <span style="font-size:13px;color:var(--color-neutral-500)">Location to be announced</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">02 · For a Utah player</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">What the network means</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+        <div style="display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:10px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="font:500 13px/1 var(--font-heading);color:var(--color-accent)">01</span>
+          <span style="font:500 24px/1.1 var(--font-heading);letter-spacing:-.03em">Training exchanges</span>
+          <span style="font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">Selected Academy players train inside a professional environment with network clubs, and network staff visit Utah.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:10px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="font:500 13px/1 var(--font-heading);color:var(--color-accent)">02</span>
+          <span style="font:500 24px/1.1 var(--font-heading);letter-spacing:-.03em">A pathway to the pro game</span>
+          <span style="font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">A defined route from Utah Athletic Academy to a professional club in the same family — RC Vichy Athletic is the first.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:10px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="font:500 13px/1 var(--font-heading);color:var(--color-accent)">03</span>
+          <span style="font:500 24px/1.1 var(--font-heading);letter-spacing:-.03em">Shared methodology</span>
+          <span style="font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">One game model, one coaching curriculum and one player-development standard across every club in the network.</span>
+        </div>
+      </div>
+      <span style="align-self:flex-start;font:500 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-400);border:1px dashed var(--color-neutral-600);border-radius:5px;padding:5px 7px">Placeholder · details to be confirmed</span>
+    </section>
+
+    <section style="padding:64px 0;display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">03 · Professional club</span><h2 style="margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);letter-spacing:-.04em">RC Vichy Athletic</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px">
+        <div style="display:flex;flex-direction:column;gap:24px;padding:clamp(24px,3vw,36px);border-radius:12px;background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:var(--shadow-md)">
+          <div style="display:flex;align-items:center;gap:20px">
+            <image-slot id="crest-vichy" shape="circle" fit="contain" placeholder="RC Vichy Athletic crest" style="width:104px;height:104px;flex:none"></image-slot>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font:500 28px/1.05 var(--font-heading);letter-spacing:-.03em">RC Vichy Athletic</span>
+              <span style="font-size:14px;color:var(--color-neutral-400)">Vichy, France</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;border-radius:10px;overflow:hidden;background:var(--color-divider)">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--color-bg)"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">City</span><span style="font:500 17px/1.2 var(--font-heading)">Vichy, Auvergne-Rhône-Alpes</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--color-bg)"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Status</span><span style="display:flex;align-items:center;gap:8px;font:500 17px/1.2 var(--font-heading)"><span style="width:8px;height:8px;border-radius:50%;background:#78b7b3;box-shadow:0 0 8px #78b7b3"></span>Partnership · active</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--color-bg)"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Role in network</span><span style="font:500 17px/1.2 var(--font-heading)">Professional club</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--color-bg)"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">League</span><span style="font:500 17px/1.2 var(--font-heading);color:var(--color-neutral-400)">To be supplied</span></div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.65;color:var(--color-neutral-300);text-wrap:pretty">RC Vichy Athletic is the first professional club in the Athletic Global network. Club description, history and first-team details will be supplied by Athletic Global.</p>
+          <span style="align-self:flex-start;font:500 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-400);border:1px dashed var(--color-neutral-600);border-radius:5px;padding:5px 7px">Placeholder · crest and description to be supplied</span>
+        </div>
+        <div style="position:relative;min-height:360px;border-radius:12px;overflow:hidden;background:var(--color-surface)">
+          <div style="position:absolute;inset:0;mix-blend-mode:lighten">
+            <image-slot id="vichy-photo" fit="cover" placeholder="RC Vichy Athletic photography" style="width:100%;height:100%"></image-slot>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:48px 0 104px">
+      <div style="display:flex;flex-direction:column;gap:20px;padding:clamp(32px,5vw,64px);border-radius:14px;background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.18),transparent 60%),var(--color-surface);box-shadow:var(--shadow-md)">
+        <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">The pathway starts in Utah</span>
+        <h2 style="margin:0;max-width:820px;font:500 clamp(36px,5vw,72px)/.98 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">Every route into the network begins at one of four levels.</h2>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="Utah Athletic Programs.dc.html#programs" style="border:1px solid var(--color-accent);color:var(--color-accent);font:500 15px/1 var(--font-body);padding:14px 20px;border-radius:8px" style-hover="background:rgba(120,183,179,.1);color:var(--color-accent-300)">See the pathway →</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:28px clamp(20px,4vw,56px);font-size:13px;color:var(--color-neutral-500)">
+    <span>© 2026 Utah Athletic · Part of Athletic Global</span>
+    <div style="display:flex;gap:20px"><a href="https://www.instagram.com/utahathletic.soccer/" style="color:var(--color-neutral-400)">Instagram</a></div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;affiliateSlots&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:0,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;}}">
+class Component extends DCLogic {
+  state = { inn: false };
+  componentDidMount() { requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ inn: true }))); }
+  renderVals() {
+    const n = this.props.affiliateSlots ?? 3;
+    return {
+      pageOp: this.state.inn ? 1 : 0,
+      pageTf: this.state.inn ? 'none' : 'scale(1.03)',
+      slots: Array.from({ length: n }, (_, i) => ({ name: 'Affiliate academy ' + String(i + 1).padStart(2, '0') }))
+    };
+  }
+}
+</script>
+</body>
+</html>
