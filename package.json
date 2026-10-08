@@ -9,10 +9,11 @@
     "preview": "astro preview",
     "check": "astro check",
     "design:extract": "node scripts/extract-design.mjs",
-    "geo:build": "node scripts/build-utah-geo.mjs"
+    "geo:build": "node scripts/build-utah-geo.mjs && node scripts/build-world-geo.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",
+    "@phosphor-icons/react": "^2.1.10",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vercel/analytics": "^2.0.1",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "topojson-client": "^3.1.0",
-    "us-atlas": "^3.0.1"
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2"
   }
 }

@@ -1,10 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-import UAApp from '../components/UAApp.jsx';
-import { buildAssets } from '../lib/assets';
+import UAApp from '../components/app/UAApp.jsx';
+import { loadSite } from '../lib/content';
 
-const assets = await buildAssets();
+const data = await loadSite();
 ---
-<Base title="Utah Athletic Soccer Club" preload={assets.heroHome}>
-  <UAApp client:load assets={assets} />
+<Base title="Utah Athletic Soccer Club">
+  <UAApp client:load data={data} />
 </Base>

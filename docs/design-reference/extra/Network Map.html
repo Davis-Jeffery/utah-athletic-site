@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html style="background:#111318;color-scheme:dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Athletic Global — Network map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+:root{--acc:#78b7b3;--line:rgba(233,233,237,.1);--ink:#e9e9ed}
+html,body{margin:0;height:100%;background:#111318;color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc)}a:hover{color:#b5e1dd}
+.map{position:relative;height:100%;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 45% 40%,rgba(120,183,179,.08),transparent 60%),#15171d;box-shadow:inset 0 0 0 1px var(--line)}
+svg{display:block;width:100%;height:100%;cursor:grab}svg:active{cursor:grabbing}
+.ctrls{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.ctrls button{cursor:pointer;height:34px;min-width:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:rgba(17,19,24,.85);backdrop-filter:blur(8px);color:var(--ink);font:500 12px/1 Inter,system-ui,sans-serif;transition:border-color .2s,color .2s}
+.ctrls button:hover{border-color:var(--acc);color:var(--acc)}
+.ctrls button.on{border-color:var(--acc);color:var(--acc);background:rgba(120,183,179,.12)}
+.ctrls button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.attr{position:absolute;left:12px;bottom:10px;font-size:10px;color:#5f616b}
+.ring{fill:none;stroke:var(--acc);transform-box:fill-box;transform-origin:center;animation:pulse 2.4s cubic-bezier(.2,.8,.2,1) infinite}
+@keyframes pulse{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.8);opacity:0}}
+</style>
+</head>
+<body>
+<div class="map">
+  <svg id="svg" viewBox="0 0 960 520" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of the Athletic Global network"></svg>
+  <div class="ctrls">
+    <button id="vLink" class="on">Utah ↔ Vichy</button>
+    <button id="vWorld">World</button>
+  </div>
+  <div class="attr">Map data: Natural Earth via world-atlas</div>
+</div>
+<script>
+const NODES = [
+  { name: 'Utah Athletic', sub: 'Utah, USA · Academy pathway', ll: [-111.89, 40.76], side: -1 },
+  { name: 'RC Vichy Athletic', sub: 'Vichy, France · Professional club', ll: [3.426, 46.128], side: 1 }];
+const W = 960, H = 520, svg = d3.select('#svg');
+const world = svg.append('g'), over = svg.append('g');
+let proj, zoom, tf = d3.zoomIdentity;
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json()).then(w => {
+  const land = topojson.feature(w, w.objects.countries).features.filter(f => f.id !== '010');
+  proj = d3.geoEqualEarth().fitExtent([[20, 20], [W - 20, H - 20]], { type: 'FeatureCollection', features: land });
+  const path = d3.geoPath(proj);
+  world.append('path').datum(d3.geoGraticule10()).attr('d', path).attr('fill', 'none').attr('stroke', 'rgba(233,233,237,.035)').attr('vector-effect', 'non-scaling-stroke');
+  world.append('g').selectAll('path').data(land).join('path').attr('d', path)
+    .attr('fill', d => d.id === '840' || d.id === '250' ? '#25302f' : '#1f2229')
+    .attr('stroke', d => d.id === '840' || d.id === '250' ? 'rgba(120,183,179,.5)' : 'rgba(233,233,237,.07)')
+    .attr('stroke-width', .7).attr('vector-effect', 'non-scaling-stroke');
+  const arc = world.append('path').datum({ type: 'LineString', coordinates: [NODES[0].ll, NODES[1].ll] }).attr('d', path)
+    .attr('fill', 'none').attr('stroke', '#78b7b3').attr('stroke-width', 1.6).attr('vector-effect', 'non-scaling-stroke');
+  const len = arc.node().getTotalLength();
+  arc.attr('stroke-dasharray', len).attr('stroke-dashoffset', len).transition().delay(700).duration(1600).ease(d3.easeCubicInOut).attr('stroke-dashoffset', 0)
+    .on('end', () => arc.attr('stroke-dasharray', '5 5').attr('stroke-opacity', .8));
+  const runner = over.append('circle').attr('r', 3.5).attr('fill', '#b5e1dd').style('filter', 'drop-shadow(0 0 6px #78b7b3)');
+  const gi = d3.geoInterpolate(NODES[0].ll, NODES[1].ll);
+  d3.timer(t => { const p = proj(gi(((t / 4200) % 1))); runner.attr('transform', 'translate(' + tf.apply(p) + ')'); });
+  NODES.forEach(n => {
+    const g = over.append('g').attr('class', 'node').datum(n);
+    g.append('circle').attr('class', 'ring').attr('r', 10);
+    g.append('circle').attr('r', 6).attr('fill', '#111318').attr('stroke', '#78b7b3').attr('stroke-width', 2);
+    g.append('circle').attr('r', 2.6).attr('fill', '#78b7b3');
+    const lab = g.append('g'), tx = 16 * n.side, anchor = n.side > 0 ? 'start' : 'end';
+    lab.append('text').attr('x', tx).attr('y', -3).attr('text-anchor', anchor).attr('fill', '#e9e9ed').attr('font-size', 15).attr('font-weight', 500).text(n.name);
+    lab.append('text').attr('x', tx).attr('y', 14).attr('text-anchor', anchor).attr('fill', '#8b8d98').attr('font-size', 11).text(n.sub);
+    const bb = lab.node().getBBox();
+    lab.insert('rect', 'text').attr('x', bb.x - 9).attr('y', bb.y - 7).attr('width', bb.width + 18).attr('height', bb.height + 14).attr('rx', 7).attr('fill', 'rgba(17,19,24,.92)').attr('stroke', 'rgba(120,183,179,.45)');
+  });
+  zoom = d3.zoom().scaleExtent([1, 8]).translateExtent([[-100, -100], [W + 100, H + 100]])
+    .filter(e => (e.type !== 'wheel' || e.ctrlKey) && !e.button)
+    .on('zoom', e => { tf = e.transform; world.attr('transform', tf); place(); });
+  svg.call(zoom).on('dblclick.zoom', null);
+  place();
+  setTimeout(() => goLink(1400), 300);
+});
+function place() { over.selectAll('.node').attr('transform', d => 'translate(' + tf.apply(proj(d.ll)) + ')'); }
+function goLink(ms) {
+  const a = proj(NODES[0].ll), b = proj(NODES[1].ll), k = Math.min(8, .62 * W / Math.abs(b[0] - a[0]));
+  svg.transition().duration(ms || 900).ease(d3.easeCubicInOut).call(zoom.transform, d3.zoomIdentity.translate(W / 2, H / 2 + 20).scale(k).translate(-(a[0] + b[0]) / 2, -(a[1] + b[1]) / 2 + 20));
+  setOn('vLink');
+}
+function goWorld() { svg.transition().duration(900).ease(d3.easeCubicInOut).call(zoom.transform, d3.zoomIdentity); setOn('vWorld'); }
+function setOn(id) { ['vLink', 'vWorld'].forEach(x => document.getElementById(x).classList.toggle('on', x === id)); }
+document.getElementById('vLink').onclick = () => goLink();
+document.getElementById('vWorld').onclick = goWorld;
+</script>
+</body>
+</html>

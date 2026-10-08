@@ -5,18 +5,19 @@ const YT = id => R('yt-' + id, 'https://i.ytimg.com/vi/' + id + '/maxresdefault.
 const WEEK = rows => ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d, i) => ({ day: d, items: rows[i] || [] }));
 const T = (t, label) => ({ t, label, k: 't' }), M = (t, label) => ({ t, label, k: 'm' });
 const PTS = {
-  academy: [[300,0],[393.75,150],[206.25,150],[300,0]],
-  club: [[196.9,165],[403.1,165],[496.9,315],[103.1,315]],
-  rec: [[93.75,330],[297,330],[297,480],[0,480]],
-  futures: [[303,330],[506.25,330],[600,480],[303,480]]
+  pro: [[300,0],[362.5,100],[237.5,100],[300,0]],
+  academy: [[230,112],[370,112],[437.5,220],[162.5,220]],
+  club: [[155,232],[445,232],[515,344],[85,344]],
+  rec: [[77.5,356],[297,356],[297,480],[0,480]],
+  futures: [[303,356],[522.5,356],[600,480],[303,480]]
 };
 const P = {
   academy: {
-    num: '01', name: 'Academy', tier: 'Tier 01 · Elite platform', ages: 'U9–U18', kicker: 'Elite', lx: '50%', ly: '22%', fs: '24px',
+    num: '01', name: 'Academy', tier: 'Tier 01 · Elite platform', ages: 'U9–U18', kicker: 'Elite', lx: '50%', ly: '34.6%', fs: '22px',
     groups: [
       { glabel: 'U9–U11', ages: 'U9–U11', line: 'Highest Tier RED X-League Divisions', cost: 2700, commit: '3× / week', installs: 10 },
       { glabel: 'U12–U18', ages: 'U12–U18', line: 'ECNL · Elite Academy League', cost: 3400, commit: '4–5× / week', installs: 10 }],
-    img: R('hero-academy', 'https://images.unsplash.com/photo-1745997645080-941f962f1392?fm=jpg&q=70&w=2400&auto=format&fit=crop'), line: 'ECNL · Elite Academy League',
+    img: 'assets/academy-hero-team.png', line: 'ECNL · Elite Academy League',
     tagline: "A professional training environment for the state's most elite young players. We don't play local leagues — we compete on national platforms.",
     forHead: 'Built for the few who want it most.',
     intro: 'The best players in Utah train together daily, compete on national platforms, and are measured against the top clubs in the country. Every session, fixture and review is designed around one outcome: the next level.',
@@ -38,7 +39,7 @@ const P = {
     years: ['2008', '2009', '2010', '2011', '2012', '2013', '2014']
   },
   club: {
-    num: '02', name: 'Club', tier: 'Tier 02 · Competitive', ages: 'U9–U19', kicker: 'Competitive', lx: '50%', ly: '50%', fs: '34px',
+    num: '02', name: 'Club', tier: 'Tier 02 · Competitive', ages: 'U9–U19', kicker: 'Competitive', lx: '50%', ly: '60%', fs: '30px',
     img: R('hero-club', 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?fm=jpg&q=70&w=2400&auto=format&fit=crop'), line: 'USYS · State Cup',
     tagline: 'Competitive club soccer coached to the Academy standard. The proving ground between grassroots and the national platforms.',
     forHead: 'Compete. Develop. Climb.',
@@ -61,7 +62,7 @@ const P = {
     years: ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017']
   },
   rec: {
-    num: '03', name: 'Recreation', tier: 'Tier 03 · Community', ages: 'U5–U14', kicker: 'Community', lx: '28%', ly: '84%', fs: '26px',
+    num: '03', name: 'Recreation', tier: 'Tier 03 · Community', ages: 'U5–U14', kicker: 'Community', lx: '28%', ly: '87.5%', fs: '24px',
     img: R('hero-rec', 'https://images.unsplash.com/photo-1680024436315-fb06267264b2?fm=jpg&q=70&w=2400&auto=format&fit=crop'), line: 'UA Rec League',
     tagline: 'Local, well-coached and built for fun. One practice and one game a week — where every player starts.',
     forHead: 'Everyone plays.',
@@ -84,7 +85,7 @@ const P = {
     years: ['U5', 'U6', 'U8', 'U10', 'U12', 'U14']
   },
   futures: {
-    num: '04', name: 'Futures', tier: 'Tier 03 · Elevated rec', ages: 'U5–U8', kicker: 'Elevated rec', lx: '72%', ly: '84%', fs: '26px',
+    num: '04', name: 'Futures', tier: 'Tier 03 · Elevated rec', ages: 'U5–U8', kicker: 'Elevated rec', lx: '72%', ly: '87.5%', fs: '24px',
     img: R('hero-futures', 'https://images.unsplash.com/photo-1622659097509-4d56de14539e?fm=jpg&q=70&w=2400&auto=format&fit=crop'), imgNote: '', line: 'Rec League + 2× training',
     tagline: 'An elevated rec experience for our youngest players: two staff-led trainings a week, plus Saturday rec games.',
     forHead: 'First touches, done right.',
@@ -160,7 +161,64 @@ const TEAMS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(age => {
   const w = Math.round(games * (0.45 + r() * 0.25)), d = Math.round((games - w) * 0.4), l = games - w - d;
   return { age, label: 'U' + age, league, format, players, facts: [{ k: 'Birth year', v: String(birth) }, { k: 'Squad', v: players.length + ' players' }, { k: 'Head coach', v: 'Coach Name' }, { k: '2025–26 record', v: w + 'W ' + d + 'D ' + l + 'L' }] };
 });
-const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['locations', 'Locations'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['players', 'Players'], ['join', 'Join']];
+const SECS = [['overview', "Who it's for"], ['leagues', 'Leagues'], ['locations', 'Locations'], ['season', 'Season'], ['schedule', 'Schedule'], ['cost', 'Cost'], ['staff', 'Staff'], ['join', 'Join']];
+const REGIONS = [['north', 'North', 'Salt Lake County'], ['south', 'South', 'Utah County'], ['west', 'West', 'West Utah County']];
+const LEADS = (r, lbl) => [
+  { role: 'Managing Director', name: 'Director Name', scope: lbl + ' region · all programs', email: r + '@utahathletic.com' },
+  { role: 'Director of Coaching', name: 'Director Name', scope: lbl + ' region · coaching & curriculum', email: 'coaching.' + r + '@utahathletic.com' }].map(l => ({ ...l, mail: 'mailto:' + l.email }));
+const REC_RG = { north: { status: 'soon', season: 'Spring 2027', hub: 'Draper / Sandy' }, south: { status: 'none' }, west: { status: 'active', hub: 'Saratoga Springs / Lehi', fee: 0 } };
+const RG = {
+  academy: { north: { status: 'active', hub: 'Murray' }, south: { status: 'active', hub: 'Orem' }, west: { status: 'soon', season: 'Fall 2027', hub: 'Saratoga Springs' } },
+  club: { north: { status: 'active', hub: 'Draper / Sandy', fee: 100 }, south: { status: 'active', hub: 'Orem', fee: 0 }, west: { status: 'active', hub: 'Saratoga Springs', fee: -50 } },
+  rec: REC_RG, futures: REC_RG
+};
+const DEV = {
+  academy: [['Technical', 'Speed of execution under pressure — first touch, passing range and 1v1 mastery.'], ['Tactical', 'One game model from U9 to U18: positional play, pressing and transitions.'], ['Physical', 'Periodized strength, speed and load monitoring, managed by age and stage.'], ['Mental', 'Competitive habits, resilience and decision-making, reviewed in individual plans.']],
+  club: [['Technical', 'Ball mastery and passing quality built in every session.'], ['Tactical', 'The Academy game model, introduced at the right pace for each age.'], ['Physical', 'Age-appropriate athleticism, coordination and injury prevention.'], ['Mental', 'Confidence, effort and team habits that carry into Academy trials.']],
+  rec: [['Technical', 'Lots of touches: dribbling, striking and receiving through games.'], ['Tactical', 'Simple principles — space, support and teamwork — in small-sided play.'], ['Physical', 'Agility, balance and coordination through fun movement.'], ['Mental', 'Enjoyment, confidence and good sporting behaviour.']],
+  futures: [['Technical', 'Ball mastery first: hundreds of touches every session.'], ['Tactical', 'Play-based learning of space, direction and teammates.'], ['Physical', 'Fundamental movement — run, jump, balance, coordinate.'], ['Mental', 'Love of the game, focus and listening in a team setting.']]
+};
+const UPH = n => 'https://images.unsplash.com/photo-' + n + '?w=1200&q=70&auto=format&fit=crop';
+const SP = { night: '1431324155629-1a6deb1dec8d', dribble: '1574629810360-7efbbe195018', youth: '1517466787929-bc90951d0974', strike: '1560272564-c83b66b1ad12', duel: '1606925797300-0b35e9d1794e', kids: '1526232761682-d26e03ac148e', train: '1600679472829-3044539ce8ed', tackle: '1553778263-73a83bab9b0c', rec: '1680024436315-fb06267264b2', fut: '1622659097509-4d56de14539e' };
+const PICS = {
+  academy: { who: ['youth', 'tackle', 'duel'], dev: ['dribble', 'night', 'strike', 'train'] },
+  club: { who: ['tackle', 'train', 'dribble'], dev: ['duel', 'night', 'strike', 'youth'] },
+  rec: { who: ['kids', 'rec', 'train'], dev: ['fut', 'dribble', 'kids', 'rec'] },
+  futures: { who: ['fut', 'kids', 'rec'], dev: ['train', 'dribble', 'kids', 'fut'] }
+};
+const DEEP = {
+  Technical: { icon: 'ph ph-soccer-ball', tag: 'The foundation', w: '100%', deep: 'Technique is the base everything else is built on. Every session starts with the ball, and every drill is run at game speed with an opponent close by.', focus: ['First touch and receiving on the half-turn', 'Passing range with both feet', '1v1 attacking and defending'] },
+  Tactical: { icon: 'ph ph-strategy', tag: 'Reading the game', w: '86%', deep: 'Players learn one shared game model, so moving up an age group — or a level — means more detail, not a new system.', focus: ['Positional play and support angles', 'Pressing triggers and compactness', 'Transitions in both directions'] },
+  Physical: { icon: 'ph ph-lightning', tag: 'The engine', w: '72%', deep: 'Physical work is planned around age and growth stage, so players get faster and stronger without overload.', focus: ['Speed, agility and change of direction', 'Age-appropriate strength', 'Load monitoring and injury prevention'] },
+  Mental: { icon: 'ph ph-brain', tag: 'The finishing layer', w: '58%', deep: 'The top layer turns ability into performance: decisions under pressure, resilience after mistakes and the habits of a professional.', focus: ['Decision-making under pressure', 'Resilience and composure', 'Ownership of an individual development plan'] }
+};
+const FOR_ICONS = {
+  academy: ['ph ph-fire', 'ph ph-trophy', 'ph ph-clipboard-text', 'ph ph-users-three'],
+  club: ['ph ph-soccer-ball', 'ph ph-trend-up', 'ph ph-scales', 'ph ph-users-three'],
+  rec: ['ph ph-hand-waving', 'ph ph-calendar-check', 'ph ph-sneaker-move', 'ph ph-users-three'],
+  futures: ['ph ph-baby', 'ph ph-plus-circle', 'ph ph-puzzle-piece', 'ph ph-rocket-launch']
+};
+const CMP_COLS = ['futures', 'rec', 'club', 'academy'];
+const CMP = [
+  ['Training sessions / week', '2×', '1×', '3×', '4–5×'],
+  ['Licensed professional coaching', 'Licensed UA coaches', 'Volunteer coaches', 'Licensed UA coaches', 'Licensed UA coaches'],
+  ['Competition', 'UA Rec League', 'UA Rec League', 'USYS · State Cup', 'ECNL · EA · X-League'],
+  ['Year-round program', 'n', 'n', 'Tryouts & team placement every May', 'Tryouts & team placement every May'],
+  ['Player evaluations', 'Progress card', 'n', 'Seasonal', 'Individual plan'],
+  ['Strength & conditioning', 'n', 'n', 'n', '1× / week, year-round'],
+  ['Film & video review', 'n', 'n', 'n', '2× / month'],
+  ['Mental performance seminars', 'n', 'n', 'n', '2× / month'],
+  ['Next step on the pathway', 'Club', 'Club', 'Academy trials', 'Athletic Global']
+];
+const COLLAGE_IMGS = Array.from({ length: 20 }, (_, i) => 'assets/collage/c' + String(i + 1).padStart(2, '0') + '.jpg');
+const COLLAGE_TILES = [['1 / 3', '1 / 3'], ['3 / 4', '1 / 2'], ['4 / 6', '1 / 2'], ['6 / 7', '1 / 3'], ['3 / 4', '2 / 4'], ['4 / 5', '2 / 3'], ['5 / 6', '2 / 4'], ['1 / 2', '3 / 4'], ['2 / 3', '3 / 4'], ['4 / 5', '3 / 4'], ['6 / 7', '3 / 4']];
+const PATH = [['futures', 'Futures'], ['rec', 'Recreation'], ['club', 'Club'], ['academy', 'Academy'], ['pro', 'Professional']];
+const EMPTY_RG = { label: '', area: '', title: '', kicker: '', hub: '', season: '', path: '', mapSrc: 'about:blank', leads: [], venues: [], line: '', fee: '', feeUnit: '', feeNote: '', contactNum: '', alts: [], toLine: '', msgHead: '', msgCopy: '' };
+const PSTAT = {
+  trial: { label: 'Accepting player trial applications', cta: 'Apply for a player trial' },
+  tryouts: { label: 'Open tryouts', cta: 'Register for tryouts' }
+};
+const TRY_DATES = { academy: { next: 'May 2027', reg: 'Opens, Jan. 1, 2027', regShort: 'Jan. 1, 2027' }, club: { next: 'To be announced', reg: 'Opens May 2027', regShort: 'May 2027' } };
 const MODES = [['expand', 'Expand'], ['zoom', 'Zoom'], ['curtain', 'Curtain']];
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 const EASE = 'cubic-bezier(.76,0,.24,1)';
@@ -172,15 +230,25 @@ class Component extends DCLogic {
   homeRef = React.createRef();
   scrollRef = React.createRef();
   componentDidMount() {
+    if (!window.UA_TRYOUTS || !window.UA_EVENTS) this.tPoll = setInterval(() => { if (window.UA_TRYOUTS && window.UA_EVENTS) { clearInterval(this.tPoll); this.forceUpdate(); } }, 80);
+    this.collageOrder = COLLAGE_TILES.map((_, i) => i).sort(() => Math.random() - .5); this.collageStep = 0;
+    this.collageTimer = setInterval(() => { if (document.hidden) return; const t = this.collageOrder[this.collageStep++ % this.collageOrder.length]; this.setState(s => { const c = (s.collage || COLLAGE_TILES.map(() => 0)).slice(); c[t] = (c[t] + 1) % 3; return { collage: c }; }); }, 1700);
     setTimeout(() => this.setState({ intro: true }), 100);
     setTimeout(() => this.setState({ introDone: true }), 1400);
+    const OK = ['north', 'south', 'west'];
+    const q = new URLSearchParams(location.search).get('region'), ck = (document.cookie.match(/(?:^|; )ua_region=(\w+)/) || [])[1];
+    const m = location.hash.match(/^#\/(academy|club|rec|futures)(?:\/(north|south|west))?/);
+    const my = m && m[2] ? m[2] : OK.includes(q) ? q : OK.includes(ck) ? ck : null;
+    if (my) this.remember(my);
+    if (m) setTimeout(() => { this.open(m[1]); this.setState({ region: m[2] || null }); this.setHash(m[1], m[2] || null); }, 450);
     this.onKey = e => {
+      if (this.state.devModal != null) { if (e.key === 'Escape') this.closeDev(); else if (e.key === 'ArrowRight') this.stepDev(1); else if (e.key === 'ArrowLeft') this.stepDev(-1); return; }
       if (this.state.player != null) { if (e.key === 'Escape') this.closePlayer(); else if (e.key === 'ArrowRight') this.stepPlayer(1); else if (e.key === 'ArrowLeft') this.stepPlayer(-1); return; }
       if (e.key === 'Escape' && this.state.active && !this.state.busy) this.close();
     };
     window.addEventListener('keydown', this.onKey);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); document.body.style.overflow = ''; }
+  componentWillUnmount() { clearInterval(this.tPoll); clearInterval(this.collageTimer); window.removeEventListener('keydown', this.onKey); document.body.style.overflow = ''; }
   mode() { return this.state.mode || this.props.transition || 'expand'; }
   dur() { return Math.round(760 * (this.props.speed ?? 1)); }
   pyrRect() { const el = document.querySelector('[data-pyr]'); return el && el.getBoundingClientRect(); }
@@ -205,13 +273,44 @@ class Component extends DCLogic {
     const [cx, cy] = this.sliceCenter(id); const w = this.homeRef.current.getBoundingClientRect();
     return (cx - w.left) + 'px ' + (cy - w.top) + 'px';
   }
+  openDev(i) {
+    this.setState(st => ({ devModal: i, dIn: false, devHover: null, devBuilt: (st.devBuilt || []).includes(i) ? st.devBuilt : [...(st.devBuilt || []), i] }), () => requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ dIn: true }))));
+  }
+  closeDev() { this.setState({ dIn: false }); setTimeout(() => this.setState({ devModal: null }), 240); }
+  stepDev(dir) { const i = ((this.state.devModal || 0) + dir + 4) % 4; this.setState(st => ({ devModal: i, devBuilt: (st.devBuilt || []).includes(i) ? st.devBuilt : [...(st.devBuilt || []), i] })); }
   openPlayer(i) { this.setState({ player: i, mIn: false }, () => requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ mIn: true })))); }
   closePlayer() { this.setState({ mIn: false }); setTimeout(() => this.setState({ player: null }), 220); }
   stepPlayer(dir) { const n = TEAMS[this.state.team || 0].players.length; this.setState(s => ({ player: (s.player + dir + n) % n })); }
   pickTeam(i) { if (i === this.state.team) return; this.setState({ rosterFade: true }); setTimeout(() => this.setState({ team: i, rosterFade: false }), 180); }
-  reset(id) { return { team: 0, player: null, rosterFade: false, grp: 0, active: id, focus: id, hover: null, phase: 0, sess: 0, tab: 'a', sent: false, bill: 'full', sec: 'overview', tilt: { x: 0, y: 0 } }; }
+  reset(id) { return { devOpen: null, devBuilt: [], devModal: null, devHover: null, region: this.state.myRegion || null, regMenu: false, msgSent: false, copied: false, rFade: false, team: 0, player: null, rosterFade: false, grp: 0, active: id, focus: id, hover: null, phase: 0, sess: 0, tab: 'a', sent: false, bill: 'full', sec: 'overview', tilt: { x: 0, y: 0 } }; }
+  remember(r) {
+    try { document.cookie = 'ua_region=' + (r || '') + ';path=/;max-age=' + (r ? 31536000 : 0); } catch (e) {}
+    this.setState({ myRegion: r });
+  }
+  setHash(id, r) { try { history.replaceState(null, '', location.pathname + location.search + (id ? '#/' + id + (r ? '/' + r : '') : '')); } catch (e) {} }
+  setRegion(r) {
+    if (r === this.state.region) { this.setState({ regMenu: false }); return; }
+    this.setState({ region: r, sent: false, msgSent: false, sess: 0, tab: 'a', regMenu: false, rFade: true });
+    if (r) this.remember(r);
+    this.setHash(this.state.active, r);
+    requestAnimationFrame(() => {
+      const c = this.scrollRef.current, hero = c && c.querySelector('#ovhero');
+      if (hero) { const top = hero.getBoundingClientRect().bottom - c.getBoundingClientRect().top + c.scrollTop - 57; if (c.scrollTop > top) c.scrollTo({ top, behavior: 'smooth' }); }
+      setTimeout(() => this.setState({ rFade: false }), 60);
+    });
+  }
+  goNetwork() {
+    if (this.state.busy) return;
+    const origin = this.homeOriginFor('pro');
+    window.addEventListener('pageshow', () => this.setState({ home: IDLE, busy: false, hover: null }), { once: true });
+    this.setState({ busy: true, home: { tf: 'none', origin, op: 1, filter: 'none', trans: 'none' } }, () => requestAnimationFrame(() => requestAnimationFrame(() => {
+      this.setState({ home: { tf: 'scale(4.5)', origin, op: 0, filter: 'blur(6px)', trans: 'transform 700ms cubic-bezier(.6,0,.3,1), opacity 500ms ease 200ms, filter 700ms' } });
+      setTimeout(() => { location.href = 'Athletic Network.dc.html'; }, 660);
+    })));
+  }
   open(id) {
     if (this.state.active || this.state.busy) return;
+    this.setHash(id, this.state.myRegion || null);
     const d = this.dur(), mode = this.mode(), raf = f => requestAnimationFrame(() => requestAnimationFrame(f));
     document.body.style.overflow = 'hidden';
     const done = () => this.setState({ busy: false });
@@ -239,7 +338,7 @@ class Component extends DCLogic {
   close() {
     const id = this.state.active; if (!id || this.state.busy) return;
     const d = this.dur(), mode = this.mode();
-    const finish = () => { document.body.style.overflow = ''; this.setState({ active: null, ov: null, busy: false, home: IDLE, hover: null }); };
+    const finish = () => { document.body.style.overflow = ''; this.setHash(null); this.setState({ active: null, ov: null, busy: false, home: IDLE, hover: null }); };
     this.setState({ busy: true });
     if (mode === 'expand') {
       this.setState(s => ({ home: IDLE, ov: { ...s.ov, clip: this.full(), cop: 0, trans: 'none' } }));
@@ -272,6 +371,7 @@ class Component extends DCLogic {
     this.setState({ swap: true });
     setTimeout(() => {
       this.setState({ ...this.reset(id) });
+      this.setHash(id, this.state.myRegion || null);
       if (this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
       requestAnimationFrame(() => this.setState({ swap: false }));
     }, 300);
@@ -304,9 +404,19 @@ class Component extends DCLogic {
       };
       labels.push({ name: pr.name, ages: pr.ages, kicker: pr.kicker, x: pr.lx, y: pr.ly, fs: pr.fs, kickerColor: on ? ACC : 'var(--color-accent-300)', lift: on ? 'translateY(-8px)' : '', op: !s.intro ? 0 : dim ? 0.45 : 1 });
     });
+    const pOn = hv === 'pro', pDim = hv && !pOn, pDelay = s.introDone ? 0 : 0.42;
+    const proSl = {
+      fill: pOn ? 'url(#uaFill)' : 'url(#uaPro)', stroke: pOn ? ACC : 'rgba(120,183,179,.85)',
+      op: !s.intro ? 0 : pDim ? 0.45 : 1, tf: !s.intro ? 'translateY(40px)' : pOn ? 'translateY(-8px)' : 'none',
+      trans: 'transform .55s cubic-bezier(.2,.8,.2,1) ' + pDelay + 's, opacity .5s ' + pDelay + 's, fill .25s, stroke .25s',
+      enter: () => this.setState({ hover: 'pro', focus: 'pro' }), leave: () => this.setState({ hover: null }), open: () => this.goNetwork()
+    };
+    const proLab = { op: !s.intro ? 0 : pDim ? 0.45 : 1, lift: pOn ? 'translateY(-8px)' : '', kc: pOn ? ACC : 'var(--color-accent-300)' };
+    const pf = s.focus === 'pro';
+    const proRow = { bg: pf ? 'rgba(120,183,179,.08)' : 'transparent', numColor: pf ? ACC : 'var(--color-neutral-500)', arrowColor: pf ? ACC : 'var(--color-neutral-500)', arrowTf: pf ? 'translateX(4px)' : 'none' };
     const rows = ORDER.map(id => {
       const pr = P[id], f = s.focus === id;
-      return { num: pr.num, name: pr.name, line: pr.line + ' · ' + money(pr.cost) + (pr.unit === 'per year' ? '/yr' : '/season'), ages: pr.ages, bg: f ? 'rgba(120,183,179,.08)' : 'transparent', numColor: f ? ACC : 'var(--color-neutral-500)', arrowColor: f ? ACC : 'var(--color-neutral-500)', arrowTf: f ? 'translateX(4px)' : 'none', enter: () => this.setState({ hover: id, focus: id }), leave: () => this.setState({ hover: null }), open: () => this.open(id) };
+      return { num: pr.num, name: pr.name, line: id === 'academy' ? pr.line : pr.line + ' · ' + money(pr.cost) + (pr.unit === 'per year' ? '/yr' : '/season'), ages: pr.ages, bg: f ? 'rgba(120,183,179,.08)' : 'transparent', numColor: f ? ACC : 'var(--color-neutral-500)', arrowColor: f ? ACC : 'var(--color-neutral-500)', arrowTf: f ? 'translateX(4px)' : 'none', enter: () => this.setState({ hover: id, focus: id }), leave: () => this.setState({ hover: null }), open: () => this.open(id) };
     });
     const id = s.active || 'academy', base = P[id];
     const grp = base.groups ? (base.groups[s.grp] || base.groups[0]) : null;
@@ -318,22 +428,58 @@ class Component extends DCLogic {
       ...pr, hasImg: !!pr.img, noImg: !pr.img, bgImg: pr.img ? 'url("' + pr.img + '")' : 'none',
       stats: [{ k: 'Ages', v: pr.ages }, { k: 'Competes in', v: pr.line }, { k: 'Investment', v: money(pr.cost) + (pr.unit === 'per year' ? ' / year' : ' / season') }, { k: 'Training', v: pr.commit }],
       leagues: pr.leagues.map(l => ({ ...l, hasLogo: !!l.logo, logoBg: l.logo ? 'url("' + l.logo + '")' : 'none', lwPx: (l.lw || 0) + 'px', lhPx: (l.lh || 0) + 'px' })),
-      forWho: pr.forWho.map((f, i) => ({ ...f, n: '0' + (i + 1) })),
+      forWho: pr.forWho.map((f, i) => ({ ...f, n: '0' + (i + 1), icon: (FOR_ICONS[id] || [])[i] || 'ph ph-star' })),
       week: pr.week.map(d => ({ day: d.day, items: d.items.length ? d.items.map(it => ({ ...it, bg: it.k === 'm' ? 'var(--color-accent-700)' : 'rgba(120,183,179,.06)', fg: it.k === 'm' ? 'var(--color-accent-100)' : 'var(--color-text)', ring: it.k === 't' ? 'rgba(120,183,179,.55)' : 'transparent' })) : [{ t: '', label: 'Rest', bg: 'transparent', fg: 'var(--color-neutral-600)', ring: 'rgba(233,233,237,.06)' }] }))
     };
     const rng = ph => MONTHS[ph.a] + (ph.b - ph.a > 1 ? ' – ' + MONTHS[ph.b - 1] : '');
     const phases = pr.phases.map((ph, i) => ({ ...ph, range: rng(ph), left: (ph.a / 12 * 100) + '%', width: ((ph.b - ph.a) / 12 * 100) + '%', bg: s.phase === i ? 'rgba(120,183,179,.18)' : 'var(--color-surface)', border: s.phase === i ? ACC : 'transparent', fg: s.phase === i ? 'var(--color-accent-200)' : 'var(--color-neutral-300)', pick: () => this.setState({ phase: i }) }));
     const sel = pr.phases[s.phase] || pr.phases[0];
-    const sessions = pr.sessions.map((t, i) => ({ ...t, bg: s.sess === i ? 'rgba(120,183,179,.1)' : 'var(--color-bg)', ring: s.sess === i ? ACC : 'var(--color-divider)', fg: s.sess === i ? 'var(--color-accent-300)' : 'var(--color-text)', pick: () => this.setState({ sess: i }) }));
+    const regHub = s.region && RG[id][s.region] && RG[id][s.region].hub;
+    const sessions = pr.sessions.map((t, i) => ({ ...t, loc: regHub ? regHub : t.loc, bg: s.sess === i ? 'rgba(120,183,179,.1)' : 'var(--color-bg)', ring: s.sess === i ? ACC : 'var(--color-divider)', fg: s.sess === i ? 'var(--color-accent-300)' : 'var(--color-text)', pick: () => this.setState({ sess: i }) }));
     const split = s.bill === 'split';
     const ovOn = !!s.ov;
+    const regKey = s.region, rd = regKey ? RG[id][regKey] : null, rm = regKey ? REGIONS.find(x => x[0] === regKey) : null;
+    const stSub = r => r.status === 'active' ? r.hub : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered';
+    const regionTabs = [[null, 'Overview', 'All regions'], ...REGIONS].map(([k, l, a]) => {
+      const on = s.region === k, r = k ? RG[id][k] : null;
+      return { label: l, sub: r ? stSub(r) : 'Every region', fg: on ? 'var(--color-text)' : 'var(--color-neutral-400)', subFg: on ? 'var(--color-neutral-300)' : 'var(--color-neutral-500)', bar: on ? ACC : 'transparent',
+        dot: !r ? 'transparent' : r.status === 'active' ? ACC : 'transparent', ring: !r ? 'var(--color-neutral-500)' : r.status === 'none' ? 'var(--color-neutral-600)' : ACC, go: () => this.setRegion(k) };
+    });
+    const rg = rd ? {
+      label: rm[1], area: rm[2], title: rm[1] + ' ' + base.name, kicker: rm[1] + ' region · ' + rm[2], hub: rd.hub || '', season: rd.season || '',
+      path: '/' + id + '/' + regKey, mapSrc: 'Utah Map.html?p=' + id + '&r=' + regKey, leads: LEADS(regKey, rm[1]),
+      venues: rd.hub ? [{ k: 'Training', name: rd.hub + ' Training Complex', city: rd.hub + ', UT', addr: 'Venue name and address to be supplied' }, { k: 'Tryouts', name: rd.hub + ' — Main Field', city: rd.hub + ', UT', addr: 'Venue name and address to be supplied' }] : [],
+      line: rd.status === 'active' ? 'The same ' + base.name + ' program and standard, run locally from ' + rd.hub + '. Staff, venues, tryouts' + (id === 'academy' ? '' : ', fees') + ' and contacts below are specific to the ' + rm[1] + ' region.' : rd.status === 'soon' ? base.name + ' launches in the ' + rm[1] + ' region in ' + rd.season + '.' : 'This program does not run in the ' + rm[1] + ' region.',
+      fee: base.cost ? money(base.cost + (rd.fee || 0)) : '', feeUnit: base.unit || 'per season', feeNote: base.costNote || '', contactNum: id === 'academy' ? '04' : '05',
+      alts: REGIONS.filter(x => RG[id][x[0]].status === 'active').map(x => ({ label: x[1] + ' ' + base.name, hub: RG[id][x[0]].hub, go: () => this.setRegion(x[0]) })),
+      toLine: 'Managing Director, ' + rm[1] + ' region · ' + regKey + '@utahathletic.com',
+      msgHead: rd.status === 'soon' ? "You're on the list." : 'Message sent.', msgCopy: rd.status === 'soon' ? 'The ' + rm[1] + ' team will contact you first when ' + base.name + ' tryouts open.' : 'The ' + rm[1] + ' regional team will reply within 48 hours.'
+    } : EMPTY_RG;
+    const regionCards = REGIONS.map(([k, l, a]) => { const r = RG[id][k]; return {
+      label: l, area: a, hub: r.hub || 'No hub in this region', statusLabel: r.status === 'active' ? 'Active' : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered',
+      tagBg: r.status === 'active' ? 'rgba(120,183,179,.14)' : 'transparent', tagFg: r.status === 'none' ? 'var(--color-neutral-400)' : 'var(--color-accent-300)', tagRing: r.status === 'active' ? 'transparent' : r.status === 'soon' ? 'rgba(120,183,179,.5)' : 'var(--color-divider)',
+      border: r.status === 'active' ? '1px solid var(--color-accent-800)' : r.status === 'soon' ? '1px dashed rgba(120,183,179,.6)' : '1px dashed var(--color-neutral-600)',
+      cta: r.status === 'active' ? 'Open ' + l + ' ' + base.name + ' →' : r.status === 'soon' ? 'Register interest →' : 'See nearest hub →', go: () => this.setRegion(k) }; });
+    const feeCards = REGIONS.map(([k, l, a]) => { const r = RG[id][k], act = r.status === 'active'; return { label: l, hub: r.hub || a, fee: act ? money(base.cost + (r.fee || 0)) : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered', unit: act ? (base.unit || 'per season') : '', feeFg: act ? ACC : 'var(--color-neutral-400)', fs: act ? '44px' : '22px', go: () => this.setRegion(k) }; });
+    const myR = REGIONS.find(x => x[0] === s.myRegion);
+    const stKey = id === 'academy' ? (this.props.academyStatus ?? 'trial') : id === 'club' ? (this.props.clubStatus ?? 'trial') : null;
+    const isTrial = stKey === 'trial';
+    const pstat = stKey ? { ...PSTAT[stKey], next: isTrial ? TRY_DATES[id].next : pr.sessions[0].date + ' · ' + pr.sessions[0].time, reg: isTrial ? TRY_DATES[id].reg : 'Open now' } : { label: '', cta: '', next: '', reg: '' };
     const mini = {}; ORDER.forEach(k => { mini[k] = k === id ? ACC : 'rgba(233,233,237,.22)'; });
     const glowId = hv || null;
     return {
-      sl, labels, rows, p, phases, sessions, mini, groupTabs, hasGroups: groupTabs.length > 0, statRows, heroAges: base.ages, isAcademy: id === 'academy',
+      sl, labels, rows, proSl, proLab, proRow, p, phases, sessions, mini, groupTabs, hasGroups: groupTabs.length > 0, statRows, heroAges: base.ages, isAcademy: id === 'academy',
       glowPts: (glowId ? PTS[glowId] : PTS.academy).map(q => q.join(',')).join(' '), glowOp: glowId ? 0.35 : 0,
-      pyrHint: hv ? 'Click to open ' + P[hv].name : 'Hover a level · click to explore',
+      pyrHint: hv === 'pro' ? 'Click to see where the pathway leads' : hv ? 'Click to open ' + P[hv].name : 'Hover a level · click to explore',
       tiltTf: tiltOn ? 'perspective(1400px) rotateY(' + (s.tilt.x * 14).toFixed(2) + 'deg) rotateX(' + (-s.tilt.y * 10).toFixed(2) + 'deg)' : 'none',
+      collage: COLLAGE_TILES.map(([col, row], t) => { const cur = (s.collage || [])[t] || 0; return { col, row, layers: [0, 1, 2].map(k => { const on = k === cur; return { bg: 'url("' + COLLAGE_IMGS[(t + k * COLLAGE_TILES.length) % COLLAGE_IMGS.length] + '")', pos: 'center ' + (30 + (t * 7) % 30) + '%', op: on ? 1 : 0, tf: on ? 'scale(1.0)' : 'scale(1.08)' }; }) }; }),
+      homeEvents: window.UA_EVENTS ? window.UA_EVENTS.all().map(e => { const k2 = e.status.key; return { name: e.name, dates: e.dates, location: e.location, url: e.url, mono: e.brand.mono, accent: e.brand.accent,
+        panel: 'radial-gradient(ellipse at 30% 20%,' + e.brand.bg2 + ',' + e.brand.bg + ' 70%)', status: e.status.label,
+        dot: k2 === 'open' ? '#78b7b3' : k2 === 'past' ? '#5f616b' : '#e9e9ed', badgeFg: k2 === 'open' ? '#d6f0ee' : k2 === 'past' ? '#8b8d98' : '#e9e9ed', ring: k2 === 'open' ? 'inset 0 0 0 1px #78b7b3' : 'inset 0 0 0 1px rgba(233,233,237,.25)' }; }) : [],
+      tryoutsHref: 'Tryouts.dc.html?region=' + (s.region || 'north'),
+      nearLabel: window.UA_TRYOUTS ? window.UA_TRYOUTS.REGIONS[s.region || 'north'].label + ' region' : '',
+      nearYou: window.UA_TRYOUTS ? ['academy', 'club', 'rec', 'futures'].map(lv => { const T = window.UA_TRYOUTS, rk = s.region || 'north', n = T.nextFor(lv, rk);
+        return { level: T.PROGRAMS[lv].name, kind: n.kind === 'season' ? 'Season sign-up' : n.kind === 'tryout' ? 'Next tryout' : 'Not yet posted', title: n.title, when: n.when, where: n.where, cta: n.kind === 'tryout' ? 'Register' : n.kind === 'season' ? 'Sign up' : n.cta, href: n.register || ('Tryouts.dc.html?region=' + rk + '&level=' + lv) }; }) : [],
       heroBgTf: 'scale(1.04) translate(' + (s.tilt.x * -14).toFixed(1) + 'px,' + (s.tilt.y * -10).toFixed(1) + 'px)',
       glowTf: 'translate(' + (s.tilt.x * 40).toFixed(1) + 'px,' + (s.tilt.y * 40).toFixed(1) + 'px)',
       heroMove: e => { if (!tiltOn || s.active) return; const r = e.currentTarget.getBoundingClientRect(); this.setState({ tilt: { x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 } }); },
@@ -351,7 +497,72 @@ class Component extends DCLogic {
       scrollRef: this.scrollRef, onOvScroll: this.onScroll,
       close: () => this.close(),
       switcher: ORDER.map(k => { const on = k === id; return { name: P[k].name, border: on ? ACC : 'transparent', bg: on ? 'rgba(120,183,179,.1)' : 'transparent', fg: on ? ACC : 'var(--color-neutral-300)', go: () => this.switchTo(k) }; }),
-      goJoin: () => this.goSec('join'),
+      goJoin: () => { const r = s.region || s.myRegion || 'north', st = RG[id][r].status; if (s.region !== r) this.setRegion(r); setTimeout(() => this.goSec(st === 'active' ? 'rtry' : st === 'soon' ? 'rsoon' : 'rnone'), 380); },
+      pstat, statusOn: !!stKey, statsOn: !stKey, agesNote: base.groups ? base.groups.map(g => g.glabel).join('  ·  ') : (base.line || ''),
+      ctaLabel: stKey ? pstat.cta : p.cta,
+      tryHead: isTrial ? 'Player trial application' : 'Next tryouts in ' + (rg.label || ''),
+      tryCopy: isTrial ? 'Tryout registration opens ' + TRY_DATES[id].regShort + '. Until then, apply for a private trial with ' + (rg.label || '') + ' staff — we review every application.' : p.joinCopy,
+      showTrial: !s.sent && isTrial, showRegForm: !s.sent && s.tab === 'a' && !isTrial,
+      regionTabs, rg, regionCards, feeCards, inOverview: !regKey, inRegion: !!regKey,
+      rActive: !!rd && rd.status === 'active', rSoon: !!rd && rd.status === 'soon', rNone: !!rd && rd.status === 'none', rFees: !!rd && rd.status === 'active' && id !== 'academy',
+      academyFees: id === 'academy', regionalFees: id !== 'academy',
+      dev: DEV[id].map(([t, d], i) => { const on = s.devOpen === i, built = (s.devBuilt || []).includes(i), dp = DEEP[t]; return { n: '0' + (i + 1), t, d, ...dp, id: 'ph-' + id + '-dev-' + i, src: UPH(SP[PICS[id].dev[i]]), ph: t + ' training photo',
+        toggle: () => this.setState(st => ({ devOpen: st.devOpen === i ? null : i, devBuilt: (st.devBuilt || []).includes(i) ? st.devBuilt : [...(st.devBuilt || []), i] })),
+        rows: on ? '1fr' : '0fr', op: on ? 1 : 0, tf: on ? 'none' : 'translateY(-10px)', chev: on ? 'rotate(45deg)' : 'none',
+        ring: on ? '0 0 0 1px #78b7b3,0 16px 40px rgba(0,0,0,.4)' : 'var(--shadow-sm)', iconBg: built ? 'rgba(120,183,179,.18)' : 'transparent', iconFg: built ? ACC : 'var(--color-neutral-300)',
+        blockBg: built ? 'linear-gradient(180deg,rgba(120,183,179,' + (on ? '.5' : '.32') + '),rgba(120,183,179,.12))' : 'transparent', blockRing: built ? 'inset 0 0 0 1px #78b7b3' + (on ? ',0 0 24px rgba(120,183,179,.35)' : '') : 'inset 0 0 0 1px rgba(233,233,237,.14)',
+        blockFg: built ? 'var(--color-text)' : 'var(--color-neutral-500)', blockOp: built ? 1 : 0.55, blockTf: built ? 'none' : 'translateY(-18px) scale(.96)',
+        ...(() => { const hv = s.devHover === i, ang = [-135, -45, 45, 135][i] * Math.PI / 180, cx = 50 + 43 * Math.cos(ang), cy = 50 + 43 * Math.sin(ang); return {
+          cx: cx.toFixed(2), cy: cy.toFixed(2), x: cx.toFixed(2) + '%', y: cy.toFixed(2) + '%', lw: hv ? 1.6 : 1, lo: hv ? 0.9 : built ? 0.45 : 0.22,
+          open: () => this.openDev(i), enter: () => this.setState({ devHover: i }), leave: () => this.setState({ devHover: null }),
+          labOp: hv ? 1 : 0, labTy: hv ? '0' : '6px', chkOp: built ? 1 : 0,
+          nodeBg: hv ? 'rgba(120,183,179,.28)' : built ? 'rgba(120,183,179,.16)' : 'rgba(27,29,36,.9)', nodeFg: hv || built ? '#b5e1dd' : 'var(--color-neutral-300)',
+          nodeRing: hv ? '0 0 0 1px #78b7b3,0 0 0 8px rgba(120,183,179,.12),0 0 32px rgba(120,183,179,.45)' : '0 0 0 1px ' + (built ? '#78b7b3' : 'rgba(120,183,179,.45)') + ',0 12px 28px rgba(0,0,0,.45)',
+          nodeTf: hv ? 'scale(1.14)' : 'none',
+          legRing: hv || built ? '#78b7b3' : 'rgba(120,183,179,.35)', legFg: hv ? ACC : 'var(--color-text)', legArr: hv ? ACC : 'var(--color-neutral-500)', seen: built ? 'Explored ✓' : 'Explore →' }; })() }; }),
+      build: (() => { const n = (s.devBuilt || []).length, done = n === 4; return { count: String(n), glow: String(0.06 + n * 0.05), headFg: done ? ACC : 'var(--color-text)',
+        core: done ? 'A complete player' : 'The complete player', head: done ? 'A complete player.' : n === 0 ? 'Start with the foundation.' : (4 - n) + ' layer' + (n === 3 ? '' : 's') + ' to go.',
+        sub: done ? 'Technical, tactical, physical and mental — developed together, at every level and in every region.' : 'Open each principle to add its layer. Together they build the complete player.' }; })(),
+      whoPics: PICS[id].who.map((k, i) => ({ id: 'ph-' + id + '-who-' + i, src: UPH(SP[k]), flex: i === 0 ? '2 1 420px' : '1 1 240px', ph: 'Player action photo' })),
+      pathSteps: PATH.map(([k, l], i) => { const on = k === id; return { label: l, arr: i ? '→' : '', bg: on ? 'rgba(120,183,179,.14)' : 'transparent', ring: on ? ACC : 'var(--color-divider)', fg: on ? ACC : 'var(--color-neutral-300)', sub: on ? 'You are here' : k === 'pro' ? 'Athletic Global' : '' }; }),
+      ...(() => { const ci = CMP_COLS.indexOf(id), last = CMP.length - 1;
+        const inc = CMP.filter(r => r[ci + 1] !== 'n').length;
+        return {
+          cmpGrid: 'minmax(200px,1.3fr) ' + CMP_COLS.map(k => k === id ? 'minmax(0,1.6fr)' : 'minmax(0,1fr)').join(' '),
+          cmpCount: inc + ' of ' + CMP.length + ' included in ' + base.name,
+          cmpCols: CMP_COLS.map(k => { const cur = k === id; return { name: P[k].name, ages: P[k].ages, tag: cur ? 'Viewing' : 'View →', cursor: cur ? 'default' : 'pointer',
+            pad: cur ? '18px 16px 16px' : '12px 16px 14px', fs: cur ? '28px' : '18px', fg: cur ? 'var(--color-text)' : 'var(--color-neutral-300)',
+            bg: cur ? 'linear-gradient(180deg,rgba(120,183,179,.22),rgba(120,183,179,.1))' : 'transparent', ring: cur ? 'inset 1px 0 0 #78b7b3,inset -1px 0 0 #78b7b3,inset 0 1px 0 #78b7b3' : 'none',
+            tagBg: cur ? '#78b7b3' : 'transparent', tagFg: cur ? '#111318' : 'var(--color-accent-300)', go: () => { if (!cur) this.switchTo(k); } }; }),
+          cmpRows: CMP.map((r, ri) => ({ label: r[0], cells: CMP_COLS.map((k, j) => { const v = r[j + 1], cur = k === id;
+            return { txt: v === 'y' ? (cur ? 'Included' : '') : v === 'n' ? '—' : v, icon: v === 'y' ? 'ph ph-check-circle' : v === 'n' ? '' : (cur ? 'ph ph-check-circle' : ''),
+              iconFg: cur ? '#78b7b3' : 'var(--color-accent-500)', fg: v === 'n' ? 'var(--color-neutral-600)' : cur ? 'var(--color-text)' : 'var(--color-neutral-400)', fs: cur ? '15px' : '13px',
+              bg: cur ? 'rgba(120,183,179,.08)' : 'transparent', ring: cur ? 'inset 1px 0 0 #78b7b3,inset -1px 0 0 #78b7b3' + (ri === last ? ',inset 0 -1px 0 #78b7b3' : '') : 'none',
+              rad: cur && ri === last ? '0 0 12px 12px' : '0' }; }) }))
+        }; })(),
+      contactHref: 'Contact Us.dc.html?region=' + (s.region || '') + '&program=' + id,
+      whoImg: { id: 'ph-' + id + '-who-main', src: UPH(SP[PICS[id].who[0]]) },
+      ...(() => { const T = window.UA_TRYOUTS, rk = regKey || s.region || 'north'; if (!T) return { rTryHas: false, rTryRows: [] };
+        const P = T.PROGRAMS[id];
+        let rows = [];
+        if (P.kind === 'season') { const v = T.SEASON_VENUE[rk]; rows = T.SESSIONS.map(x => ({ title: x.name + ' · ' + x.span, when: 'Starts ' + T.fmtDate(x.start) + ' · ' + x.signup, where: T.VENUES[v].name, mapUrl: T.mapUrl(v), register: P.register, cta: 'Sign up' })); }
+        else rows = T.events({ level: id, region: rk }).slice(0, 4).map(e => ({ title: e.age + ' · ' + e.gender, when: T.fmtDate(e.date) + ' · ' + e.time, where: e.venueName, mapUrl: e.mapUrl, register: e.register, cta: 'Register' }));
+        return { rTryHas: rows.length > 0, rTryRows: rows, rTryLabel: P.kind === 'season' ? 'Season sign-up' : 'Posted tryout dates', rTryAll: 'Tryouts.dc.html?region=' + rk + '&level=' + id };
+      })(),
+      ctaImg: { id: 'ph-' + id + '-cta', src: UPH(SP[PICS[id].who[1]]) },
+      core: { id: 'ph-' + id + '-core', src: UPH(SP[PICS[id].who[0]]) },
+      dmOn: s.devModal != null, dmOp: s.dIn ? 1 : 0, dmTf: s.dIn ? 'none' : 'scale(.9) translateY(20px)', dmOrigin: '50% 60%',
+      dm: (() => { const i = s.devModal || 0, row = DEV[id][i], t = row[0], dp = DEEP[t], pv = DEV[id][(i + 3) % 4][0], nx = DEV[id][(i + 1) % 4][0];
+        return { n: '0' + (i + 1), t, d: row[1], ...dp, id: 'ph-' + id + '-dev-' + i, src: UPH(SP[PICS[id].dev[i]]), ph: t + ' training photo', prevT: pv, nextT: nx }; })(),
+      dmClose: () => this.closeDev(), dmPrev: () => this.stepDev(-1), dmNext: () => this.stepDev(1),
+      msgSent: !!s.msgSent, msgOpen: !s.msgSent,
+      submitMsg: e => { e.preventDefault(); this.setState({ msgSent: true }); }, resetMsg: () => this.setState({ msgSent: false }),
+      copyLabel: s.copied ? 'Copied ✓' : 'Copy link',
+      copyLink: () => { try { navigator.clipboard.writeText(location.href).catch(() => {}); } catch (e) {} this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1600); },
+      myRegionLabel: myR ? myR[1] : 'Choose', myRegionDot: myR ? ACC : 'transparent', regMenuOn: !!s.regMenu,
+      toggleRegMenu: () => this.setState(st => ({ regMenu: !st.regMenu })),
+      regOpts: [...REGIONS.map(([k, l, a]) => ({ k, label: l, sub: a })), { k: null, label: 'All regions', sub: 'Clear my region' }].map(o => ({ ...o, fg: s.myRegion === o.k ? ACC : 'var(--color-text)', bg: s.myRegion === o.k ? 'rgba(120,183,179,.08)' : 'transparent', check: s.myRegion === o.k && o.k ? '✓' : '',
+        pick: () => { if (o.k) this.remember(o.k); else this.remember(null); if (s.active) this.setRegion(o.k); else this.setState({ regMenu: false }); } })),
       contentTf: s.swap ? 'translateY(24px)' : 'none', contentOp: s.swap ? 0 : 1,
       secs: SECS.map(([k, label]) => ({ label, fg: s.sec === k ? 'var(--color-text)' : 'var(--color-neutral-500)', bar: s.sec === k ? ACC : 'transparent', go: () => this.goSec(k) })),
       months: MONTHS,
@@ -368,8 +579,8 @@ class Component extends DCLogic {
       sessionPick: (pr.sessions[s.sess] || pr.sessions[0]).date,
       submit: e => { e.preventDefault(); this.setState({ sent: true }); },
       resetForm: () => this.setState({ sent: false }),
-      successHead: s.tab === 'a' ? (pr.cta === 'Register' ? "You're registered." : "You're on the list.") : 'Message received.',
-      successCopy: s.tab === 'a' ? 'Confirmation for ' + (pr.sessions[s.sess] || pr.sessions[0]).date + ' is on its way to your inbox.' : 'A ' + pr.name + ' director will reply within 48 hours.',
+      successHead: isTrial ? 'Application received.' : s.tab === 'a' ? (pr.cta === 'Register' ? "You're registered." : "You're on the list.") : 'Message received.',
+      successCopy: isTrial ? 'The ' + (rg.label || '') + ' Director of Coaching will review it and contact you to schedule a trial.' : s.tab === 'a' ? 'Confirmation for ' + (pr.sessions[s.sess] || pr.sessions[0]).date + ' is on its way to your inbox.' : 'A ' + pr.name + ' director will reply within 48 hours.',
       mapSrc: 'Utah Map.html?p=' + id,
       hasTeams: !!base.teams, noTeams: !base.teams,
       teamTabs: TEAMS.map((t, i) => { const on = (s.team || 0) === i; return { label: t.label, sub: t.league === 'Elite Academy League' ? 'EA' : t.league === 'RED X-League' ? 'X-League' : 'ECNL', border: on ? ACC : 'var(--color-divider)', bg: on ? 'rgba(120,183,179,.12)' : 'transparent', fg: on ? ACC : 'var(--color-text)', pick: () => this.pickTeam(i) }; }),

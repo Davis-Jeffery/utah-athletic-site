@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="nocturne.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<script src="./tryouts-data.js"></script>
+<style>
+:root{--color-accent:#78b7b3;--color-accent-100:#eefaf9;--color-accent-200:#d6f0ee;--color-accent-300:#b5e1dd;--color-accent-400:#95cdc8;--color-accent-500:#78b7b3;--color-accent-600:#5e9692;--color-accent-700:#467471;--color-accent-800:#305351;--color-accent-900:#1f3534;--color-bg:#111318;--color-surface:#1b1d24}
+html,body{margin:0;background:var(--color-bg)}
+a{color:var(--color-accent);text-decoration:none}a:hover{color:var(--color-accent-300)}
+::selection{background:rgba(120,183,179,.3)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #78b7b3;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+  <header style="position:relative;z-index:31;display:flex;align-items:center;gap:24px;padding:12px clamp(16px,4vw,56px);background:rgba(17,19,24,.85);backdrop-filter:blur(14px)">
+    <a href="Utah Athletic Programs.dc.html" style="margin-right:auto;display:flex;align-items:center"><img src="assets/ua-logo.avif" alt="Utah Athletic" style="height:38px;width:auto"></a>
+    <nav style="display:flex;gap:22px;font-size:14px;flex-wrap:wrap">
+      <a href="Utah Athletic Programs.dc.html#programs" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Programs</a>
+      <a href="Athletic Network.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Network</a>
+      <a href="Tryouts.dc.html" style="color:var(--color-text)">Tryouts</a>
+      <a href="Events.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Tournaments &amp; Events</a>
+      <a href="Contact Us.dc.html" style="color:var(--color-neutral-400)" style-hover="color:var(--color-text)">Contact</a>
+    </nav>
+  </header>
+
+  <section style="position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;pointer-events:none;background-image:url('assets/collage/c14.jpg');background-size:cover;background-position:center 40%;filter:grayscale(1) contrast(1.2) brightness(.8)"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:#78b7b3;mix-blend-mode:color;opacity:.5"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#111318 0%,rgba(17,19,24,.85) 38%,rgba(17,19,24,.35) 75%,rgba(17,19,24,.5) 100%)"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 60%,#111318 100%)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto;padding:clamp(56px,8vw,120px) clamp(16px,4vw,56px) clamp(40px,5vw,64px);display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><span style="width:28px;height:1px;background:var(--color-accent)"></span>Tryouts 2027</div>
+      <h1 style="margin:0;font:500 clamp(46px,7vw,104px)/.92 var(--font-heading);letter-spacing:-.05em;text-wrap:balance">Find your <span style="color:#78b7b3">tryout.</span></h1>
+      <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Pick your region and level. Every date, time and field in one place — register in a couple of taps.</p>
+    </div>
+  </section>
+
+  <div style="position:sticky;top:0;z-index:30">
+
+
+
+  <div style="background:linear-gradient(180deg,rgba(27,29,36,.97),rgba(21,23,29,.97));backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(120,183,179,.25),0 12px 30px rgba(0,0,0,.45)">
+    <div style="max-width:1280px;margin:0 auto;padding:12px clamp(16px,4vw,56px);display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-500)">Region</span>
+        <div style="display:flex;gap:4px;padding:3px;border-radius:10px;background:var(--color-surface)">
+          <sc-for list="{{ regionOpts }}" as="ro" hint-placeholder-count="3">
+            <button onClick="{{ ro.pick }}" style="cursor:pointer;min-height:40px;padding:0 16px;border-radius:8px;border:0;background:{{ ro.bg }};color:{{ ro.fg }};box-shadow:{{ ro.ring }};font:500 14px/1 var(--font-body);transition:all .2s">{{ ro.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%">
+        <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-500)">Level</span>
+        <div style="display:flex;gap:4px;padding:3px;border-radius:10px;background:var(--color-surface);overflow-x:auto">
+          <sc-for list="{{ levelOpts }}" as="lo" hint-placeholder-count="5">
+            <button onClick="{{ lo.pick }}" style="flex:none;cursor:pointer;min-height:40px;padding:0 14px;border-radius:8px;border:0;background:{{ lo.bg }};color:{{ lo.fg }};box-shadow:{{ lo.ring }};font:500 14px/1 var(--font-body);transition:all .2s">{{ lo.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-500)">Showing</span>
+        <span style="display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;background:rgba(120,183,179,.12);box-shadow:inset 0 0 0 1px #78b7b3;font:500 14px/1 var(--font-body);color:#e9e9ed;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:#78b7b3;box-shadow:0 0 8px #78b7b3"></span>{{ showing }}</span>
+      </div>
+    </div>
+    <div style="height:2px;background:linear-gradient(to right,transparent,#78b7b3 48px,#78b7b3 calc(100% - 48px),transparent);opacity:.55"></div>
+  </div>
+  </div>
+
+  <main style="max-width:1280px;margin:0 auto;padding:28px clamp(16px,4vw,56px) 40px;display:flex;flex-direction:column;gap:44px;opacity:{{ fadeOp }};transition:opacity .2s">
+    <sc-for list="{{ blocks }}" as="bk" hint-placeholder-count="2">
+      <section style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">{{ bk.kicker }}</span>
+            <h2 style="margin:0;font:500 clamp(28px,3.2vw,40px)/1 var(--font-heading);letter-spacing:-.035em">{{ bk.title }}</h2>
+          </div>
+          <a href="{{ bk.programHref }}" style="font-size:13px;color:var(--color-accent-300)">About {{ bk.name }} →</a>
+        </div>
+
+        <sc-if value="{{ bk.hasRows }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ bk.rows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding:14px 16px;border-radius:10px;background:var(--color-surface);box-shadow:var(--shadow-sm);transition:box-shadow .2s" style-hover="box-shadow:0 0 0 1px var(--color-accent-800),var(--shadow-sm)">
+                <span style="flex:1 1 120px;display:flex;flex-direction:column;gap:4px"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Age group</span><span style="font:500 18px/1 var(--font-heading);letter-spacing:-.02em">{{ r.age }}</span></span>
+                <span style="flex:0 1 70px;display:flex;flex-direction:column;gap:4px"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Gender</span><span style="font-size:14px">{{ r.gender }}</span></span>
+                <span style="flex:1 1 120px;display:flex;flex-direction:column;gap:4px"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Date</span><span style="font-size:14px">{{ r.date }}</span></span>
+                <span style="flex:1 1 120px;display:flex;flex-direction:column;gap:4px"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Time</span><span style="font-size:14px;white-space:nowrap">{{ r.time }}</span></span>
+                <a href="{{ r.mapUrl }}" target="_blank" rel="noopener" style="flex:2 1 220px;display:flex;flex-direction:column;gap:4px;color:var(--color-text)" style-hover="color:#b5e1dd"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-500)">Location</span><span style="display:flex;align-items:center;gap:6px;font-size:14px"><i class="ph ph-map-pin" style="color:#78b7b3"></i>{{ r.venue }}</span></a>
+                <a href="{{ r.register }}" target="_blank" rel="noopener" style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #78b7b3;color:#b5e1dd;font:500 14px/1 var(--font-body);transition:background .2s" style-hover="background:rgba(120,183,179,.14);color:#e9e9ed">Register →</a>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ bk.isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;padding:22px;border-radius:12px;background:var(--color-surface);box-shadow:0 0 0 1px var(--color-divider)">
+            <span style="display:flex;flex-direction:column;gap:6px;max-width:560px"><span style="font:500 20px/1.2 var(--font-heading)">{{ bk.emptyHead }}</span><span style="font-size:14px;line-height:1.55;color:var(--color-neutral-400)">{{ bk.emptyCopy }}</span></span>
+            <a href="#invite" style="display:flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #78b7b3;color:#b5e1dd;font:500 14px/1 var(--font-body)">{{ bk.emptyCta }}</a>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ bk.isSeason }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px">
+            <sc-for list="{{ bk.sessions }}" as="ss" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:12px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+                <span style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font:500 24px/1 var(--font-heading);letter-spacing:-.03em">{{ ss.name }}</span><span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-300)">{{ ss.span }}</span></span>
+                <span style="display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--color-neutral-300)"><span style="display:flex;gap:8px;align-items:center"><i class="ph ph-calendar-blank" style="color:#78b7b3"></i>{{ ss.start }}</span><a href="{{ ss.mapUrl }}" target="_blank" rel="noopener" style="display:flex;gap:8px;align-items:center;color:var(--color-neutral-300)" style-hover="color:#b5e1dd"><i class="ph ph-map-pin" style="color:#78b7b3"></i>{{ ss.venue }}</a><span style="display:flex;gap:8px;align-items:center"><i class="ph ph-clock" style="color:#78b7b3"></i>{{ ss.signup }}</span></span>
+                <a href="{{ ss.register }}" target="_blank" rel="noopener" style="margin-top:auto;display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:8px;border:1px solid #78b7b3;color:#b5e1dd;font:500 14px/1 var(--font-body)" style-hover="background:rgba(120,183,179,.14)">Sign up for {{ ss.name }} →</a>
+              </div>
+            </sc-for>
+          </div>
+          <span style="font-size:13px;color:var(--color-neutral-500)">{{ bk.name }} has no tryouts — every player who signs up is placed on a team.</span>
+        </sc-if>
+      </section>
+    </sc-for>
+
+    <sc-if value="{{ showInvite }}" hint-placeholder-val="{{ false }}">
+      <section id="invite" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px;padding:clamp(20px,3vw,32px);border-radius:14px;background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">Academy · {{ reg.label }}</span>
+          <h2 style="margin:0;font:500 clamp(28px,3.2vw,40px)/1.02 var(--font-heading);letter-spacing:-.035em;text-wrap:balance">Request an invitation to trial</h2>
+          <p style="margin:0;font-size:15px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">Can't make a posted date, or want to be seen sooner? Apply and the {{ reg.label }} Director of Coaching will invite you to a training session.</p>
+        </div>
+        <sc-if value="{{ inviteSent }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;justify-content:center"><span style="font:500 26px/1.1 var(--font-heading)">Request sent.</span><span style="font-size:14px;color:var(--color-neutral-400)">The {{ reg.label }} Director of Coaching will reply within 5 days.</span></div>
+        </sc-if>
+        <sc-if value="{{ inviteOpen }}" hint-placeholder-val="{{ true }}">
+          <form onSubmit="{{ submitInvite }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-content:start">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Player name<input required style="min-height:44px;padding:0 12px;font:400 15px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Birth year<input required inputmode="numeric" placeholder="2013" style="min-height:44px;padding:0 12px;font:400 15px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Parent email<input required type="email" style="min-height:44px;padding:0 12px;font:400 15px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-neutral-400)">Current club<input placeholder="Optional" style="min-height:44px;padding:0 12px;font:400 15px var(--font-body);color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;outline:none" style-focus="border-color:#78b7b3"></label>
+            <button type="submit" style="grid-column:1 / -1;cursor:pointer;min-height:48px;border-radius:8px;border:1px solid #78b7b3;background:rgba(120,183,179,.08);color:#b5e1dd;font:500 15px/1 var(--font-body)" style-hover="background:rgba(120,183,179,.16)">Send to {{ reg.label }} Academy →</button>
+          </form>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <section style="display:flex;flex-direction:column;gap:14px">
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">Before you come · {{ reg.label }} region</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:12px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="display:flex;align-items:center;gap:10px;font:500 18px/1 var(--font-heading)"><i class="ph ph-backpack" style="font-size:22px;color:#78b7b3"></i>What to bring</span>
+          <sc-for list="{{ bring }}" as="b" hint-placeholder-count="5">
+            <span style="display:flex;gap:10px;align-items:center;font-size:14px;color:var(--color-neutral-300)"><i class="ph ph-check" style="color:#78b7b3"></i>{{ b }}</span>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:12px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="display:flex;align-items:center;gap:10px;font:500 18px/1 var(--font-heading)"><i class="ph ph-calendar-x" style="font-size:22px;color:#78b7b3"></i>Missed your date?</span>
+          <span style="font-size:14px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Request a private trial with the {{ reg.label }} staff. We'll invite your player to a regular training session with the right age group.</span>
+          <a href="{{ privateHref }}" style="margin-top:auto;display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:8px;border:1px solid #78b7b3;color:#b5e1dd;font:500 14px/1 var(--font-body)" style-hover="background:rgba(120,183,179,.14)">Request a private trial →</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:12px;background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="display:flex;align-items:center;gap:10px;font:500 18px/1 var(--font-heading)"><i class="ph ph-user-circle" style="font-size:22px;color:#78b7b3"></i>{{ reg.label }} contact</span>
+          <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-300)">Managing Director</span><span style="font-size:15px">{{ reg.md }}</span></span>
+          <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-300)">Director of Coaching</span><span style="font-size:15px">{{ reg.doc }}</span></span>
+          <a href="{{ reg.mail }}" style="font-size:14px">{{ reg.email }}</a>
+          <a href="{{ contactHref }}" style="margin-top:auto;font-size:13px;color:var(--color-accent-300)">Contact the {{ reg.label }} team →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:28px clamp(16px,4vw,56px);font-size:13px;color:var(--color-neutral-500)">
+    <span>© 2026 Utah Athletic · Part of Athletic Global</span>
+    <span>Registration is handled in Ollie.</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const LV = [['', 'All levels'], ['academy', 'Academy'], ['club', 'Club'], ['rec', 'Recreation'], ['futures', 'Futures']];
+const RG_KEYS = ['north', 'south', 'west'];
+const PROG_STATUS = { academy: { west: 'Fall 2027' } };
+const seg = on => ({ bg: on ? 'rgba(120,183,179,.16)' : 'transparent', fg: on ? '#b5e1dd' : 'var(--color-neutral-300)', ring: on ? 'inset 0 0 0 1px #78b7b3' : 'none' });
+class Component extends DCLogic {
+  state = { region: 'north', level: '', inviteSent: false, fade: false, ready: !!window.UA_TRYOUTS };
+  componentDidMount() {
+    const q = new URLSearchParams(location.search);
+    const ck = (document.cookie.match(/(?:^|; )ua_region=(\w+)/) || [])[1];
+    const r = RG_KEYS.includes(q.get('region')) ? q.get('region') : RG_KEYS.includes(ck) ? ck : 'north';
+    const l = LV.some(x => x[0] === q.get('level')) ? q.get('level') : '';
+    this.setState({ region: r, level: l });
+    if (!window.UA_TRYOUTS) this.poll = setInterval(() => { if (window.UA_TRYOUTS) { clearInterval(this.poll); this.setState({ ready: true }); } }, 60);
+  }
+  componentWillUnmount() { clearInterval(this.poll); }
+  set(patch) {
+    this.setState({ fade: true });
+    setTimeout(() => {
+      this.setState({ ...patch, fade: false, inviteSent: false }, () => {
+        const { region, level } = this.state;
+        document.cookie = 'ua_region=' + region + ';path=/;max-age=31536000';
+        try { const u = new URL(location.href); u.searchParams.set('region', region); level ? u.searchParams.set('level', level) : u.searchParams.delete('level'); history.replaceState(null, '', u); } catch (e) {}
+      });
+    }, 140);
+  }
+  renderVals() {
+    const s = this.state, T = window.UA_TRYOUTS;
+    const regionOpts = RG_KEYS.map(k => ({ label: T ? T.REGIONS[k].label : k, ...seg(s.region === k), pick: () => this.set({ region: k }) }));
+    const levelOpts = LV.map(([k, l]) => ({ label: l, ...seg(s.level === k), pick: () => this.set({ level: k }) }));
+    if (!T) return { regionOpts, levelOpts, blocks: [], reg: {}, bring: [], summary: '', fadeOp: 1, showInvite: false };
+    const R = T.REGIONS[s.region];
+    const levels = s.level ? [s.level] : ['academy', 'club', 'rec', 'futures'];
+    let count = 0;
+    const blocks = levels.map(lv => {
+      const P = T.PROGRAMS[lv], base = { name: P.name, programHref: 'Utah Athletic Programs.dc.html#/' + lv + '/' + s.region, hasRows: false, isEmpty: false, isSeason: false };
+      if (P.kind === 'season') {
+        const v = T.SEASON_VENUE[s.region];
+        return { ...base, kicker: P.name + ' · ' + P.ages + ' · ' + R.label, title: 'Season sign-up', isSeason: true,
+          sessions: T.SESSIONS.map(x => ({ name: x.name, span: x.span, start: 'Starts ' + T.fmtDate(x.start), signup: x.signup, venue: T.VENUES[v].name, mapUrl: T.mapUrl(v), register: P.register })) };
+      }
+      const rows = T.events({ level: lv, region: s.region }).map(e => ({ age: e.age, gender: e.gender, date: T.fmtDate(e.date), time: e.time, venue: e.venueName, mapUrl: e.mapUrl, register: e.register }));
+      count += rows.length;
+      const soon = (PROG_STATUS[lv] || {})[s.region];
+      return { ...base, kicker: P.name + ' · ' + P.ages + ' · ' + R.label, title: rows.length ? rows.length + ' tryout sessions' : 'No posted dates', hasRows: rows.length > 0, rows, isEmpty: !rows.length,
+        emptyHead: soon ? P.name + ' launches in ' + R.label + ' — ' + soon : 'Dates to be announced',
+        emptyCopy: soon ? 'There are no ' + R.label + ' ' + P.name + ' tryouts yet. Request an invitation and the ' + R.label + ' staff will contact you as the program opens.' : 'We\'ll post ' + R.label + ' dates here as soon as they\'re set.',
+        emptyCta: P.invite ? 'Request an invitation' : 'Get notified' };
+    });
+    const showInvite = levels.includes('academy');
+    return {
+      regionOpts, levelOpts, blocks, showInvite, fadeOp: s.fade ? 0.25 : 1,
+      summary: count ? count + ' tryout sessions in ' + R.label : R.label + ' region',
+      showing: R.label + ' · ' + (s.level ? T.PROGRAMS[s.level].name : 'All levels') + (count ? ' · ' + count + ' sessions' : ''),
+      reg: { ...R, mail: 'mailto:' + R.email }, bring: T.BRING,
+      inviteSent: s.inviteSent, inviteOpen: !s.inviteSent,
+      submitInvite: e => { e.preventDefault(); this.setState({ inviteSent: true }); },
+      privateHref: showInvite ? '#invite' : 'Contact Us.dc.html?region=' + s.region + '&program=' + (s.level || ''),
+      contactHref: 'Contact Us.dc.html?region=' + s.region + (s.level ? '&program=' + s.level : '')
+    };
+  }
+}
+</script>
+</body>
+</html>

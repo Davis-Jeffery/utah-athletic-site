@@ -1,0 +1,23 @@
+# Club regions. Staff names and emails are placeholders until the club supplies them.
+# seasonVenue: where Rec and Futures sessions run for families in this region (an id from venues.yaml).
+- id: north
+  order: 1
+  label: North
+  area: Salt Lake County
+  managingDirector: { name: Director Name, email: north@utahathletic.com }
+  directorOfCoaching: { name: Director Name, email: coaching.north@utahathletic.com }
+  seasonVenue: lehi
+- id: south
+  order: 2
+  label: South
+  area: Utah County
+  managingDirector: { name: Director Name, email: south@utahathletic.com }
+  directorOfCoaching: { name: Director Name, email: coaching.south@utahathletic.com }
+  seasonVenue: lehi
+- id: west
+  order: 3
+  label: West
+  area: West Utah County
+  managingDirector: { name: Director Name, email: west@utahathletic.com }
+  directorOfCoaching: { name: Director Name, email: coaching.west@utahathletic.com }
+  seasonVenue: saratoga

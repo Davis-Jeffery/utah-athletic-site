@@ -1,12 +1,18 @@
-// Builds the image URL map the app uses. Every image is optimized to WebP at build time.
-// Keys match the image fields in src/data/programs.ts.
+// Builds the image URL map the site uses. Every image is optimized to WebP at build time.
+// Keys are file names in src/assets/images without the extension; content refers to images by key.
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 const files = import.meta.glob<{ default: ImageMetadata }>('../assets/images/*.{jpg,png,webp}', { eager: true });
 
-// Widths per image group: hero backgrounds are full-bleed, the rest are cards and badges.
-const widthFor = (key: string) => (key.startsWith('hero-') ? 2000 : key.startsWith('video-') ? 960 : 320);
+// Widths per image group. Collage photos get two sizes: a small one for the home
+// collage tiles and section photos, and a large one ("<key>@lg") for full-bleed heroes.
+const variants = (key: string): [string, number, number][] => {
+  if (key.startsWith('collage-')) return [['', 760, 66], ['@lg', 1800, 70]];
+  if (key.startsWith('hero-')) return [['', 2000, 72]];
+  if (key.startsWith('video-')) return [['', 960, 72]];
+  return [['', 320, 80]];
+};
 
 let cache: Promise<Record<string, string>> | undefined;
 
@@ -15,15 +21,12 @@ export function buildAssets() {
     const out: Record<string, string> = {};
     for (const [path, mod] of Object.entries(files)) {
       const key = path.split('/').pop()!.replace(/\.[^.]+$/, '');
-      const w = Math.min(widthFor(key), mod.default.width);
-      const img = await getImage({ src: mod.default, width: w, format: 'webp', quality: 72 });
-      out[key] = img.src;
+      for (const [suffix, width, quality] of variants(key)) {
+        const img = await getImage({ src: mod.default, width: Math.min(width, mod.default.width), format: 'webp', quality });
+        out[key + suffix] = img.src;
+      }
     }
-    // Names the ported template uses directly.
     out.logo = '/logo-ua.avif';
-    out.heroHome = out['hero-home'];
-    out.badgeA = out['slot-ecnl'];
-    out.badgeB = out['slot-ea'];
     return out;
   })();
   return cache;
