@@ -258,7 +258,7 @@ export default class UAApp extends React.Component {
       <div style={{ position: 'relative', overflowX: 'clip', background: 'var(--color-bg)', color: 'var(--color-text)', fontFamily: 'var(--font-body)' }}>
         <div ref={this.homeRef} aria-hidden={s.active ? 'true' : undefined} inert={s.active && !s.busy ? true : undefined}
           style={{ transform: s.home.tf, transformOrigin: s.home.origin, opacity: s.home.op, filter: s.home.filter, transition: s.home.trans }}>
-          <SiteHeader current="programs" logo={data.logo} tryoutsHref={`/tryouts/${s.myRegion ? '?region=' + s.myRegion : ''}`} regionMenu={s.active ? null : this.regionMenu()} />
+          <SiteHeader current="programs" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} tryoutsHref={`/tryouts/${s.myRegion ? '?region=' + s.myRegion : ''}`} regionMenu={s.active ? null : this.regionMenu()} />
           <Home data={data} hover={s.hover} focus={s.focus} intro={s.intro} introDone={s.introDone} active={!!s.active} tilt={tilt}
             myRegion={s.myRegion} today={s.today}
             onHover={(id) => this.setState(id ? { hover: id, focus: id } : { hover: null })}

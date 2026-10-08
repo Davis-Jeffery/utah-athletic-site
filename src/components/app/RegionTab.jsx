@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER } from '../../data/site';
-import { fmtDate, tryoutsFor, money } from '../../lib/schedule';
+import { fmtDate, tryoutsFor, money, signupText } from '../../lib/schedule';
 import { Kicker, SectionHead, Field, SubmitButton, Sent, PhotoSlot, ROW_RULE } from '../ui.jsx';
 
 export default function RegionTab({ program: p, regionId, data, today, onRegion }) {
@@ -137,7 +137,7 @@ function Tryouts({ p, rm, data, today }) {
   const season = p.kind === 'season';
   const trial = !season && p.enrollment !== 'tryouts';
   const rows = season
-    ? data.seasons.map((s) => ({ key: s.id, title: `${s.name} · ${s.span}`, when: `Starts ${fmtDate(s.start)} · ${s.signup}`, where: rm.seasonVenue.name, mapUrl: rm.seasonVenue.mapUrl, cta: 'Sign up', pick: s.name }))
+    ? data.seasons.map((s) => ({ key: s.id, title: `${s.name} · ${s.span}`, when: `Starts ${fmtDate(s.start)} · ${signupText(s, today)}`, where: rm.seasonVenue.name, mapUrl: rm.seasonVenue.mapUrl, cta: 'Sign up', pick: s.name }))
     : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, mapUrl: t.mapUrl, cta: 'Register', pick: `${fmtDate(t.date)}, ${t.age} ${t.gender}` }));
   const head = trial ? 'Player trial application' : season ? `Sign up in ${rm.label}` : `Next tryouts in ${rm.label}`;
   const copy = trial

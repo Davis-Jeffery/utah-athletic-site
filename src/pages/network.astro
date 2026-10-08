@@ -24,7 +24,7 @@ const facts = [['City', 'Vichy, Auvergne-Rhône-Alpes'], ['Status', 'Partnership
 ---
 <Base title="Athletic Global network | Utah Athletic" description="Utah Athletic is part of Athletic Global, a network of affiliate academies and professional clubs with a route to the professional game." bodyClass="page-zoom-in">
   <div style="position:relative;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
-    <SiteHeader current="network" logo={data.logo} />
+    <SiteHeader current="network" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
 
     <section style="position:relative;min-height:min(78vh,720px);display:flex;align-items:flex-end;overflow:hidden">
       <img src={A['collage-c19@lg']} alt="" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:grayscale(1) contrast(1.15) brightness(.6)" />
@@ -123,6 +123,6 @@ const facts = [['City', 'Vichy, Auvergne-Rhône-Alpes'], ['Status', 'Partnership
         </div>
       </section>
     </main>
-    <SiteFooter />
+    <SiteFooter social={data.settings.social} />
   </div>
 </Base>

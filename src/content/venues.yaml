@@ -1,7 +1,0 @@
-# Fields used for tryouts and sessions. The map link on every tryout row is a Google Maps
-# search for "name, address", so keep the address specific. Placeholders until confirmed.
-- { id: murray, name: 'Murray Park, Field 3', address: '296 E Murray Park Ave, Murray, UT' }
-- { id: orem, name: 'Orem Community Park, North Fields', address: '600 S 400 E, Orem, UT' }
-- { id: draper, name: 'Draper Park, Fields 1–2', address: '12500 S 1300 E, Draper, UT' }
-- { id: saratoga, name: 'Neptune Park, Main Field', address: 'Saratoga Springs, UT' }
-- { id: lehi, name: 'Lehi Sports Park', address: 'Lehi, UT' }
