@@ -145,7 +145,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           {data.videos.map((v) => (
             <a key={v.url} href={v.url} target="_blank" rel="noopener" className="hv-video" style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--color-text)' }}>
               <div style={{ position: 'relative', aspectRatio: '16 / 9', borderRadius: '8px', overflow: 'hidden', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
-                <img src={v.img} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(.5) brightness(.85)' }} />
+                <img src={v.img.src} alt={v.img.alt || ''} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: v.img.pos, filter: 'saturate(.5) brightness(.85)' }} />
                 <span style={{ position: 'absolute', left: '12px', bottom: '12px', fontSize: '12px', padding: '5px 9px', borderRadius: '6px', background: 'rgba(17,19,24,.8)', color: 'var(--color-text)' }}>▶ {v.len}</span>
               </div>
               <span style={{ font: '500 18px/1.25 var(--font-heading)', letterSpacing: '-.015em' }}>{v.title}</span>
@@ -287,8 +287,8 @@ function Collage({ photos, tf }) {
       {COLLAGE_TILES.map(([col, row], t) => (
         <div key={t} style={{ position: 'relative', overflow: 'hidden', gridColumn: col, gridRow: row, background: '#15171d' }}>
           {[0, 1, 2].map((k) => {
-            const on = cur[t] === k, load = k === 0 || on || armed.has(t + ':' + k);
-            return <div key={k} style={{ position: 'absolute', inset: 0, backgroundImage: load ? `url("${photos[(t + k * n) % photos.length]}")` : 'none', backgroundSize: 'cover', backgroundPosition: `center ${30 + ((t * 7) % 30)}%`, opacity: on ? 1 : 0, transform: on ? 'scale(1)' : 'scale(1.08)', transition: 'opacity 1.4s ease,transform 7s cubic-bezier(.2,.8,.2,1)' }} />;
+            const on = cur[t] === k, load = k === 0 || on || armed.has(t + ':' + k), photo = photos[(t + k * n) % photos.length];
+            return <div key={k} style={{ position: 'absolute', inset: 0, backgroundImage: load ? `url("${photo.src}")` : 'none', backgroundSize: 'cover', backgroundPosition: photo.pos || `center ${30 + ((t * 7) % 30)}%`, opacity: on ? 1 : 0, transform: on ? 'scale(1)' : 'scale(1.08)', transition: 'opacity 1.4s ease,transform 7s cubic-bezier(.2,.8,.2,1)' }} />;
           })}
         </div>
       ))}

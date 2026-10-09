@@ -11,6 +11,39 @@ const W = { hero: 2000, section: 760, logo: 320, video: 960 } as const;
 const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
 
+/**
+ * Image as components use it: { src, pos?, alt? }.
+ * - src: CDN URL at `width`, with the editor's crop applied (see imageUrl in sanity.ts).
+ * - pos: CSS object-position from the editor's hotspot, only when one is set. Components fall back
+ *   to their own position when it's missing, so images without a hotspot render as before.
+ * - alt: the editor's description, only when filled in. Components keep their own alt otherwise.
+ */
+export type Pic = { src: string; pos?: string; alt?: string };
+type SanityImage = Parameters<typeof imageUrl>[0];
+
+const pct = (n: number) => `${Math.round(Math.min(1, Math.max(0, n)) * 1000) / 10}%`;
+/** Hotspot as object-position. Sanity stores it relative to the original image, but the URL is
+ *  already cropped, so it's re-expressed relative to the crop. Offline fixture builds serve
+ *  uncropped local files, so they use the hotspot as is. */
+function focus(im: NonNullable<SanityImage>): string | undefined {
+  const h = im.hotspot as { x?: number; y?: number } | undefined;
+  if (typeof h?.x !== 'number' || typeof h?.y !== 'number') return undefined;
+  const c = im.asset._ref.startsWith('image-dryrun-') ? undefined : (im.crop as { left?: number; right?: number; top?: number; bottom?: number } | undefined);
+  const l = c?.left ?? 0, r = c?.right ?? 0, t = c?.top ?? 0, b = c?.bottom ?? 0;
+  return `${pct((h.x - l) / (1 - l - r || 1))} ${pct((h.y - t) / (1 - t - b || 1))}`;
+}
+
+function pic(im: SanityImage, width: number, quality?: number): Pic | undefined {
+  const src = imageUrl(im, width, quality);
+  if (!src || !im) return undefined;
+  const out: Pic = { src };
+  const pos = focus(im);
+  if (pos) out.pos = pos;
+  const alt = im.alt?.trim();
+  if (alt) out.alt = alt;
+  return out;
+}
+
 /** "venue.lehi" -> "lehi" */
 const idOf = (_id: string) => _id.replace(/^[a-zA-Z]+\./, '');
 
@@ -38,7 +71,7 @@ async function build() {
   useLocalAssets(A);
   const c = await fetchContent();
   const settings = c.siteSettings[0];
-  const img = imageUrl;
+  const img = pic;
 
   const venues = c.venue.map((v) => ({ id: idOf(v._id), name: v.name, address: v.address, mapUrl: mapUrl(v.name, v.address) }));
   const venue = (_ref: string) => {

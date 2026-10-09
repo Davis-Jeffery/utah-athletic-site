@@ -73,7 +73,7 @@ export default function DevModel({ program }) {
             })}
           </svg>
           <div style={{ position: 'absolute', left: '50%', top: '50%', width: '44%', aspectRatio: '1', transform: 'translate(-50%,-50%)', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 0 1px #78b7b3,0 0 0 8px rgba(120,183,179,.08),0 24px 60px rgba(0,0,0,.55)', background: 'var(--color-surface)' }}>
-            <img src={program.photos.core} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(.6) contrast(1.06)' }} />
+            <img src={program.photos.core.src} alt={program.photos.core.alt || ''} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: program.photos.core.pos, filter: 'saturate(.6) contrast(1.06)' }} />
           </div>
           <div style={{ position: 'absolute', left: '50%', top: '100%', transform: 'translate(-50%,0)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', paddingTop: '14px', textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
             <span style={{ font: '500 15px/1 var(--font-heading)', color: done ? ACC : 'var(--color-text)', transition: 'color .4s' }}>{done ? 'A complete player' : 'The complete player'}</span>
@@ -109,7 +109,7 @@ function DevModal({ it, prev, next, shown, onClose, onStep }) {
       <div role="dialog" aria-modal="true" aria-label={it.t} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', width: '100%', maxWidth: '980px', maxHeight: '100%', overflowY: 'auto', borderRadius: '16px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-lg),0 0 0 1px var(--color-accent-800)', transform: shown ? 'none' : 'scale(.9) translateY(20px)', transformOrigin: '50% 60%', transition: 'transform .45s cubic-bezier(.2,.8,.2,1)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,320px),1fr))' }}>
           <div style={{ position: 'relative', minHeight: '320px', background: 'var(--color-bg)' }}>
-            <img src={it.photo} alt={`${it.t} training`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(.55) contrast(1.06) brightness(.9)' }} />
+            <img src={it.photo.src} alt={it.photo.alt || `${it.t} training`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: it.photo.pos, filter: 'saturate(.55) contrast(1.06) brightness(.9)' }} />
             <span aria-hidden="true" style={{ position: 'absolute', left: '18px', top: '18px', width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', color: '#78b7b3', background: 'rgba(17,19,24,.85)', backdropFilter: 'blur(8px)', boxShadow: '0 0 0 1px #78b7b3', pointerEvents: 'none' }}><it.Icon /></span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: 'clamp(22px,3vw,34px)' }}>
