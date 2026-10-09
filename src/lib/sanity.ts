@@ -9,10 +9,19 @@ import { createImageUrlBuilder } from '@sanity/image-url';
 import { z } from 'astro/zod';
 import { readFile } from 'node:fs/promises';
 
+// SANITY_READ_TOKEN (a Viewer token) is required: Sanity hides documents whose id contains a
+// dot (program.academy, region.north, ...) from anonymous reads, so without it the build sees
+// no programs or regions. Set it in .env locally and in Vercel's environment variables.
+const token = import.meta.env.SANITY_READ_TOKEN || process.env.SANITY_READ_TOKEN;
+if (!token && !process.env.SANITY_FIXTURE) {
+  throw new Error('Missing SANITY_READ_TOKEN. Create a Viewer token at sanity.io/manage (API > Tokens) and add it to .env and to Vercel > Settings > Environment Variables.');
+}
+
 export const sanity = createClient({
   projectId: import.meta.env.SANITY_PROJECT_ID || '03wnsd9x',
   dataset: import.meta.env.SANITY_DATASET || 'production',
   apiVersion: '2025-10-01',
+  token,
   useCdn: false, // builds always read the latest published content
   perspective: 'published',
 });
