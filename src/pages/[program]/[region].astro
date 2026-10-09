@@ -19,6 +19,6 @@ const description = st.status === 'active'
   : st.status === 'soon' ? `${p.name} launches in the ${r.label} region in ${st.season}. Register interest.`
     : `${p.name} isn't offered in the ${r.label} region. Find the nearest hub.`;
 ---
-<Base title={`${r.label} ${p.name} | Utah Athletic`} description={description} preload={p.img}>
+<Base title={`${r.label} ${p.name} | Utah Athletic`} description={description} preload={p.img.src}>
   <UAApp client:load data={data} initial={{ program: p.id, region: r.id }} />
 </Base>

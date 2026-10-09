@@ -56,7 +56,7 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
 
       <div style={{ transform: swap ? 'translateY(24px)' : 'none', opacity: swap ? 0 : 1, transition: 'transform .5s cubic-bezier(.2,.8,.2,1),opacity .3s' }}>
         <section id="ovhero" style={{ position: 'relative', minHeight: 'min(80vh,760px)', display: 'flex', alignItems: 'flex-end', overflow: 'hidden' }}>
-          <img src={p.img} alt="" fetchPriority="high" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) contrast(1.15) brightness(.62)' }} />
+          <img src={p.img.src} alt={p.img.alt || ''} fetchPriority="high" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.img.pos, filter: 'grayscale(1) contrast(1.15) brightness(.62)' }} />
           <div style={{ position: 'absolute', inset: 0, background: '#78b7b3', mixBlendMode: 'color', opacity: 0.55 }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(17,19,24,.25),rgba(17,19,24,.6) 50%,#111318),radial-gradient(ellipse at 15% 100%,rgba(120,183,179,.22),transparent 55%)' }} />
           <div style={{ position: 'relative', width: '100%', maxWidth: '1360px', margin: '0 auto', padding: '96px clamp(20px,4vw,56px) 44px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -160,7 +160,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             <p style={{ margin: 0, fontSize: '17px', lineHeight: 1.65, color: 'var(--color-neutral-300)', maxWidth: '520px', textWrap: 'pretty' }}>{p.intro}</p>
           </div>
           <div style={{ position: 'relative', minHeight: '260px', overflow: 'hidden', background: 'var(--color-bg)', clipPath: 'polygon(16% 0,100% 0,100% 100%,0 100%)' }}>
-            <img src={p.photos.who} alt={`${p.name} players in action`} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={p.photos.who.src} alt={p.photos.who.alt || `${p.name} players in action`} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.photos.who.pos }} />
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(180deg,transparent 55%,rgba(17,19,24,.75))' }} />
             <span style={{ position: 'absolute', right: '18px', bottom: '16px', pointerEvents: 'none', fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{p.name} · {p.ages}</span>
           </div>
@@ -168,7 +168,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       </section>
 
       <section style={{ position: 'relative', margin: '8px 0 24px', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-bg)', boxShadow: '0 0 0 1px rgba(120,183,179,.3),0 24px 60px rgba(0,0,0,.45)' }}>
-        <img src={p.photos.cta} alt="" loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) contrast(1.15) brightness(.7)' }} />
+        <img src={p.photos.cta.src} alt={p.photos.cta.alt || ''} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.photos.cta.pos, filter: 'grayscale(1) contrast(1.15) brightness(.7)' }} />
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: '#78b7b3', mixBlendMode: 'color', opacity: 0.5 }} />
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(90deg,rgba(17,19,24,.94) 0%,rgba(17,19,24,.72) 50%,rgba(17,19,24,.35) 100%)' }} />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px 32px', flexWrap: 'wrap', padding: 'clamp(28px,3.4vw,44px) clamp(22px,4vw,52px)' }}>
@@ -208,7 +208,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             <div key={l.name} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .25s,transform .25s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{l.level}</span>
-                {l.logo ? <img src={l.logo} alt={`${l.name} logo`} width={l.lw} height={l.lh} loading="lazy" style={{ flex: 'none', width: l.lw + 'px', height: l.lh + 'px', objectFit: 'contain', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
+                {l.logo ? <img src={l.logo.src} alt={l.logo.alt || `${l.name} logo`} width={l.lw} height={l.lh} loading="lazy" style={{ flex: 'none', width: l.lw + 'px', height: l.lh + 'px', objectFit: 'contain', objectPosition: l.logo.pos, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
               </div>
               <span style={{ font: '500 34px/1 var(--font-heading)', letterSpacing: '-.035em' }}>{l.name}</span>
               <span style={{ marginTop: 'auto', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{l.d}</span>

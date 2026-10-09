@@ -13,6 +13,6 @@ export function getStaticPaths() {
 const data = await loadSite();
 const p = data.programs.find((x) => x.id === Astro.params.program)!;
 ---
-<Base title={`${p.name} | Utah Athletic`} description={p.tagline} preload={p.img}>
+<Base title={`${p.name} | Utah Athletic`} description={p.tagline} preload={p.img.src}>
   <UAApp client:load data={data} initial={{ program: p.id, region: null }} />
 </Base>
