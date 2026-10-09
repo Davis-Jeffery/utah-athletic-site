@@ -11,12 +11,12 @@ const programs = data.programs.map(({ id, name }) => ({ id, name }));
 ---
 <Base title="Contact | Utah Athletic" description="Contact Utah Athletic's main office, or reach a regional Managing Director or Director of Coaching directly.">
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
-    <SiteHeader current="contact" logo={data.logo} />
+    <SiteHeader current="contact" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker="Contact us" maxWidth="1360px" bottom="40px">
       <h1 style="margin:0;max-width:900px;font:500 clamp(48px,6.4vw,96px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">Talk to the people <span style="color:#78b7b3">who run the program.</span></h1>
       <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Send a question to our main office, or direct it to a regional Managing Director or Director of Coaching. We reply within 48 hours.</p>
     </PageHero>
-    <ContactApp client:load regions={data.regions} programs={programs} />
-    <SiteFooter />
+    <ContactApp client:load regions={data.regions} programs={programs} mainEmail={data.settings.mainEmail} />
+    <SiteFooter social={data.settings.social} />
   </div>
 </Base>

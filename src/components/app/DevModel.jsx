@@ -3,10 +3,10 @@
 // Each opened principle counts toward "x / 4 explored".
 import React, { useEffect, useState } from 'react';
 import { SoccerBall, Strategy, Lightning, Brain, Check } from '@phosphor-icons/react';
-import { DEVELOPMENT } from '../../data/site';
 import { ACC, Kicker, ROW_RULE } from '../ui.jsx';
 
-const ICONS = { SoccerBall, Strategy, Lightning, Brain };
+// Icon per pillar. Copy for each pillar comes from Site settings in the Studio.
+const ICONS = { Technical: SoccerBall, Tactical: Strategy, Physical: Lightning, Mental: Brain };
 const ANGLES = [-135, -45, 45, 135];
 
 export default function DevModel({ program }) {
@@ -14,7 +14,7 @@ export default function DevModel({ program }) {
   const [hover, setHover] = useState(null);
   const [modal, setModal] = useState(null);
   const [shown, setShown] = useState(false);
-  const items = program.development.map((row, i) => ({ ...row, ...DEVELOPMENT[row.t], Icon: ICONS[DEVELOPMENT[row.t].icon], n: '0' + (i + 1), photo: program.photos.dev[i] }));
+  const items = program.development.map((row, i) => ({ ...row, Icon: ICONS[row.t], n: '0' + (i + 1), photo: program.photos.dev[i] }));
   const add = (i) => setBuilt((b) => (b.includes(i) ? b : [...b, i]));
   const open = (i) => { add(i); setHover(null); setModal(i); setShown(false); requestAnimationFrame(() => requestAnimationFrame(() => setShown(true))); };
   const close = () => { setShown(false); setTimeout(() => setModal(null), 240); };

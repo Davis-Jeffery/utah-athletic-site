@@ -20,13 +20,13 @@ The site was ported from the Claude Design prototype. When the design changes, d
    git diff --stat docs/design-reference
    git diff docs/design-reference/template.html docs/design-reference/page-script.js
    ```
-5. **Port the changes** using the map below. If the handoff README asks for new content fields, add them to the schema in `src/content.config.ts` first. The fastest way is to hand it to Claude in the desktop app (prompt below).
+5. **Port the changes** using the map below. Content (copy, dates, photos) goes into the Studio, not code. If the handoff needs new content fields, add them to `studio/schemaTypes/`, `src/lib/sanity.ts` and `src/lib/content.ts` first. The fastest way is to hand it to Claude in the desktop app (prompt below).
 6. **Check it:** `npm run build && npm run dev`, click through the pyramid, open and close each program, switch region tabs, try `/tryouts/`, `/events/`, `/network/` and `/contact/`, and check phone width.
 7. **Commit and push the branch** to get a Vercel preview link. Merge to `main` when it looks right.
 
 ### Prompt for Claude (desktop app, in this repo)
 
-> I exported a new version of the design and ran `npm run design:extract`. Read docs/DESIGN-SYNC.md, then look at `git diff docs/design-reference` and port only those changes into the site using the map. Content changes go in src/content (YAML) or src/data/site.ts, markup and logic changes go in the components listed in the map, new images go in src/assets/images. Keep the routing, content wiring and site-only pieces listed below. Run the build, check it in a browser at desktop and phone width, and summarize what changed.
+> I exported a new version of the design and ran `npm run design:extract`. Read docs/DESIGN-SYNC.md, then look at `git diff docs/design-reference` and port only those changes into the site using the map. Content changes go in Sanity (list them for an editor, or add fields to studio/schemaTypes/ if they're new), layout constants go in src/data/site.ts, markup and logic changes go in the components listed in the map, new images go in src/assets/images. Keep the routing, content wiring and site-only pieces listed below. Run the build, check it in a browser at desktop and phone width, and summarize what changed.
 
 ## What the extract writes
 
@@ -38,12 +38,12 @@ Line numbers drift, so search for the anchor text in each file.
 
 | In the design (`docs/design-reference/`) | In the site | Search for |
 |---|---|---|
-| Program content `const P = { academy, club, rec, futures }`, `RG` (region status), `DEV`, `CMP`, `TRY_DATES`, `PSTAT` in page-script.js | `src/content/programs/<key>.yaml` (`regions`, `development`, `compare`, `enrollment`, `nextTryout`, `registrationOpens`) | the program key |
-| `REGIONS`, `LEADS` | `src/content/regions.yaml` | region id |
-| `extra/tryouts-data.js`: `VENUES`, `RAW`/`plan`, `SESSIONS`, `SEASON_VENUE`, `PROGRAMS.register` | `venues.yaml`, `tryouts.yaml`, `seasons.yaml`, `regions.yaml` (`seasonVenue`), each program's `registerUrl` | venue or tryout id |
-| `extra/events-data.js` `EVENTS` | `src/content/events.yaml` | event id |
-| `DEEP`, `CMP` row labels, `CMP_COLS`, `PATH`, `VIDS`, `PTS`, `MONTHS`, `COLLAGE_TILES`, `BRING`, `REEL` | `src/data/site.ts` | `DEVELOPMENT`, `COMPARE_ROWS`, `PATHWAY`, `VIDEOS`, `PYRAMID_POINTS`, `COLLAGE_TILES`, `TRYOUT_BRING`, `EVENT_REEL` |
-| Photos `PICS`/`SP` (Unsplash in the design) | each program's `photos` (club photos `collage-cNN`) | `photos:` |
+| Program content `const P = { academy, club, rec, futures }`, `RG` (region status), `DEV`, `CMP`, `TRY_DATES`, `PSTAT` in page-script.js | Studio: Programs (`studio/schemaTypes/program.ts`) | the program key |
+| `REGIONS`, `LEADS` | Studio: Regions | region id |
+| `extra/tryouts-data.js`: `VENUES`, `RAW`/`plan`, `SESSIONS`, `SEASON_VENUE`, `PROGRAMS.register` | Studio: Venues, Tryout sessions, Rec and Futures sessions, Regions (season venue), each program's Ollie link | venue or tryout id |
+| `extra/events-data.js` `EVENTS` | Studio: Tournaments and events | event id |
+| `DEEP`, `CMP` row labels, `CMP_COLS`, `PATH`, `VIDS`, `PTS`, `MONTHS`, `COLLAGE_TILES`, `BRING`, `REEL` | `src/data/site.ts` (`COMPARE_ROWS`, `PATHWAY`, `PYRAMID_POINTS`, `COLLAGE_TILES`, `MONTHS`); Studio: Site settings (development pillars, videos, what to bring, event reel, collage photos) | constant name or settings field |
+| Photos `PICS`/`SP` (Unsplash in the design) | Studio: each program's Photos tab | `photos` |
 | `class Component`: `open`, `close`, `switchTo`, `setRegion`, `goNetwork`, `goJoin` | `src/components/app/UAApp.jsx` (same names) | method name |
 | Header, region menu | `src/components/SiteHeader.jsx` (`RegionMenu`) | `<header` |
 | Hero collage, pyramid, program list, Tryouts near you, Tournaments, Where the pathway leads, Inside UA, "Want to play for us?" | `src/components/app/Home.jsx` | `Collage`, `Pyramid`, `id="network"`, `id="inside"` |
@@ -79,7 +79,7 @@ Line numbers drift, so search for the anchor text in each file.
 ### Things that exist only in the site (keep them when porting)
 
 - Real routes instead of the prototype's `#/academy/north` hashes: `nav()`, `silently()`, the `popstate` listener and the `initial` prop in `UAApp.jsx`; `src/pages/[program]/`.
-- Content collections and `src/lib/content.ts` (the prototype hard-codes content in scripts).
+- Sanity content and `src/lib/sanity.ts` / `src/lib/content.ts` (the prototype hard-codes content in scripts).
 - Date handling in `src/lib/schedule.ts`: past tryouts hidden, event status on the visitor's date (`useToday`).
 - `<RecFormats />` inside the Rec program's Competition section.
 - Accessibility additions: keyboard-focusable pyramid slices, Escape closes the innermost layer first, `aria-pressed` on filters, 44px tap targets, reduced-motion support (collage, transitions, maps).

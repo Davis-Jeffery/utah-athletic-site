@@ -2,8 +2,8 @@
 // cookie), results grouped by level, the Academy invitation form and supporting cards.
 import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
-import { ORDER, REGION_ORDER, TRYOUT_BRING } from '../data/site';
-import { fmtDate, tryoutsFor, readRegion, rememberRegion } from '../lib/schedule';
+import { ORDER, REGION_ORDER } from '../data/site';
+import { fmtDate, tryoutsFor, readRegion, rememberRegion, signupText } from '../lib/schedule';
 import { ACC, Field, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
@@ -152,7 +152,7 @@ export default function TryoutsApp({ data }) {
                       <span style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'var(--color-neutral-300)' }}>
                         <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />Starts {fmtDate(s.start)}</span>
                         <a href={R.seasonVenue.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'var(--color-neutral-300)' }}><MapPin color={ACC} aria-hidden="true" />{R.seasonVenue.name}</a>
-                        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><Clock color={ACC} aria-hidden="true" />{s.signup}</span>
+                        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><Clock color={ACC} aria-hidden="true" />{signupText(s, today)}</span>
                       </span>
                       <a href={b.p.registerUrl} target="_blank" rel="noopener" className="hv-t14" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Sign up for {s.name} →</a>
                     </div>
@@ -193,7 +193,7 @@ export default function TryoutsApp({ data }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '10px' }}>
             <div style={card}>
               <CardHead Icon={Backpack}>What to bring</CardHead>
-              {TRYOUT_BRING.map((b) => <span key={b} style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '14px', color: 'var(--color-neutral-300)' }}><Check color={ACC} aria-hidden="true" />{b}</span>)}
+              {data.bring.map((b) => <span key={b} style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '14px', color: 'var(--color-neutral-300)' }}><Check color={ACC} aria-hidden="true" />{b}</span>)}
             </div>
             <div style={card}>
               <CardHead Icon={CalendarX}>Missed your date?</CardHead>

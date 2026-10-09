@@ -12,23 +12,17 @@ npm run build    # production build into dist/
 
 ## Edit content
 
-Most changes are edits to the YAML files in `src/content/`. The build checks every file and tells you exactly what's wrong if something doesn't fit.
+Content (programs, tryout sessions, Rec and Futures sessions, events, venues, regional contacts, photos and site-wide links) is edited in the Sanity Studio: https://utah-athletic.sanity.studio. Click Publish and the live site rebuilds in about a minute.
 
-- `programs/academy.yaml` (and `club`, `rec`, `futures`): program copy, leagues, season, weekly schedule, staff, where it runs by region, and the Ollie registration link
-- `tryouts.yaml`: one line per tryout session (program, region, venue, date, time, age group)
-- `seasons.yaml`: Rec and Futures sign-up sessions
-- `events.yaml`: tournaments (status updates itself from the dates)
-- `regions.yaml`, `venues.yaml`: regional leaders and fields
+Layout and structure stay in code: `src/data/site.ts` (navigation, pyramid, compare rows), `src/data/rec-formats.ts` (rec divisions and rules) and `src/data/locations.ts` (map hubs). Push to `main` and Vercel deploys; push to any other branch for a preview link.
 
-Also in `src/data/`: `site.ts` (navigation, videos, shared copy), `rec-formats.ts` (rec divisions, field sizes, game rules) and `locations.ts` (map hubs).
-
-Push to `main` and Vercel deploys in about a minute. Push to any other branch to get a preview link.
+To work on the Studio itself: `npm run studio` (http://localhost:3333).
 
 ## Structure
 
 ```
 src/
-  content/     content collections (edit here)
+studio/       Sanity Studio and content schemas
   data/        site-wide copy, map data
   assets/      images (optimized at build)
   components/  React components (app/ is the home and program pages)

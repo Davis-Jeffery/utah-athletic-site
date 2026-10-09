@@ -164,7 +164,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter social={data.settings.social} />
     </>
   );
 }

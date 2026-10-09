@@ -6,7 +6,6 @@ import SiteFooter from '../components/SiteFooter.jsx';
 import EventsApp from '../components/EventsApp.jsx';
 import { loadSite } from '../lib/content';
 import { buildAssets } from '../lib/assets';
-import { EVENT_REEL } from '../data/site';
 import { FlagBanner, Handshake } from '@phosphor-icons/react';
 
 const data = await loadSite();
@@ -17,7 +16,7 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
 ---
 <Base title="Tournaments & Events | Utah Athletic" description="Every Utah Athletic tournament in one place: Copa Athletic, Summer Night Lights, Pioneer Cup and Chaos Cup." preload={A['collage-c18@lg']}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
-    <SiteHeader current="events" logo={data.logo} />
+    <SiteHeader current="events" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker="Tournaments & Events" photo={A['collage-c18@lg']} position="center 45%" bottom="clamp(36px,5vw,56px)">
       <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6.6vw,100px)/.92 var(--font-heading);letter-spacing:-.05em;text-wrap:balance">Where Utah <span style="color:#78b7b3">comes to play.</span></h1>
       <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Every Utah Athletic tournament in one place. Each event runs its own site for schedules, rules and team registration.</p>
@@ -49,9 +48,9 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
           <span aria-hidden="true" style="font-size:13px;color:var(--color-neutral-500)">Scroll →</span>
         </div>
         <div tabindex="0" aria-label="Tournament photos" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px">
-          {EVENT_REEL.map(([photo, event, caption]) => (
+          {data.settings.eventReel.map(({ photo, event, caption }) => (
             <figure style="flex:none;width:min(78vw,340px);aspect-ratio:4 / 5;position:relative;margin:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#15171d">
-              <img src={A[photo]} alt={`${event}: ${caption}`} loading="lazy" decoding="async" class="hv-zoom" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s" />
+              <img src={photo} alt={`${event}: ${caption}`} loading="lazy" decoding="async" class="hv-zoom" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s" />
               <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(17,19,24,.9));pointer-events:none"></div>
               <figcaption style="position:absolute;left:14px;bottom:12px;display:flex;flex-direction:column;gap:3px;pointer-events:none;margin:0">
                 <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b5e1dd">{event}</span>

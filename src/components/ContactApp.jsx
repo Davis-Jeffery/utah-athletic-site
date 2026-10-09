@@ -3,13 +3,13 @@
 // The form is front-end only for now (see "Open work" in CLAUDE.md).
 import React, { useEffect, useState } from 'react';
 import { EnvelopeSimple, Check } from '@phosphor-icons/react';
-import { MAIN_EMAIL, ORDER } from '../data/site';
+import { ORDER } from '../data/site';
 import { Field, ROW_RULE } from './ui.jsx';
 
 const LEADERS = [['md', 'Managing Director'], ['doc', 'Director of Coaching'], ['any', 'Either']];
 const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
 
-export default function ContactApp({ regions, programs }) {
+export default function ContactApp({ regions, programs, mainEmail }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
   const [leader, setLeader] = useState('md');
@@ -22,7 +22,7 @@ export default function ContactApp({ regions, programs }) {
   }, [regions]);
 
   const rm = regions.find((r) => r.id === region);
-  const to = !rm ? `Main office · ${MAIN_EMAIL}`
+  const to = !rm ? `Main office · ${mainEmail}`
     : leader === 'any' ? `${rm.label} regional leadership · ${rm.managingDirector.email}`
       : leader === 'doc' ? `Director of Coaching, ${rm.label} region · ${rm.directorOfCoaching.email}`
         : `Managing Director, ${rm.label} region · ${rm.managingDirector.email}`;
@@ -33,7 +33,7 @@ export default function ContactApp({ regions, programs }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '22px', borderRadius: '12px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}><EnvelopeSimple size={16} aria-hidden="true" />Main office</span>
-          <a href={'mailto:' + MAIN_EMAIL} className="hv-outline" style={{ font: '500 clamp(22px,2.4vw,30px)/1.1 var(--font-heading)', letterSpacing: '-.02em', color: 'var(--color-text)', overflowWrap: 'anywhere' }}>{MAIN_EMAIL}</a>
+          <a href={'mailto:' + mainEmail} className="hv-outline" style={{ font: '500 clamp(22px,2.4vw,30px)/1.1 var(--font-heading)', letterSpacing: '-.02em', color: 'var(--color-text)', overflowWrap: 'anywhere' }}>{mainEmail}</a>
           <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>General questions, registration, billing and media.</span>
         </div>
         <h2 style={{ margin: 0, padding: '14px 2px 2px', fontSize: '11px', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>Regional leadership</h2>

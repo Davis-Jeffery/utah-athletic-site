@@ -2,10 +2,10 @@
 // pages (inside the app); elsewhere the header renders as static HTML.
 import React, { useEffect, useRef } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
-import { NAV, TRYOUTS_LABEL } from '../data/site';
+import { NAV } from '../data/site';
 import { Rule } from './ui.jsx';
 
-export default function SiteHeader({ current, logo = '/logo-ua.avif', tryoutsHref = '/tryouts/', regionMenu = null, sticky = true }) {
+export default function SiteHeader({ current, tryoutsLabel = 'Tryouts', logo = '/logo-ua.avif', tryoutsHref = '/tryouts/', regionMenu = null, sticky = true }) {
   return (
     <>
       <header className="site-header" style={{ position: sticky ? 'sticky' : 'relative', top: 0, zIndex: 31, display: 'flex', alignItems: 'center', gap: '28px', padding: '14px clamp(16px,4vw,56px)', background: 'rgba(17,19,24,.85)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
@@ -18,7 +18,7 @@ export default function SiteHeader({ current, logo = '/logo-ua.avif', tryoutsHre
           ))}
         </nav>
         {regionMenu ? <RegionMenu {...regionMenu} /> : null}
-        <a href={tryoutsHref} data-tryouts-link className="site-tryouts hv-t12" style={{ flex: 'none', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 14px/1 var(--font-body)', padding: '13px 16px', borderRadius: '8px' }}>{TRYOUTS_LABEL} →</a>
+        <a href={tryoutsHref} data-tryouts-link className="site-tryouts hv-t12" style={{ flex: 'none', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 14px/1 var(--font-body)', padding: '13px 16px', borderRadius: '8px' }}>{tryoutsLabel} →</a>
       </header>
       <Rule />
     </>

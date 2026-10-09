@@ -1,4 +1,0 @@
-# Rec and Futures sessions. Everyone who signs up is placed on a team (no tryouts).
-# Placeholder dates until the club confirms the calendar.
-- { id: s1, order: 1, name: Session 1, span: Nov – Dec, start: '2026-11-07', signup: Sign-up open now }
-- { id: s2, order: 2, name: Session 2, span: Jan – Mar, start: '2027-01-09', signup: Sign-up opens Nov. 15 }

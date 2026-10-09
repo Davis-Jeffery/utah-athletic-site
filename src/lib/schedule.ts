@@ -13,6 +13,10 @@ export function fmtRange(start: string, end: string) {
   return (m(a) === m(b) ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()} – ${m(b)} ${b.getDate()}`) + ', ' + b.getFullYear();
 }
 
+// Season sign-up line, worked out from the date so it never goes stale.
+export const signupText = (s: { signupOpens?: string }, today: string) =>
+  !s.signupOpens || s.signupOpens <= today ? 'Sign-up open now' : `Sign-up opens ${fmtDay(s.signupOpens)}`;
+
 export const mapUrl = (name: string, address: string) =>
   'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ', ' + address);
 
