@@ -7,5 +7,5 @@ export default defineCliConfig({
   },
   // Hosted at https://utah-athletic.sanity.studio after `npm run deploy`.
   studioHost: 'utah-athletic',
-  deployment: { autoUpdates: true },
+  deployment: { appId: 'v0gp9377s7b33fnloay48x5m', autoUpdates: true },
 });

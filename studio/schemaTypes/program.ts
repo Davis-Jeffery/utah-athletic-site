@@ -10,7 +10,7 @@ const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physica
 
 const daySessions = (name: string, title: string) =>
   defineField({
-    name, title, type: 'array', group: 'season',
+    name, title, type: 'array',
     of: [defineArrayMember({
       type: 'object', name: 'session',
       fields: [
