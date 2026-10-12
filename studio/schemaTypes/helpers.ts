@@ -39,6 +39,23 @@ export const photo = (name: string, title: string, o: Opts = {}) =>
     validation: (r: ImageRule) => (o.required ? r.required() : r),
   });
 
+/**
+ * A page section: one top-level object field, so it can sit in a tab (only top-level fields can).
+ * Fields inside it must not set a group.
+ */
+export const section = (name: string, title: string, group: string, fields: ReturnType<typeof defineField>[], description?: string) =>
+  defineField({ name, title, type: 'object', group, description, options: { collapsible: true, collapsed: false }, fields });
+
+/** A heading whose second part shows in teal, e.g. "Every level." + "One standard." */
+export const headingPair = () => [
+  str('heading', 'Heading', { required: true }),
+  str('headingAccent', 'Heading, teal part', { description: 'Shown after the heading, in teal. Optional.' }),
+];
+
+/** Optional dashed tag marking copy that's still a stand-in. Clear it once the real copy is in. */
+export const placeholderNote = () =>
+  str('placeholderNote', 'Placeholder note', { description: 'Shows a small dashed tag under this section, e.g. "Placeholder · copy to be supplied". Clear it once the real copy is in.' });
+
 export const PROGRAM_OPTIONS = [
   { title: 'Academy', value: 'academy' },
   { title: 'Club', value: 'club' },

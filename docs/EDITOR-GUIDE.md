@@ -13,7 +13,7 @@ If the Publish button is grey, something on the page needs fixing first. Look fo
 
 ## Where do I change...
 
-The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tournaments and events**, **Venues**, then **Programs**, **Regions** and **Site settings**.
+The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tournaments and events**, **Venues**, then **Programs**, **Regions**, **Network page** and **Site settings**.
 
 | On the website | In the Studio |
 |---|---|
@@ -28,7 +28,13 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 | Directors and coaches | **Programs**, pick the program, **Staff** tab |
 | Which regions a program runs in | **Programs**, pick the program, **Regions** tab |
 | A program photo | **Programs**, pick the program, **Photos** tab |
+| Home page wording (big heading, section headings, "Where the pathway leads", "Want to play for us?") | **Site settings**, **Home page** tab. Sections are in the same order as on the page. |
 | Home page collage or video thumbnails | **Site settings**, **Home page** tab |
+| The "Professional" top of the pyramid and its row in the program list | **Site settings**, **Professional tier** tab |
+| Anything on the Network page | **Network page**. Tabs follow the page from top to bottom. |
+| Add or remove an affiliate academy card | **Network page**, **The network** tab, **Affiliate academies in development** |
+| The professional club's crest, photo or facts | **Network page**, **Professional club** tab |
+| A dashed "Placeholder" tag | Clear the **Placeholder note** field in that section once the real wording is in. |
 | Rec and Futures session dates | **Rec and Futures sessions**: **First day** and **Months** |
 | Rec and Futures sign-up date | **Rec and Futures sessions**: **Sign-up opens**. Leave it empty if sign-up is already open. |
 | Where Rec and Futures play in a region | **Regions**, pick the region, **Rec and Futures venue** |
@@ -56,6 +62,10 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 3. If the field isn't in the **Venue** list, add it under **Venues** first, then come back.
 4. Click **Publish**.
 
+## Arrows on buttons
+
+Don't type an arrow (→) in a button or link label. The site adds it for you.
+
 ## Swapping a photo
 
 1. Find the photo using the table above. For example: **Programs**, **Club**, **Photos** tab.
@@ -70,7 +80,7 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 - **A tryout that ends before it starts,** or an oldest age group younger than the youngest. This catches typos before families see them.
 - **Tournament dates in the wrong order:** an end before the start, or registration closing before it opens.
 - **Placeholder links.** A yellow warning means a link still points to a stand-in address like ollie.example or example.com. You can still publish, but it's a reminder to put the real link in.
-- **Deleting programs, regions or Site settings.** The site's pages are built around them, so you can edit them but not remove them.
+- **Deleting programs, regions, the Network page or Site settings.** The site's pages are built around them, so you can edit them but not remove them.
 
 ## Undoing a mistake
 
@@ -81,8 +91,8 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 
 - How pages look or are laid out
 - Adding or removing a program or a region
-- The pyramid on the home page
-- The map hubs and which cities they serve
+- The shape and colors of the pyramid on the home page (you can change its wording)
+- The map hubs and which cities they serve, and where the clubs sit on the Network page map
 - The big photos at the top of the Tryouts, Events and Network pages
 - Anything on the **Developer** tab of a program (it's locked)
 

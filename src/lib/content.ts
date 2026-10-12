@@ -128,7 +128,27 @@ async function build() {
 
   const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.logo, 80), dates: fmtRange(e.start, e.end) }));
 
+  // Home page and Professional tier copy (Site settings), and the Network page.
+  const note = (s?: string) => s?.trim() || undefined;
+  const { homeHero, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
+  const home = {
+    hero: homeHero, tryouts: homeTryouts, events: homeEvents, inside: homeInside, play: homePlay,
+    pathway: {
+      ...homePathway, placeholderNote: note(homePathway.placeholderNote),
+      cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
+    },
+  };
+  const n = c.networkPage[0];
+  const network = {
+    hero: { ...n.hero, placeholderNote: note(n.hero.placeholderNote) },
+    network: n.network,
+    means: { ...n.means, placeholderNote: note(n.means.placeholderNote) },
+    club: { ...n.club, placeholderNote: note(n.club.placeholderNote), crest: img(n.club.crest, W.logo), photo: img(n.club.photo, W.section) },
+    closing: n.closing,
+  };
+
   return {
+    home, pro: proTier, network,
     programs, regions, venues, tryouts, seasons, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),

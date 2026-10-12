@@ -5,5 +5,6 @@ import { tryoutSession } from './tryoutSession';
 import { season } from './season';
 import { event } from './event';
 import { siteSettings } from './siteSettings';
+import { networkPage } from './networkPage';
 
-export const schemaTypes = [tryoutSession, season, event, venue, program, region, siteSettings];
+export const schemaTypes = [tryoutSession, season, event, venue, program, region, siteSettings, networkPage];

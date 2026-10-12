@@ -7,8 +7,9 @@ import { PinIcon } from '@sanity/icons/Pin';
 import { DocumentsIcon } from '@sanity/icons/Documents';
 import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
 import { CogIcon } from '@sanity/icons/Cog';
+import { EarthAmericasIcon } from '@sanity/icons/EarthAmericas';
 
-export const FIXED_TYPES = new Set(['program', 'region', 'siteSettings']);
+export const FIXED_TYPES = new Set(['program', 'region', 'siteSettings', 'networkPage']);
 
 export const PROGRAMS = [
   ['academy', 'Academy'],
@@ -61,6 +62,10 @@ export const structure: StructureResolver = (S) =>
             .title('Regions')
             .items(REGIONS.map(([id, title]) => S.listItem().title(title).id(id).child(S.document().schemaType('region').documentId(`region.${id}`)))),
         ),
+      S.listItem()
+        .title('Network page')
+        .icon(EarthAmericasIcon)
+        .child(S.document().schemaType('networkPage').documentId('networkPage').title('Network page')),
       S.listItem()
         .title('Site settings')
         .icon(CogIcon)

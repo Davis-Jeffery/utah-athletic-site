@@ -73,6 +73,35 @@ const event = z.object({
   brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex, mono: z.string() }),
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });
+const heading = { heading: z.string(), headingAccent: opt };
+const settingsHome = {
+  homeHero: z.object({ kicker: z.string(), heading: z.string(), headingAccent: z.string(), intro: z.string() }),
+  homeTryouts: z.object({ kicker: z.string(), ...heading }),
+  homeEvents: z.object({ kicker: z.string(), ...heading }),
+  homePathway: z.object({
+    kicker: z.string(), heading: z.string(), body: z.string(), placeholderNote: opt, button: z.string(),
+    cards: z.array(z.object({ name: z.string(), details: z.string(), tag: z.string(), look: z.enum(['today', 'development']), useClubLogo: z.boolean().optional(), crest: image.optional(), crestLabel: opt })).default([]),
+  }),
+  homeInside: z.object({ heading: z.string(), kicker: z.string() }),
+  homePlay: z.object({ heading: z.string(), body: z.string(), primaryButton: z.string(), secondaryButton: z.string() }),
+  proTier: z.object({ rowName: z.string(), rowLine: z.string(), rowLink: z.string(), pyramidKicker: z.string(), pyramidName: z.string(), pyramidSub: z.string(), hint: z.string() }),
+};
+const networkPage = z.object({
+  _id: z.string(),
+  hero: z.object({ kicker: z.string(), ...heading, intro: z.string(), placeholderNote: opt }),
+  network: z.object({
+    kicker: z.string(), heading: z.string(),
+    clubs: z.array(z.object({ tag: z.string(), name: z.string(), details: z.string() })).default([]),
+    affiliates: z.array(z.object({ name: z.string(), details: z.string() })).default([]),
+  }),
+  means: z.object({ kicker: z.string(), heading: z.string(), cards: z.array(z.object({ title: z.string(), body: z.string() })).default([]), placeholderNote: opt }),
+  club: z.object({
+    kicker: z.string(), heading: z.string(), name: z.string(), location: z.string(), crest: image.optional(),
+    facts: z.array(z.object({ label: z.string(), value: z.string(), dot: z.boolean().optional() })).default([]),
+    description: z.string(), placeholderNote: opt, photo: image.optional(),
+  }),
+  closing: z.object({ kicker: z.string(), heading: z.string(), button: z.string() }),
+});
 const settings = z.object({
   mainEmail: z.string().email(), tryoutsLabel: z.string(),
   social: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
@@ -81,9 +110,10 @@ const settings = z.object({
   tryoutBring: z.array(z.string()).default([]),
   eventReel: z.array(z.object({ photo: image, event: z.string(), caption: z.string() })).default([]),
   development: z.object({ technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
+  ...settingsHome,
 });
 
-const SCHEMAS = { venue, region, program, tryoutSession: tryout, season, event, siteSettings: settings } as const;
+const SCHEMAS = { venue, region, program, tryoutSession: tryout, season, event, siteSettings: settings, networkPage } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 
 // ---------- fetch ----------
@@ -104,7 +134,7 @@ export async function fetchContent(): Promise<Docs> {
     if (r.success) (out[doc._type as keyof Docs] as unknown[]).push(r.data);
     else problems.push(...r.error.issues.map((i) => `  ${doc._id} (${doc._type}) > ${i.path.join('.') || '(document)'}: ${i.message}`));
   }
-  for (const t of ['program', 'region', 'siteSettings'] as const) {
+  for (const t of ['program', 'region', 'siteSettings', 'networkPage'] as const) {
     if (!out[t].length) problems.push(`  No published ${t} documents. Run the import or publish them in the Studio.`);
   }
   if (problems.length) throw new Error(`Sanity content doesn't match what the site needs:\n${problems.join('\n')}`);
