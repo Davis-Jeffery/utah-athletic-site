@@ -13,9 +13,31 @@ export function fmtRange(start: string, end: string) {
   return (m(a) === m(b) ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()} – ${m(b)} ${b.getDate()}`) + ', ' + b.getFullYear();
 }
 
-// Season sign-up line, worked out from the date so it never goes stale.
-export const signupText = (s: { signupOpens?: string }, today: string) =>
-  !s.signupOpens || s.signupOpens <= today ? 'Sign-up open now' : `Sign-up opens ${fmtDay(s.signupOpens)}`;
+// Recreation and Futures session status. 'auto' works it out from the dates on the visitor's own
+// day, so it never goes stale; any other value is the editor's override. Past sessions are 'past'.
+export type SessionStatus = 'upcoming' | 'open' | 'closed' | 'full' | 'inseason' | 'past';
+type Sess = { status: string; opens: string; closes: string; start: string; end: string };
+export function sessionStatus(s: Sess, today: string): SessionStatus {
+  if (today > s.end) return 'past';
+  if (s.status !== 'auto') return s.status as SessionStatus;
+  if (today < s.opens) return 'upcoming';
+  if (today <= s.closes) return 'open';
+  return today >= s.start ? 'inseason' : 'closed';
+}
+export function sessionLabel(s: Sess, today: string) {
+  const st = sessionStatus(s, today);
+  return {
+    status: st,
+    canJoin: st === 'open',
+    text: st === 'upcoming' ? `Registration opens ${fmtDay(s.opens)}`
+      : st === 'open' ? (s.status === 'auto' ? `Registration open until ${fmtDay(s.closes)}` : 'Registration open')
+        : st === 'full' ? 'Full' : st === 'inseason' ? 'In season' : 'Registration closed',
+  };
+}
+// A program's sessions in a region that haven't ended, in date order.
+export function sessionsFor(data: SiteData, program: string, region: string, today: string) {
+  return data.sessions.filter((s) => s.program === program && s.region === region && s.end >= today);
+}
 
 export const mapUrl = (name: string, address: string) =>
   'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ', ' + address);
@@ -50,8 +72,15 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
   const p = data.programs.find((x) => x.id === program)!;
   const r = data.regions.find((x) => x.id === region)!;
   if (p.kind === 'season') {
-    const s = data.seasons.find((x) => x.start >= today) || data.seasons[data.seasons.length - 1];
-    return { kind: 'season', title: `${s.name} · ${s.span}`, when: 'Starts ' + fmtDate(s.start), where: r.seasonVenue.name, href: p.registerUrl, cta: 'Sign up', external: true };
+    // The first session families can still join, else the next one coming.
+    const list = sessionsFor(data, program, region, today);
+    const s = list.find((x) => sessionLabel(x, today).canJoin) || list.find((x) => sessionStatus(x, today) === 'upcoming') || list[0];
+    if (!s) return {
+      kind: 'none', title: 'No posted sessions', when: 'Dates to be announced', where: `${r.label} region`,
+      href: `/tryouts/?region=${region}&level=${program}`, cta: 'Get notified', external: false,
+    };
+    const l = sessionLabel(s, today);
+    return { kind: 'season', title: s.name, when: `${s.dates} · ${l.text}`, where: s.venueName, href: l.canJoin ? s.url : `/tryouts/?region=${region}&level=${program}`, cta: l.canJoin ? 'Sign up' : 'See details', external: l.canJoin };
   }
   const t = tryoutsFor(data, { program, region }, today)[0];
   if (!t) return {

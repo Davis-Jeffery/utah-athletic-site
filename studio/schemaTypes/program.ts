@@ -22,9 +22,32 @@ const daySessions = (name: string, title: string) =>
     })],
   });
 
+// A list of staff picked from Staff (program leadership, a region's leaders, a region's coaches).
+// People are entered once under Staff; here editors pick them, in display order, and can give
+// them a different title for this spot.
+const people = (name: string, title: string, o: { description?: string; group?: string; hidden?: any; titleHint: string }) =>
+  defineField({
+    name, title, type: 'array', group: o.group, description: o.description, hidden: o.hidden,
+    of: [defineArrayMember({
+      type: 'object', name: 'assignment',
+      fields: [
+        defineField({ name: 'person', title: 'Person', type: 'reference', to: [{ type: 'staff' }], validation: (r) => r.required() }),
+        str('title', 'Title here (optional)', { description: `Leave empty to use their title from Staff. ${o.titleHint}` }),
+      ],
+      preview: {
+        select: { name: 'person.name', main: 'person.title', title: 'title', media: 'person.headshot' },
+        prepare: ({ name, main, title, media }) => ({ title: name || 'Pick a person', subtitle: title || main, media }),
+      },
+    })],
+    validation: (r) => r.unique(),
+  });
+
+// Programs priced and scheduled by their sessions (Recreation sessions, Futures sessions).
+const SESSION_PROGRAMS = ['rec', 'futures'];
+
 const regionStatus = (name: string, title: string) =>
   defineField({
-    name, title, type: 'object', group: 'regions',
+    name, title, type: 'object', group: 'regions', options: { collapsible: true, collapsed: false },
     fields: [
       defineField({
         name: 'status', title: 'Status', type: 'string', validation: (r) => r.required(),
@@ -32,7 +55,18 @@ const regionStatus = (name: string, title: string) =>
       }),
       str('hub', 'Hub', { description: 'Where it runs, e.g. "Draper / Sandy".', hidden: ({ parent }: any) => parent?.status === 'none' }),
       str('season', 'Launching', { description: 'e.g. "Fall 2027".', hidden: ({ parent }: any) => parent?.status !== 'soon' }),
-      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent }) => parent?.status === 'none' }),
+      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || SESSION_PROGRAMS.includes(document?.key) }),
+      people('leaders', 'Leaders', {
+        description: 'This program\'s leaders in this region, e.g. a managing director and a director of coaching. Pick people from Staff; add as many as you need and drag to reorder.',
+        hidden: ({ parent }: any) => parent?.status === 'none',
+        titleHint: 'e.g. "Managing Director".',
+      }),
+      people('coaches', 'Coaches', {
+        description: 'This program\'s coaches in this region. Pick people from Staff; add as many as you need and drag to reorder.',
+        // Rec is coached by volunteers, so it has no coaches list (see NO_COACH_LIST in src/data/site.ts).
+        hidden: ({ parent, document }: any) => parent?.status !== 'active' || document?.key === 'rec',
+        titleHint: 'e.g. their team here, "U9 to U11 Boys".',
+      }),
     ],
   });
 
@@ -111,7 +145,11 @@ export const program = defineType({
     }),
 
     // Cost
-    defineField({ name: 'cost', title: 'Cost ($)', type: 'number', group: 'cost', validation: (r) => r.required().min(0) }),
+    defineField({
+      name: 'cost', title: 'Cost ($)', type: 'number', group: 'cost', validation: (r) => r.required().min(0),
+      // Recreation and Futures prices come from their sessions.
+      hidden: ({ document }: any) => SESSION_PROGRAMS.includes(document?.key),
+    }),
     defineField({ name: 'unit', title: 'Billed', type: 'string', group: 'cost', options: { list: ['per year', 'per season'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
     txt('costNote', 'Cost note', { required: true, group: 'cost', rows: 2 }),
     defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', of: [{ type: 'string' }] }),
@@ -156,22 +194,17 @@ export const program = defineType({
     }),
 
     // Staff
-    defineField({
-      name: 'directors', title: 'Directors', type: 'array', group: 'staff',
-      of: [defineArrayMember({
-        type: 'object', name: 'director',
-        fields: [str('name', 'Name', { required: true }), str('role', 'Role', { required: true }), txt('bio', 'Short bio', { required: true, rows: 2 }), photo('headshot', 'Headshot')],
-        preview: { select: { title: 'name', subtitle: 'role', media: 'headshot' } },
-      })],
+    people('leadership', 'Program leadership', {
+      group: 'staff',
+      description: 'The "Program leadership" section on the program page: people who lead the whole program. Pick people from Staff; add as many as you need and drag to reorder. Regional leaders and coaches are on the Regions tab.',
+      titleHint: 'e.g. "Academy Director".',
     }),
-    defineField({
-      name: 'coaches', title: 'Coaches', type: 'array', group: 'staff',
-      of: [defineArrayMember({
-        type: 'object', name: 'coach',
-        fields: [str('name', 'Name', { required: true }), str('role', 'Team', { required: true, description: 'e.g. "U9 to U11 Boys".' }), photo('headshot', 'Headshot')],
-        preview: { select: { title: 'name', subtitle: 'role', media: 'headshot' } },
-      })],
-    }),
+    // Retired: replaced by Program leadership above (people from Staff). Hidden until the old
+    // values are cleared from the dataset, then this field can be deleted.
+    defineField({ name: 'directors', title: 'Directors (old)', type: 'array', group: 'staff', hidden: true, of: [{ type: 'object', name: 'director', fields: [str('name', 'Name'), str('role', 'Role'), txt('bio', 'Bio'), photo('headshot', 'Headshot')] }] }),
+    // Retired: coaches now live under each region (Regions tab). Hidden until the old values
+    // are cleared from the dataset, then this field can be deleted.
+    defineField({ name: 'coaches', title: 'Coaches (old)', type: 'array', group: 'staff', hidden: true, of: [{ type: 'object', name: 'coach', fields: [str('name', 'Name'), str('role', 'Team'), photo('headshot', 'Headshot')] }] }),
 
     // Regions
     regionStatus('north', 'North'),

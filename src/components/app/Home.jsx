@@ -15,6 +15,11 @@ const STATUS_STYLE = {
   past: { dot: '#5f616b', fg: '#8b8d98', ring: 'inset 0 0 0 1px rgba(233,233,237,.25)' },
 };
 
+// A heading with an optional teal second part, as edited in Site settings.
+const Head = ({ h }) => <>{h.heading}{h.headingAccent ? <>{' '}<span style={{ color: ACC }}>{h.headingAccent}</span></> : null}</>;
+// "RC Vichy crest" -> "RC Vichy" / "crest", so the text wraps neatly inside the circle.
+const twoLines = (s) => { const i = s.lastIndexOf(' '); return i > 0 ? <>{s.slice(0, i)}<br />{s.slice(i + 1)}</> : s; };
+
 export default function Home({ data, hover, focus, intro, introDone, active, tilt: tiltOn, myRegion, today, onHover, onOpen, onNetwork }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const heroMove = (e) => {
@@ -26,6 +31,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
   const region = data.regions.find((r) => r.id === (myRegion || 'north'));
   const tryoutsHref = `/tryouts/?region=${region.id}`;
+  const { home, pro } = data;
 
   return (
     <>
@@ -39,29 +45,29 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
         <section id="programs" onMouseMove={heroMove} onMouseLeave={heroLeave} style={{ position: 'relative', maxWidth: '1440px', margin: '0 auto', padding: 'clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '56px', alignItems: 'center' }}>
           <div aria-hidden="true" style={{ position: 'absolute', right: '8%', top: '18%', width: '520px', height: '520px', maxWidth: '100%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(120,183,179,.16),transparent 65%)', pointerEvents: 'none', transform: `translate(${(tilt.x * 40).toFixed(1)}px,${(tilt.y * 40).toFixed(1)}px)`, transition: 'transform .5s ease' }} />
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '26px' }}>
-            <Kicker line>The Utah Athletic pathway</Kicker>
-            <h1 style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>Every level.<br /><span style={{ color: ACC }}>One standard.</span></h1>
-            <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>From a four-year-old's first touch to national-platform football. Choose a level to see who it's for, where it competes, what it costs, and how to join.</p>
+            <Kicker line>{home.hero.kicker}</Kicker>
+            <h1 style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></h1>
+            <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.hero.intro}</p>
             <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
-              <LevelRow num="Pro" name="Professional" line="Athletic Global · RC Vichy Athletic" right="The network →" on={focus === 'pro'}
+              <LevelRow num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}
                 onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
               {ORDER.map((id) => {
                 const p = P[id];
-                const line = id === 'academy' ? p.line : `${p.line} · ${money(p.cost)}${p.unit === 'per year' ? '/yr' : '/season'}`;
+                const line = id === 'academy' ? p.line : `${p.line} · ${p.costFrom ? 'from ' : ''}${money(p.cost)}${p.unit === 'per year' ? '/yr' : '/season'}`;
                 return <LevelRow key={id} num={p.num} name={p.name} line={line} right={`${p.ages} →`} on={focus === id}
                   onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
               })}
             </div>
           </div>
-          <Pyramid P={P} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
+          <Pyramid P={P} proTier={pro} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
         </section>
       </div>
 
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '56px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Kicker line>Tryouts near you · {region.label} region</Kicker>
-            <h2 style={{ margin: 0, font: '500 clamp(32px,3.8vw,52px)/1 var(--font-heading)', letterSpacing: '-.04em' }}>Your next step, <span style={{ color: ACC }}>by level.</span></h2>
+            <Kicker line>{home.tryouts.kicker} · {region.label} region</Kicker>
+            <h2 style={{ margin: 0, font: '500 clamp(32px,3.8vw,52px)/1 var(--font-heading)', letterSpacing: '-.04em' }}><Head h={home.tryouts} /></h2>
           </div>
           <OutlineLink href={tryoutsHref}>All tryouts →</OutlineLink>
         </div>
@@ -89,8 +95,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '40px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Kicker line>Tournaments</Kicker>
-            <h2 style={{ margin: 0, font: '500 clamp(32px,3.8vw,52px)/1 var(--font-heading)', letterSpacing: '-.04em' }}>Four events. <span style={{ color: ACC }}>One host club.</span></h2>
+            <Kicker line>{home.events.kicker}</Kicker>
+            <h2 style={{ margin: 0, font: '500 clamp(32px,3.8vw,52px)/1 var(--font-heading)', letterSpacing: '-.04em' }}><Head h={home.events} /></h2>
           </div>
           <OutlineLink href="/events/">All tournaments &amp; events →</OutlineLink>
         </div>
@@ -121,16 +127,20 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
         <Rule />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: 'clamp(32px,5vw,72px)', alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <Kicker line>Where the pathway leads</Kicker>
-            <h2 style={{ margin: 0, font: '500 clamp(36px,4.4vw,60px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>Above Academy is the professional game.</h2>
-            <p style={{ margin: 0, maxWidth: '520px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>Utah Athletic is part of Athletic Global, a network of affiliate academies and professional clubs. A player can start in Futures or Rec, move through Club and Academy, and have a route to a professional environment inside the same network.</p>
-            <Placeholder>Placeholder · copy to be supplied</Placeholder>
-            <a href="/network/" onClick={(e) => { if (!e.metaKey && !e.ctrlKey) { e.preventDefault(); onNetwork(); } }} className="hv-t10" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px', transition: 'background .2s' }}>Explore the Athletic Network →</a>
+            <Kicker line>{home.pathway.kicker}</Kicker>
+            <h2 style={{ margin: 0, font: '500 clamp(36px,4.4vw,60px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>{home.pathway.heading}</h2>
+            <p style={{ margin: 0, maxWidth: '520px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.pathway.body}</p>
+            {home.pathway.placeholderNote ? <Placeholder>{home.pathway.placeholderNote}</Placeholder> : null}
+            <a href="/network/" onClick={(e) => { if (!e.metaKey && !e.ctrlKey) { e.preventDefault(); onNetwork(); } }} className="hv-t10" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px', transition: 'background .2s' }}>{home.pathway.button} →</a>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <NetworkRow crest={<span style={{ width: '56px', height: '56px', borderRadius: '50%', border: '1px dashed var(--color-neutral-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', textAlign: 'center', color: 'var(--color-neutral-500)' }}>RC Vichy<br />crest</span>} name="RC Vichy Athletic" sub="Vichy, France · Professional club" tag="Today" />
-            <NetworkRow crest={<img src={data.logo} alt="" width="56" height="56" style={{ width: '56px', height: '56px', objectFit: 'contain' }} />} name="Utah Athletic" sub="Utah, USA · Futures to Academy" tag="Today" />
-            <NetworkRow dashed crest={<span style={{ width: '56px', height: '56px', borderRadius: '50%', border: '1px dashed var(--color-neutral-600)' }} />} name="Affiliate academies" sub="Locations to be announced" tag="In development" />
+            {home.pathway.cards.map((c, i) => (
+              <NetworkRow key={i} dashed={c.look === 'development'} name={c.name} sub={c.details} tag={c.tag}
+                crest={c.useClubLogo ? <img src={data.logo} alt="" width="56" height="56" style={{ width: '56px', height: '56px', objectFit: 'contain' }} />
+                  : c.crest ? <img src={c.crest.src} alt={c.crest.alt || ''} width="56" height="56" loading="lazy" style={{ width: '56px', height: '56px', objectFit: 'contain', objectPosition: c.crest.pos }} />
+                    : c.crestLabel ? <span style={{ width: '56px', height: '56px', borderRadius: '50%', border: '1px dashed var(--color-neutral-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', textAlign: 'center', color: 'var(--color-neutral-500)' }}>{twoLines(c.crestLabel)}</span>
+                      : <span style={{ width: '56px', height: '56px', borderRadius: '50%', border: '1px dashed var(--color-neutral-600)' }} />} />
+            ))}
           </div>
         </div>
       </section>
@@ -138,8 +148,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
       <section id="inside" style={{ maxWidth: '1440px', margin: '0 auto', padding: '48px clamp(20px,4vw,56px) 88px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
         <Rule />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '20px', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, font: '500 clamp(34px,4vw,56px)/1 var(--font-heading)', letterSpacing: '-.035em' }}>Inside Utah Athletic</h2>
-          <Kicker>The docuseries</Kicker>
+          <h2 style={{ margin: 0, font: '500 clamp(34px,4vw,56px)/1 var(--font-heading)', letterSpacing: '-.035em' }}>{home.inside.heading}</h2>
+          <Kicker>{home.inside.kicker}</Kicker>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,300px),1fr))', gap: '20px' }}>
           {data.videos.map((v) => (
@@ -156,11 +166,11 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
 
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px) 96px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: 'clamp(32px,5vw,64px)', borderRadius: '14px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.18),transparent 60%),var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
-          <h2 style={{ margin: 0, font: '500 clamp(40px,6vw,88px)/.95 var(--font-heading)', letterSpacing: '-.045em' }}>Want to play for us?</h2>
-          <p style={{ margin: 0, maxWidth: '520px', fontSize: '17px', color: 'var(--color-neutral-300)' }}>Request an invitation for a trial with Academy staff, or find the right level for your player.</p>
+          <h2 style={{ margin: 0, font: '500 clamp(40px,6vw,88px)/.95 var(--font-heading)', letterSpacing: '-.045em' }}>{home.play.heading}</h2>
+          <p style={{ margin: 0, maxWidth: '520px', fontSize: '17px', color: 'var(--color-neutral-300)' }}>{home.play.body}</p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button type="button" onClick={() => onOpen('academy')} className="hv-t12" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px' }}>Apply to Academy →</button>
-            <a href="#programs" className="hv-ghost" style={{ border: '1px solid var(--color-divider)', color: 'var(--color-text)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px' }}>Explore all programs</a>
+            <button type="button" onClick={() => onOpen('academy')} className="hv-t12" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px' }}>{home.play.primaryButton} →</button>
+            <a href="#programs" className="hv-ghost" style={{ border: '1px solid var(--color-divider)', color: 'var(--color-text)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px' }}>{home.play.secondaryButton}</a>
           </div>
         </div>
       </section>
@@ -196,14 +206,14 @@ function NetworkRow({ crest, name, sub, tag, dashed }) {
 }
 
 // The pathway pyramid. Each slice is keyboard-focusable and opens its program.
-function Pyramid({ P, hover, focus, intro, introDone, tilt, onHover, onOpen, onNetwork }) {
+function Pyramid({ P, proTier, hover, focus, intro, introDone, tilt, onHover, onOpen, onNetwork }) {
   const slice = (id, open) => {
     const on = hover === id, dim = hover && !on;
     const row = { pro: -1, academy: 0, club: 1, rec: 2, futures: 2 }[id];
     const delay = introDone ? 0 : id === 'pro' ? 0.42 : (2 - row) * 0.14 + (id === 'futures' ? 0.06 : 0);
     const rest = id === 'pro' ? 'url(#uaPro)' : 'url(#uaRest)';
     const stroke = on ? ACC : id === 'pro' ? 'rgba(120,183,179,.85)' : focus === id ? 'rgba(120,183,179,.75)' : 'rgba(120,183,179,.5)';
-    const name = id === 'pro' ? 'Professional: the Athletic Global network' : P[id].name;
+    const name = id === 'pro' ? `${proTier.pyramidName}: the ${proTier.pyramidKicker} network` : P[id].name;
     return (
       <polygon key={id} points={ptsAttr(id)} role="link" tabIndex={0} aria-label={name}
         onMouseEnter={() => onHover(id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(id)} onBlur={() => onHover(null)}
@@ -215,7 +225,7 @@ function Pyramid({ P, hover, focus, intro, introDone, tilt, onHover, onOpen, onN
   const lab = (id) => ({ op: !intro ? 0 : hover && hover !== id ? 0.45 : 1, lift: hover === id ? 'translateY(-8px)' : '', kc: hover === id ? ACC : 'var(--color-accent-300)' });
   const pro = lab('pro');
   const glow = hover || null;
-  const hint = hover === 'pro' ? 'Click to see where the pathway leads' : hover ? 'Click to open ' + P[hover].name : 'Hover a level · click to explore';
+  const hint = hover === 'pro' ? proTier.hint : hover ? 'Click to open ' + P[hover].name : 'Hover a level · click to explore';
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
       <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '120%', height: '120%', transform: 'translate(-50%,-50%)', background: 'radial-gradient(ellipse at center,rgba(17,19,24,.85) 0%,rgba(17,19,24,.55) 40%,transparent 70%)', pointerEvents: 'none' }} />
@@ -235,9 +245,9 @@ function Pyramid({ P, hover, focus, intro, introDone, tilt, onHover, onOpen, onN
         <div aria-hidden="true" style={{ position: 'absolute', left: '61%', top: '11%', transform: `translateY(-50%) ${pro.lift}`, display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'none', whiteSpace: 'nowrap', opacity: pro.op, transition: 'transform .35s cubic-bezier(.2,.8,.2,1),opacity .5s' }}>
           <span style={{ width: '28px', height: '1px', background: 'linear-gradient(to left,#78b7b3,transparent)' }} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: pro.kc }}>Athletic Global</span>
-            <span style={{ font: '500 19px/1 var(--font-heading)', letterSpacing: '-.03em', color: 'var(--color-text)' }}>Professional</span>
-            <span style={{ fontSize: '11px', color: 'var(--color-neutral-300)' }}>The destination →</span>
+            <span style={{ fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: pro.kc }}>{proTier.pyramidKicker}</span>
+            <span style={{ font: '500 19px/1 var(--font-heading)', letterSpacing: '-.03em', color: 'var(--color-text)' }}>{proTier.pyramidName}</span>
+            <span style={{ fontSize: '11px', color: 'var(--color-neutral-300)' }}>{proTier.pyramidSub} →</span>
           </span>
         </div>
         {ORDER.map((id) => {

@@ -1,18 +1,19 @@
 // /contact: main office, regional leadership cards and the message form.
-// ?region=&program= prefill the form. Picking a regional leader updates the live "To:" line.
+// ?region=&program= prefill the form. Leaders come from Staff via each program's regions: with a
+// program picked the form offers that program's leaders there, otherwise the region's. Picking one
+// updates the live "To:" line.
 // The form is front-end only for now (see "Open work" in CLAUDE.md).
 import React, { useEffect, useState } from 'react';
 import { EnvelopeSimple, Check } from '@phosphor-icons/react';
 import { ORDER } from '../data/site';
 import { Field, ROW_RULE } from './ui.jsx';
 
-const LEADERS = [['md', 'Managing Director'], ['doc', 'Director of Coaching'], ['any', 'Either']];
 const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
 
 export default function ContactApp({ regions, programs, mainEmail }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
-  const [leader, setLeader] = useState('md');
+  const [leader, setLeader] = useState(null); // a person's id, or null for whoever's first
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
@@ -22,10 +23,14 @@ export default function ContactApp({ regions, programs, mainEmail }) {
   }, [regions]);
 
   const rm = regions.find((r) => r.id === region);
-  const to = !rm ? `Main office · ${mainEmail}`
-    : leader === 'any' ? `${rm.label} regional leadership · ${rm.managingDirector.email}`
-      : leader === 'doc' ? `Director of Coaching, ${rm.label} region · ${rm.directorOfCoaching.email}`
-        : `Managing Director, ${rm.label} region · ${rm.managingDirector.email}`;
+  const pm = programs.find((p) => p.id === program);
+  const own = rm && pm ? pm.leads[rm.id] : [];
+  const options = (own.length ? own : rm?.leaders ?? []).filter((l) => l.email);
+  const pick = options.find((l) => l.id === leader);
+  const team = own.length ? `${rm.label} ${pm.name}` : `${rm?.label} region`;
+  const to = !options.length ? `Main office · ${mainEmail}`
+    : pick ? `${pick.name}, ${pick.role} · ${pick.email}`
+      : `${team} leadership · ${options[0].email}`;
   const programOpts = [...programs.map((p) => [p.id, p.name]), ['', 'Not sure yet']];
 
   return (
@@ -43,12 +48,12 @@ export default function ContactApp({ regions, programs, mainEmail }) {
               <span style={{ font: '500 22px/1 var(--font-heading)', letterSpacing: '-.03em' }}>{r.label}</span>
               <span style={{ fontSize: '12px', color: 'var(--color-neutral-500)' }}>{r.area}</span>
             </div>
-            {[['Managing Director', r.managingDirector], ['Director of Coaching', r.directorOfCoaching]].map(([role, person]) => (
-              <div key={role} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '4px 12px', alignItems: 'center', paddingTop: '10px', background: ROW_RULE }}>
-                <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{role}</span><span style={{ fontSize: '15px' }}>{person.name}</span></span>
-                <a href={'mailto:' + person.email} style={{ fontSize: '13px', overflowWrap: 'anywhere' }}>{person.email}</a>
+            {r.leaders.length ? r.leaders.map((person) => (
+              <div key={person.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '4px 12px', alignItems: 'center', paddingTop: '10px', background: ROW_RULE }}>
+                <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{person.role}</span><span style={{ fontSize: '15px' }}>{person.name}</span></span>
+                {person.email ? <a href={'mailto:' + person.email} style={{ fontSize: '13px', overflowWrap: 'anywhere' }}>{person.email}</a> : null}
               </div>
-            ))}
+            )) : <span style={{ paddingTop: '10px', fontSize: '14px', color: 'var(--color-neutral-400)', background: ROW_RULE }}>Leaders to be announced. Write to the main office for now.</span>}
           </div>
         ))}
       </div>
@@ -85,9 +90,9 @@ export default function ContactApp({ regions, programs, mainEmail }) {
                 </button>
               ))}
             </Choice>
-            {rm ? (
+            {options.length > 1 ? (
               <Choice label="Which leader?">
-                {LEADERS.map(([k, l]) => <button key={k} type="button" aria-pressed={leader === k} onClick={() => setLeader(k)} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 13px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', ...pill(leader === k) }}>{l}</button>)}
+                {[{ id: null, name: 'Anyone' }, ...options].map((l) => <button key={l.id ?? 'any'} type="button" aria-pressed={(pick?.id ?? null) === l.id} onClick={() => setLeader(l.id)} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 13px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', ...pill((pick?.id ?? null) === l.id) }}>{l.name}{l.role ? <span style={{ color: 'var(--color-neutral-500)' }}> · {l.role}</span> : null}</button>)}
               </Choice>
             ) : null}
             <Field label="Message"><textarea className="ua-input" name="message" required rows={5} placeholder="How can we help?" /></Field>

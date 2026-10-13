@@ -6,6 +6,8 @@ export type RegionKey = 'north' | 'south' | 'west';
 
 export const ORDER: ProgramKey[] = ['academy', 'club', 'rec', 'futures'];
 export const REGION_ORDER: RegionKey[] = ['north', 'south', 'west'];
+// Programs coached by volunteers: no coaching staff section on their region tabs (leaders still show).
+export const NO_COACH_LIST: ProgramKey[] = ['rec'];
 
 export const NAV = [
   { key: 'programs', label: 'Programs', href: '/#programs' },
@@ -54,9 +56,9 @@ export const COMPARE_ROWS = [
 // "Pathway position" strip on program pages.
 export const PATHWAY = [['futures', 'Futures'], ['rec', 'Recreation'], ['club', 'Club'], ['academy', 'Academy'], ['pro', 'Professional']];
 
-// /network: the Athletic Global network. Copy is placeholder until Athletic Global supplies it.
+// /network map: where each club sits and how its label reads. The rest of the Network page is
+// edited in the Studio (Network page).
 export const NETWORK_NODES = [
   { name: 'Utah Athletic', sub: 'Utah, USA · Academy pathway', ll: [-111.89, 40.76] as [number, number], side: -1 },
   { name: 'RC Vichy Athletic', sub: 'Vichy, France · Professional club', ll: [3.426, 46.128] as [number, number], side: 1 },
 ];
-export const NETWORK_AFFILIATE_SLOTS = 3;

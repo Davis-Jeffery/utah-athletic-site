@@ -4,9 +4,10 @@
 import { buildAssets } from './assets';
 import { fetchContent, imageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
+import { NO_COACH_LIST } from '../data/site';
 
 // Image widths, matching the sizes the design uses.
-const W = { hero: 2000, section: 760, logo: 320, video: 960 } as const;
+const W = { hero: 2000, section: 760, logo: 320, headshot: 400, video: 960 } as const;
 
 const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
@@ -80,11 +81,54 @@ async function build() {
     return v;
   };
 
-  const regions = [...c.region].sort((a, b) => a.order - b.order).map((r) => ({
-    id: r.key, label: r.label, area: r.area,
-    managingDirector: r.managingDirector, directorOfCoaching: r.directorOfCoaching,
-    seasonVenue: venue(r.seasonVenue._ref),
-  }));
+  // Staff, by id. Program lists point at these; the person's details live only here.
+  const people = new Map(c.staff.map(({ _id, title, headshot, ...x }) => [idOf(_id), { id: idOf(_id), ...x, title, headshot: img(headshot, W.headshot) }]));
+  type Person = { id: string; name: string; role: string; bio?: string; email?: string; headshot?: Pic };
+  /** A program list (leadership, a region's leaders or coaches) as people. `role` is the title for
+   *  this spot, or the person's own title. A pick of someone whose Staff entry isn't published is skipped. */
+  const staff = (list: { person: { _ref: string }; title?: string }[]): Person[] =>
+    list.flatMap(({ person, title }) => {
+      const s = people.get(idOf(person._ref));
+      return s ? [{ id: s.id, name: s.name, role: title || s.title, bio: s.bio, email: s.email, headshot: s.headshot }] : [];
+    });
+  const regionFor = (p: (typeof c.program)[number], k: 'north' | 'south' | 'west') => {
+    const { leaders, coaches, feeDelta, ...r } = p[k];
+    // `price`: what a family pays in this region (null when no session is posted yet).
+    const price = p.kind === 'season' ? sessionPrice(p.key, k) : { cost: p.cost + (feeDelta || 0), from: false };
+    return { ...r, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
+  };
+
+  // Recreation and Futures sessions, each in one region at its own venue and price. Status is the
+  // editor's override ('auto' = work it out from the dates, done on the visitor's date by sessionStatus).
+  const builtOn = new Date().toISOString().slice(0, 10);
+  const programDoc = (k: string) => c.program.find((p) => p.key === k)!;
+  const sessions = [
+    ...c.recSession.map((s) => ({ ...s, program: 'rec' as const, classes: [] as { date: string; startTime: string; endTime: string; note?: string }[] })),
+    ...c.futuresSession.map((s) => ({ ...s, program: 'futures' as const })),
+  ]
+    .map((s) => {
+      const v = venue(s.venue._ref), p = programDoc(s.program);
+      return {
+        id: idOf(s._id), program: s.program, region: s.region, name: s.name,
+        ages: s.minAge != null && s.maxAge != null ? fmtAges(s.minAge, s.maxAge) : p.ages,
+        cost: s.cost, venueName: v.name, mapUrl: v.mapUrl,
+        opens: s.registrationOpens, closes: s.registrationCloses, start: s.start, end: s.end, dates: fmtRange(s.start, s.end),
+        status: s.status, url: s.registerUrl ?? p.registerUrl,
+        classes: [...s.classes].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
+          .map((x) => ({ date: x.date, time: fmtTimeRange(x.startTime, x.endTime), note: x.note })),
+      };
+    })
+    .sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name));
+
+  // Prices for programs priced by session: the lowest price among sessions still running when the
+  // site was built ("from" when they differ), for the program and for each region.
+  const priceOf = (list: { cost: number }[]) => {
+    if (!list.length) return null;
+    const costs = list.map((x) => x.cost);
+    return { cost: Math.min(...costs), from: new Set(costs).size > 1 };
+  };
+  const sessionPrice = (program: string, region?: string) =>
+    priceOf(sessions.filter((s) => s.program === program && (!region || s.region === region) && s.end >= builtOn));
 
   const programs = [...c.program].sort((a, b) => a.order - b.order).map((p) => ({
     id: p.key,
@@ -96,7 +140,9 @@ async function build() {
     groups: p.groups,
     tagline: p.tagline, forHead: p.forHead, intro: p.intro,
     leagues: p.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
-    cost: p.cost, unit: p.unit, costNote: p.costNote, includes: p.includes, commit: p.commit, commitNote: p.commitNote,
+    // Session programs: the lowest current session price, falling back to the program's own cost.
+    ...(() => { const sp = p.kind === 'season' ? sessionPrice(p.key) : null; return { cost: sp?.cost ?? p.cost, costFrom: sp?.from ?? false }; })(),
+    unit: p.unit, costNote: p.costNote, includes: p.includes, commit: p.commit, commitNote: p.commitNote,
     // The timeline axis runs Aug (0) to Jul (11); `to` is the end of the last month.
     phases: p.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
@@ -107,11 +153,18 @@ async function build() {
       yearRound: p.compare.yearRound ?? null, evaluations: p.compare.evaluations ?? null, strength: p.compare.strength ?? null,
       film: p.compare.film ?? null, mental: p.compare.mental ?? null, next: p.compare.next,
     },
-    directors: p.directors.map(({ headshot, ...d }) => ({ ...d, headshot: img(headshot, W.logo) })),
-    coaches: p.coaches.map(({ headshot, ...d }) => ({ ...d, headshot: img(headshot, W.logo) })),
+    leadership: staff(p.leadership),
     joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel, years: p.years,
-    regions: { north: p.north, south: p.south, west: p.west },
+    regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
   }));
+
+  // Each region's leaders across every program that runs there (each person once, program order,
+  // with their Staff title), for /contact and /tryouts.
+  const regions = [...c.region].sort((a, b) => a.order - b.order).map((r) => {
+    const leaders = new Map<string, Person>();
+    for (const p of programs) if (p.regions[r.key].status !== 'none') for (const l of p.regions[r.key].leaders) if (!leaders.has(l.id)) leaders.set(l.id, { ...l, role: people.get(l.id)!.title });
+    return { id: r.key, label: r.label, area: r.area, leaders: [...leaders.values()] };
+  });
 
   const tryouts = c.tryoutSession
     .map((t) => {
@@ -124,12 +177,30 @@ async function build() {
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.startTime.localeCompare(b.startTime));
 
-  const seasons = [...c.season].sort((a, b) => a.start.localeCompare(b.start)).map((s) => ({ id: idOf(s._id), name: s.name, span: s.span, start: s.start, signupOpens: s.signupOpens }));
-
   const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.logo, 80), dates: fmtRange(e.start, e.end) }));
 
+  // Home page and Professional tier copy (Site settings), and the Network page.
+  const note = (s?: string) => s?.trim() || undefined;
+  const { homeHero, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
+  const home = {
+    hero: homeHero, tryouts: homeTryouts, events: homeEvents, inside: homeInside, play: homePlay,
+    pathway: {
+      ...homePathway, placeholderNote: note(homePathway.placeholderNote),
+      cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
+    },
+  };
+  const n = c.networkPage[0];
+  const network = {
+    hero: { ...n.hero, placeholderNote: note(n.hero.placeholderNote) },
+    network: n.network,
+    means: { ...n.means, placeholderNote: note(n.means.placeholderNote) },
+    club: { ...n.club, placeholderNote: note(n.club.placeholderNote), crest: img(n.club.crest, W.logo), photo: img(n.club.photo, W.section) },
+    closing: n.closing,
+  };
+
   return {
-    programs, regions, venues, tryouts, seasons, events,
+    home, pro: proTier, network,
+    programs, regions, venues, tryouts, sessions, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),
     settings: {
@@ -141,6 +212,6 @@ async function build() {
     },
     logo: A.logo,
     // Today at build time. Islands swap in the visitor's date after they load.
-    builtOn: new Date().toISOString().slice(0, 10),
+    builtOn,
   };
 }
