@@ -10,10 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sanity/vision": "^6.18.0",
+    "@sanity/ui": "^4.4.0",
+    "@sanity/vision": "^6.19.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "sanity": "^6.18.0",
+    "sanity": "^6.19.0",
     "styled-components": "^6.1.15"
   },
   "devDependencies": {

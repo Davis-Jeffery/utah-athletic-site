@@ -2,9 +2,9 @@
 // Overview tab: who it's for, development model, competition, season, week, comparison,
 // leadership and regions. Region tabs render RegionTab.
 import React, { useState } from 'react';
-import { ORDER, MONTHS, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER } from '../../data/site';
+import { ORDER, MONTHS, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
 import { fmtDate, tryoutsFor, money } from '../../lib/schedule';
-import { ACC, Kicker, SectionHead, Rule } from '../ui.jsx';
+import { ACC, Kicker, SectionHead, Rule, Headshot } from '../ui.jsx';
 import { RegionMenu } from '../SiteHeader.jsx';
 import DevModel from './DevModel.jsx';
 import CompareTable from './CompareTable.jsx';
@@ -79,7 +79,7 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>
-                {[['Ages', p.ages], ['Competes in', p.line], ['Investment', money(p.cost) + (p.unit === 'per year' ? ' / year' : ' / season')], ['Training', p.commit]].map(([k, v]) => (
+                {[['Ages', p.ages], ['Competes in', p.line], ['Investment', (p.costFrom ? 'From ' : '') + money(p.cost) + (p.unit === 'per year' ? ' / year' : ' / season')], ['Training', p.commit]].map(([k, v]) => (
                   <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 18px', background: 'rgba(27,29,36,.92)' }}>
                     <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>{k}</span>
                     <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{v}</span>
@@ -267,8 +267,8 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
                   <button key={k} type="button" onClick={() => onRegion(k)} className="hv-lift-sm" style={{ all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '10px', padding: '22px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .25s,transform .25s' }}>
                     <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{rm.label} · {r.hub || rm.area}</span>
                     <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                      <span style={{ font: `500 ${act ? '44px' : '22px'}/1 var(--font-heading)`, letterSpacing: '-.04em', color: act ? ACC : 'var(--color-neutral-400)', fontVariantNumeric: 'tabular-nums' }}>{act ? money(p.cost + (r.feeDelta || 0)) : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered'}</span>
-                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{act ? p.unit : ''}</span>
+                      <span style={{ font: `500 ${act ? '44px' : '22px'}/1 var(--font-heading)`, letterSpacing: '-.04em', color: act ? ACC : 'var(--color-neutral-400)', fontVariantNumeric: 'tabular-nums' }}>{act ? (r.price ? money(r.price.cost) : 'TBA') : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered'}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{act && r.price ? (r.price.from ? 'and up, ' : '') + p.unit : ''}</span>
                     </span>
                     <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>View {rm.label} →</span>
                   </button>
@@ -280,15 +280,17 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       </section>
 
       <section id="sec-staff" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <SectionHead kicker="07 · Leadership" title="Program leadership" maxWidth="640px" intro="Utah Athletic leadership sets the standard for every region. Regional directors and coaches are listed under each region." />
+        <SectionHead kicker="07 · Leadership" title="Program leadership" maxWidth="640px" intro={`Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
+        {p.leadership.length ? null : <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Program leadership will be listed here soon.</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '12px' }}>
-          {p.directors.map((d, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: 'minmax(90px,140px) 1fr', gap: '20px', padding: '14px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ aspectRatio: '4 / 5', borderRadius: '6px', background: 'repeating-linear-gradient(135deg,#20232b 0 8px,#252830 8px 16px)', display: 'flex', alignItems: 'flex-end', padding: '8px', font: '500 10px/1 ui-monospace,Menlo,monospace', color: 'var(--color-neutral-600)', textTransform: 'uppercase' }}>Headshot</div>
+          {p.leadership.map((d) => (
+            <div key={d.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(90px,140px) 1fr', gap: '20px', padding: '14px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
+              <Headshot pic={d.headshot} name={d.name} style={{ aspectRatio: '4 / 5', borderRadius: '6px' }} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '6px 6px 6px 0' }}>
                 <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{d.role}</span>
                 <span style={{ font: '500 26px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>{d.name}</span>
-                <span style={{ fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{d.bio}</span>
+                {d.bio ? <span style={{ fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{d.bio}</span> : null}
+                {d.email ? <a href={'mailto:' + d.email} style={{ marginTop: 'auto', fontSize: '13px', overflowWrap: 'anywhere' }}>{d.email}</a> : null}
               </div>
             </div>
           ))}

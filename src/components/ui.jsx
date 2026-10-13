@@ -1,6 +1,6 @@
 // Small building blocks shared by every page. Styles match the design's inline styles.
 import React, { useEffect, useState } from 'react';
-import { todayIso } from '../lib/schedule';
+import { todayIso, fmtDate } from '../lib/schedule';
 
 export const ACC = '#78b7b3';
 
@@ -81,6 +81,12 @@ export const PhotoSlot = ({ label, style }) => (
   <div style={{ background: 'repeating-linear-gradient(135deg,#20232b 0 8px,#252830 8px 16px)', display: 'flex', alignItems: 'flex-end', padding: '8px', font: '500 10px/1 ui-monospace,Menlo,monospace', color: 'var(--color-neutral-600)', textTransform: 'uppercase', ...style }}>{label}</div>
 );
 
+// Uploaded headshot ({ src, pos?, alt? }), or the dashed placeholder until one is added in the Studio.
+export function Headshot({ pic, name, label = 'Headshot', style, slotStyle }) {
+  if (!pic) return <PhotoSlot label={label} style={{ ...style, ...slotStyle }} />;
+  return <img src={pic.src} alt={pic.alt ?? name} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', objectFit: 'cover', objectPosition: pic.pos ?? 'center 25%', ...style }} />;
+}
+
 // Club photo with the site-wide treatment: grayscale plus a teal color layer.
 export function TealPhoto({ src, alt = '', position = 'center', brightness = 0.7, layer = 0.5, style, imgStyle }) {
   return (
@@ -97,4 +103,21 @@ export function useToday(builtOn) {
   const [today, setToday] = useState(builtOn);
   useEffect(() => { setToday(todayIso()); }, []);
   return today;
+}
+
+// A Futures session's classes, folded away until opened.
+export function ClassList({ classes }) {
+  return (
+    <details style={{ flex: '1 1 100%', fontSize: '13px', color: 'var(--color-neutral-300)' }}>
+      <summary style={{ cursor: 'pointer', color: 'var(--color-accent-300)' }}>{classes.length} {classes.length === 1 ? 'class' : 'classes'}</summary>
+      <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {classes.map((c, i) => (
+          <li key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
+            <span style={{ minWidth: '120px' }}>{fmtDate(c.date)}</span><span style={{ color: 'var(--color-neutral-400)' }}>{c.time}</span>
+            {c.note ? <span style={{ color: 'var(--color-accent-300)' }}>{c.note}</span> : null}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
 }

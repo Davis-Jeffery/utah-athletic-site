@@ -13,7 +13,7 @@ If the Publish button is grey, something on the page needs fixing first. Look fo
 
 ## Where do I change...
 
-The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tournaments and events**, **Venues**, then **Programs**, **Regions**, **Network page** and **Site settings**.
+The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures sessions**, **Tournaments and events**, **Venues**, then **Staff**, **Programs**, **Region settings**, **Network page** and **Site settings**.
 
 | On the website | In the Studio |
 |---|---|
@@ -23,9 +23,11 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 | A field or park (new or renamed) | **Venues** |
 | The Ollie registration link | **Programs**, pick the program, **Registration** tab, **Ollie registration link**. Every Register button for that program uses it. |
 | Program wording (tagline, intro, leagues) | **Programs**, pick the program, **Overview** tab |
-| Program cost and what's included | **Programs**, pick the program, **Cost** tab. Academy prices are never shown on the site. |
+| Program cost and what's included | **Programs**, pick the program, **Cost** tab. Academy prices are never shown on the site. Recreation and Futures prices are set on each session instead. |
 | Season timeline and typical week | **Programs**, pick the program, **Season and week** tab |
-| Directors and coaches | **Programs**, pick the program, **Staff** tab |
+| Add a staff member, or change someone's name, title, description, email or headshot | **Staff**. Each person is entered once; every page that shows them updates. **Assigned to** at the bottom lists where they appear. |
+| Put someone on a program's leaders or coaches in one region | **Programs**, pick the program, **Regions** tab, then **Leaders** or **Coaches** under **North**, **South** or **West**. Click **Add item** and pick the person (or **Create new** to add them to Staff on the spot). Drag to reorder. **Title here** shows a different title on this program only. Coaches show only when the region is **Running**. Recreation has no **Coaches** list: its coaches are volunteers, so its region pages show leaders only. |
+| Program leadership (the people in the program page's "Program leadership" section) | **Programs**, pick the program, **Staff** tab, **Program leadership**. Pick people from Staff the same way. |
 | Which regions a program runs in | **Programs**, pick the program, **Regions** tab |
 | A program photo | **Programs**, pick the program, **Photos** tab |
 | Home page wording (big heading, section headings, "Where the pathway leads", "Want to play for us?") | **Site settings**, **Home page** tab. Sections are in the same order as on the page. |
@@ -35,10 +37,12 @@ The left sidebar has: **Tryout sessions**, **Rec and Futures sessions**, **Tourn
 | Add or remove an affiliate academy card | **Network page**, **The network** tab, **Affiliate academies in development** |
 | The professional club's crest, photo or facts | **Network page**, **Professional club** tab |
 | A dashed "Placeholder" tag | Clear the **Placeholder note** field in that section once the real wording is in. |
-| Rec and Futures session dates | **Rec and Futures sessions**: **First day** and **Months** |
-| Rec and Futures sign-up date | **Rec and Futures sessions**: **Sign-up opens**. Leave it empty if sign-up is already open. |
-| Where Rec and Futures play in a region | **Regions**, pick the region, **Rec and Futures venue** |
-| Regional directors and their emails | **Regions**, pick the region |
+| Add a Recreation or Futures session | **Recreation sessions** or **Futures sessions**, then create one. Each session is one region at one venue, with its own price and dates. Running a season in two regions means two sessions (use **Duplicate** from the ⋯ menu, then change the region and venue). |
+| Futures classes in a session | Open the session, **Classes**, **Add item**: date, start and end time, and an optional note such as "No class: Thanksgiving". |
+| Registration open or closed | Leave **Registration status** on **Automatic** and the site follows the dates: "Registration opens …", open until the close date, closed, then "In season". Pick **Open**, **Closed**, **Full** (or **In season** for Futures) only to override. Sessions drop off the site after their end date. |
+| Recreation or Futures price | On each session (**Cost**). Program and region pages show the lowest current session price, with "and up" when sessions differ. |
+| A different signup link for one session | The session's **Registration link**. Empty uses the program's Ollie link. |
+| Who shows on Contact and Tryouts for a region | Nothing to edit there: those pages list the region's leaders from every program (each person once, with their Staff title). |
 | A tournament (dates, link, logo, colors) | **Tournaments and events**. Dates and link on **Details**, logo and colors on **Card look**. |
 | Tournament photos ("From the touchline") | **Site settings**, **Events page** tab, **Highlight reel** |
 | The "Tryouts 2027" button in the header | **Site settings**, **General** tab, **Header Tryouts button** |

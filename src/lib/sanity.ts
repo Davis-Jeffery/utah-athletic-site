@@ -34,13 +34,19 @@ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
 const ref = z.object({ _ref: z.string() });
 export const image = z.object({ asset: ref, crop: z.any().optional(), hotspot: z.any().optional(), alt: z.string().optional() });
 const keyedImage = image.extend({ _key: z.string() });
-const regionStatus = z.object({ status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(), feeDelta: z.number().optional() });
+// Program leadership, a region's leaders and a region's coaches: people picked from Staff, with
+// an optional title for that spot.
+const people = z.array(z.object({ person: ref, title: z.string().optional() })).default([]);
+const staff = z.object({ _id: z.string(), name: z.string(), title: z.string(), bio: z.string().optional(), email: z.string().email().optional(), headshot: image.optional() });
+const regionStatus = z.object({
+  status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(), feeDelta: z.number().optional(),
+  leaders: people, coaches: people,
+});
 const session = z.object({ time: z.string(), label: z.string(), kind: z.enum(['training', 'match']) });
 const opt = z.string().optional();
 
 const venue = z.object({ _id: z.string(), name: z.string(), address: z.string() });
-const person = z.object({ name: z.string(), email: z.string().email() });
-const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string(), managingDirector: person, directorOfCoaching: person, seasonVenue: ref });
+const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string() });
 
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
@@ -56,8 +62,7 @@ const program = z.object({
   week: z.object(Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, z.array(session).default([])]))),
   development: z.object({ technical: z.string(), tactical: z.string(), physical: z.string(), mental: z.string() }),
   compare: z.object({ training: z.string(), coaching: z.string(), competition: z.string(), yearRound: opt, evaluations: opt, strength: opt, film: opt, mental: opt, next: z.string() }),
-  directors: z.array(z.object({ name: z.string(), role: z.string(), bio: z.string(), headshot: image.optional() })).default([]),
-  coaches: z.array(z.object({ name: z.string(), role: z.string(), headshot: image.optional() })).default([]),
+  leadership: people,
   north: regionStatus, south: regionStatus, west: regionStatus,
 });
 
@@ -65,7 +70,16 @@ const tryout = z.object({
   _id: z.string(), program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']), venue: ref, date: isoDate,
   startTime: z.string().regex(/^\d{2}:\d{2}$/), endTime: z.string().regex(/^\d{2}:\d{2}$/), minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']),
 });
-const season = z.object({ _id: z.string(), name: z.string(), span: z.string(), start: isoDate, signupOpens: isoDate.optional() });
+const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
+const sessionBase = {
+  _id: z.string(), name: z.string(), region: z.enum(['north', 'south', 'west']), venue: ref, minAge: z.number().optional(), maxAge: z.number().optional(),
+  cost: z.number(), registrationOpens: isoDate, registrationCloses: isoDate, start: isoDate, end: isoDate, registerUrl: z.string().url().optional(),
+};
+const recSession = z.object({ ...sessionBase, status: z.enum(['auto', 'open', 'closed', 'full']).default('auto') });
+const futuresSession = z.object({
+  ...sessionBase, status: z.enum(['auto', 'open', 'inseason', 'closed', 'full']).default('auto'),
+  classes: z.array(z.object({ date: isoDate, startTime: hhmm, endTime: hhmm, note: z.string().optional() })).default([]),
+});
 const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
 const event = z.object({
   _id: z.string(), name: z.string(), tagline: z.string(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate,
@@ -113,7 +127,7 @@ const settings = z.object({
   ...settingsHome,
 });
 
-const SCHEMAS = { venue, region, program, tryoutSession: tryout, season, event, siteSettings: settings, networkPage } as const;
+const SCHEMAS = { venue, staff, region, program, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 
 // ---------- fetch ----------

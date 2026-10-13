@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER } from '../data/site';
-import { fmtDate, tryoutsFor, readRegion, rememberRegion, signupText } from '../lib/schedule';
-import { ACC, Field, useToday } from './ui.jsx';
+import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
+import { ACC, Field, ClassList, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
 const seg = (on) => ({ background: on ? 'rgba(120,183,179,.16)' : 'transparent', color: on ? '#b5e1dd' : 'var(--color-neutral-300)', boxShadow: on ? 'inset 0 0 0 1px #78b7b3' : 'none' });
@@ -40,6 +40,10 @@ export default function TryoutsApp({ data }) {
 
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
   const R = data.regions.find((x) => x.id === region);
+  // Contact card: the picked level's leaders here when it has some, else the region's.
+  const own = level && P[level].regions[region].status !== 'none' ? P[level].regions[region].leaders : [];
+  const leads = own.length ? own : R.leaders;
+  const mail = leads.find((l) => l.email)?.email;
   const levels = level ? [level] : ORDER;
   let count = 0;
   const blocks = levels.map((id) => {
@@ -58,7 +62,12 @@ export default function TryoutsApp({ data }) {
         href: st.status === 'soon' ? (p.invite ? '#invite' : `/${id}/${region}/`) : `/${id}/${alt}/`,
       };
     }
-    if (p.kind === 'season') return { id, p, kicker, title: 'Season sign-up', season: true };
+    if (p.kind === 'season') {
+      const sessions = sessionsFor(data, id, region, today);
+      return sessions.length
+        ? { id, p, kicker, title: sessions.length === 1 ? '1 session' : `${sessions.length} sessions`, sessions }
+        : { id, p, kicker, title: 'No posted sessions', empty: true, head: 'Sessions to be announced', copy: `We'll post ${R.label} ${p.name} sessions here as soon as they're set.`, cta: 'Get notified', href: `/contact/?region=${region}&program=${id}` };
+    }
     const rows = tryoutsFor(data, { program: id, region }, today);
     count += rows.length;
     return rows.length
@@ -140,23 +149,29 @@ export default function TryoutsApp({ data }) {
               </div>
             ) : null}
 
-            {b.season ? (
+            {b.sessions ? (
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '10px' }}>
-                  {data.seasons.map((s) => (
-                    <div key={s.id} style={card}>
-                      <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' }}>
-                        <span style={{ font: '500 24px/1 var(--font-heading)', letterSpacing: '-.03em' }}>{s.name}</span>
-                        <span style={{ fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{s.span}</span>
-                      </span>
-                      <span style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'var(--color-neutral-300)' }}>
-                        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />Starts {fmtDate(s.start)}</span>
-                        <a href={R.seasonVenue.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'var(--color-neutral-300)' }}><MapPin color={ACC} aria-hidden="true" />{R.seasonVenue.name}</a>
-                        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><Clock color={ACC} aria-hidden="true" />{signupText(s, today)}</span>
-                      </span>
-                      <a href={b.p.registerUrl} target="_blank" rel="noopener" className="hv-t14" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Sign up for {s.name} →</a>
-                    </div>
-                  ))}
+                  {b.sessions.map((s) => {
+                    const l = sessionLabel(s, today);
+                    return (
+                      <div key={s.id} style={card}>
+                        <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' }}>
+                          <span style={{ font: '500 24px/1 var(--font-heading)', letterSpacing: '-.03em' }}>{s.name}</span>
+                          <span style={{ fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{s.ages}</span>
+                        </span>
+                        <span style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'var(--color-neutral-300)' }}>
+                          <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />{s.dates} · {money(s.cost)}</span>
+                          <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'var(--color-neutral-300)' }}><MapPin color={ACC} aria-hidden="true" />{s.venueName}</a>
+                          <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><Clock color={ACC} aria-hidden="true" />{l.text}</span>
+                        </span>
+                        {s.classes.length ? <ClassList classes={s.classes} /> : null}
+                        {l.canJoin
+                          ? <a href={s.url} target="_blank" rel="noopener" className="hv-t14" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Sign up for {s.name} →</a>
+                          : <span style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', boxShadow: 'inset 0 0 0 1px var(--color-divider)', color: 'var(--color-neutral-400)', font: '500 14px/1 var(--font-body)' }}>{l.text}</span>}
+                      </div>
+                    );
+                  })}
                 </div>
                 <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{b.p.name} has no tryouts. Every player who signs up is placed on a team.</span>
               </>
@@ -169,12 +184,12 @@ export default function TryoutsApp({ data }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>Academy · {R.label}</span>
               <h2 style={{ margin: 0, font: '500 clamp(28px,3.2vw,40px)/1.02 var(--font-heading)', letterSpacing: '-.035em', textWrap: 'balance' }}>Request an invitation to trial</h2>
-              <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Can't make a posted date, or want to be seen sooner? Apply and the {R.label} Director of Coaching will invite you to a training session.</p>
+              <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Can't make a posted date, or want to be seen sooner? Apply and the {R.label} Academy staff will invite you to a training session.</p>
             </div>
             {inviteSent ? (
               <div role="status" style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
                 <span style={{ font: '500 26px/1.1 var(--font-heading)' }}>Request sent.</span>
-                <span style={{ fontSize: '14px', color: 'var(--color-neutral-400)' }}>The {R.label} Director of Coaching will reply within 5 days.</span>
+                <span style={{ fontSize: '14px', color: 'var(--color-neutral-400)' }}>The {R.label} Academy staff will reply within 5 days.</span>
               </div>
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); setInviteSent(true); }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '10px', alignContent: 'start' }}>
@@ -202,9 +217,10 @@ export default function TryoutsApp({ data }) {
             </div>
             <div style={card}>
               <CardHead Icon={UserCircle}>{R.label} contact</CardHead>
-              <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Managing Director</span><span style={{ fontSize: '15px' }}>{R.managingDirector.name}</span></span>
-              <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Director of Coaching</span><span style={{ fontSize: '15px' }}>{R.directorOfCoaching.name}</span></span>
-              <a href={'mailto:' + R.managingDirector.email} style={{ fontSize: '14px' }}>{R.managingDirector.email}</a>
+              {leads.length ? leads.slice(0, 3).map((l) => (
+                <span key={l.id} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{l.role}</span><span style={{ fontSize: '15px' }}>{l.name}</span></span>
+              )) : <span style={{ fontSize: '14px', color: 'var(--color-neutral-400)' }}>Leaders to be announced.</span>}
+              {mail ? <a href={'mailto:' + mail} style={{ fontSize: '14px' }}>{mail}</a> : null}
               <a href={contactHref} style={{ marginTop: 'auto', fontSize: '13px', color: 'var(--color-accent-300)' }}>Contact the {R.label} team →</a>
             </div>
           </div>

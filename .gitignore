@@ -12,3 +12,6 @@ docs/design-reference/assets/
 # Sanity import output
 .sanity-import/
 !.env.example
+
+# Personal Claude Code settings
+.claude/settings.local.json

@@ -6,6 +6,8 @@ export type RegionKey = 'north' | 'south' | 'west';
 
 export const ORDER: ProgramKey[] = ['academy', 'club', 'rec', 'futures'];
 export const REGION_ORDER: RegionKey[] = ['north', 'south', 'west'];
+// Programs coached by volunteers: no coaching staff section on their region tabs (leaders still show).
+export const NO_COACH_LIST: ProgramKey[] = ['rec'];
 
 export const NAV = [
   { key: 'programs', label: 'Programs', href: '/#programs' },

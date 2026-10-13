@@ -53,7 +53,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
                 onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
               {ORDER.map((id) => {
                 const p = P[id];
-                const line = id === 'academy' ? p.line : `${p.line} · ${money(p.cost)}${p.unit === 'per year' ? '/yr' : '/season'}`;
+                const line = id === 'academy' ? p.line : `${p.line} · ${p.costFrom ? 'from ' : ''}${money(p.cost)}${p.unit === 'per year' ? '/yr' : '/season'}`;
                 return <LevelRow key={id} num={p.num} name={p.name} line={line} right={`${p.ages} →`} on={focus === id}
                   onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
               })}
