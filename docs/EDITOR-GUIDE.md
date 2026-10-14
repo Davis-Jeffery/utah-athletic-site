@@ -13,7 +13,7 @@ If the Publish button is grey, something on the page needs fixing first. Look fo
 
 ## Where do I change...
 
-The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures sessions**, **Tournaments and events**, **Venues**, then **Staff**, **Programs**, **Region settings**, **Network page** and **Site settings**.
+The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures sessions**, **Tournaments and events**, **Venues**, then **Staff**, **Programs**, **Region settings**, **Network page** and **Site settings**, then **Submissions** and **Futures registrations**.
 
 | On the website | In the Studio |
 |---|---|
@@ -37,11 +37,15 @@ The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures se
 | Add or remove an affiliate academy card | **Network page**, **The network** tab, **Affiliate academies in development** |
 | The professional club's crest, photo or facts | **Network page**, **Professional club** tab |
 | A dashed "Placeholder" tag | Clear the **Placeholder note** field in that section once the real wording is in. |
+| Answer a form someone sent (contact, trial application, invitation, interest, registration request) | **Submissions**. **New** lists what nobody has picked up. Set **Status**, **Assigned to** and **Internal notes**; they save as you type, no Publish needed. The leaders it was addressed to also get it by email. Delete spam with the ⋯ menu. |
+| See who registered and paid for Futures | **Futures registrations**: **Paid**, **Checkout started, not paid**, **Refunded**, or **By session**. Details are read-only; add **Internal notes** if needed. Refunds are made in the Stripe dashboard and show here by themselves. |
+| Limit spots in a Futures session | The session's **Spots**. Once that many have paid, the session switches to **Full**. |
+| The Futures waiver | **Site settings**, **Futures registration** tab. Each registration keeps the text the family accepted. |
 | Add a Recreation or Futures session | **Recreation sessions** or **Futures sessions**, then create one. Each session is one region at one venue, with its own price and dates. Running a season in two regions means two sessions (use **Duplicate** from the ⋯ menu, then change the region and venue). |
 | Futures classes in a session | Open the session, **Classes**, **Add item**: date, start and end time, and an optional note such as "No class: Thanksgiving". |
 | Registration open or closed | Leave **Registration status** on **Automatic** and the site follows the dates: "Registration opens …", open until the close date, closed, then "In season". Pick **Open**, **Closed**, **Full** (or **In season** for Futures) only to override. Sessions drop off the site after their end date. |
 | Recreation or Futures price | On each session (**Cost**). Program and region pages show the lowest current session price, with "and up" when sessions differ. |
-| A different signup link for one session | The session's **Registration link**. Empty uses the program's Ollie link. |
+| A different signup link for one Recreation session | The session's **Registration link**. Empty uses the program's Ollie link. Futures registers on the site instead. |
 | Who shows on Contact and Tryouts for a region | Nothing to edit there: those pages list the region's leaders from every program (each person once, with their Staff title). |
 | A tournament (dates, link, logo, colors) | **Tournaments and events**. Dates and link on **Details**, logo and colors on **Card look**. |
 | Tournament photos ("From the touchline") | **Site settings**, **Events page** tab, **Highlight reel** |

@@ -5,7 +5,9 @@ import React, { useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER, NO_COACH_LIST } from '../../data/site';
 import { fmtDate, tryoutsFor, money, sessionsFor, sessionLabel } from '../../lib/schedule';
-import { Kicker, SectionHead, Field, SubmitButton, Sent, Headshot, ClassList, ROW_RULE } from '../ui.jsx';
+import { Kicker, SectionHead, Field, SubmitButton, Sent, Headshot, ClassList, FormGuard, useSubmit, ROW_RULE } from '../ui.jsx';
+
+const isExternal = (href) => /^https?:/.test(href);
 
 export default function RegionTab({ program: p, regionId, data, today, onRegion }) {
   const rm = data.regions.find((r) => r.id === regionId);
@@ -14,7 +16,9 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
   const isAcademy = p.id === 'academy';
   const showCoaches = !NO_COACH_LIST.includes(p.id);
   // Section numbers follow the sections shown.
-  const shown = ['lead', ...(showCoaches ? ['coach'] : []), 'try', ...(isAcademy ? [] : ['fee']), 'contact'];
+  // Futures registers online, so its sign-up comes first, right under the region heading.
+  const signupFirst = p.id === 'futures';
+  const shown = [...(signupFirst ? ['try'] : []), 'lead', ...(showCoaches ? ['coach'] : []), ...(signupFirst ? [] : ['try']), ...(isAcademy ? [] : ['fee']), 'contact'];
   const num = (s) => String(shown.indexOf(s) + 1).padStart(2, '0');
   const line = rd.status === 'active'
     ? `The same ${p.name} program and standard, run locally from ${rd.hub}. Staff, tryouts${isAcademy ? '' : ', fees'} and contacts below are specific to the ${rm.label} region.`
@@ -33,6 +37,7 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
 
       {rd.status === 'active' ? (
         <>
+          {signupFirst ? <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} /> : null}
           <section id="sec-rlead" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <SectionHead kicker={`${num('lead')} · Regional leadership`} title={`Who runs ${title}`} />
             {rd.leaders.length ? (
@@ -63,7 +68,7 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
             )}
           </section>
           ) : null}
-          <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} />
+          {signupFirst ? null : <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} />}
           {!isAcademy ? (
             <section id="sec-rfee" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -149,11 +154,13 @@ function LeadCard({ lead }) {
 // 03 · Tryouts: posted dates on the left, the trial application or registration form on the right.
 function Tryouts({ p, rm, data, today, n }) {
   const season = p.kind === 'season';
+  // Futures has no form beside the dates: each session's button opens the registration page.
+  const wide = p.id === 'futures';
   const trial = !season && p.enrollment !== 'tryouts';
   const rows = season
     ? sessionsFor(data, p.id, rm.id, today).map((s) => {
       const l = sessionLabel(s, today);
-      return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)} · ${l.text}`, where: s.venueName, mapUrl: s.mapUrl, cta: 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
+      return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: wide ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
     })
     : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, mapUrl: t.mapUrl, cta: 'Register', pick: `${fmtDate(t.date)}, ${t.age} ${t.gender}` }));
   const head = trial ? 'Player trial application' : season ? `Sign up in ${rm.label}` : `Next tryouts in ${rm.label}`;
@@ -161,13 +168,13 @@ function Tryouts({ p, rm, data, today, n }) {
     ? `Tryout registration opens ${p.registrationOpens}. Until then, apply for a private trial with ${rm.label} staff. We review every application.`
     : p.joinCopy;
   return (
-    <section id="sec-rtry" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
+    <section id="sec-rtry" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: wide ? '1fr' : 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
         <Kicker>{n} · {season ? 'Sign up' : 'Tryouts'}</Kicker>
         <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em' }}>{head}</h2>
         <p style={{ margin: 0, maxWidth: '460px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{copy}</p>
         {rows.length ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '520px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: wide ? 'none' : '520px' }}>
             <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>{season ? 'Season sign-up' : 'Posted tryout dates'}</span>
             {rows.slice(0, 4).map((r) => (
               <div key={r.key} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 14px', padding: '12px 14px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
@@ -175,7 +182,7 @@ function Tryouts({ p, rm, data, today, n }) {
                 <a href={r.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ flex: '1 1 160px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-neutral-300)' }}><MapPin color="#78b7b3" aria-hidden="true" />{r.where}</a>
                 {r.closed
                   ? <span style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', boxShadow: 'inset 0 0 0 1px var(--color-divider)', color: 'var(--color-neutral-400)', font: '500 13px/1 var(--font-body)' }}>{r.status}</span>
-                  : <a href={r.href || p.registerUrl} target="_blank" rel="noopener" className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 13px/1 var(--font-body)' }}>{r.cta} →</a>}
+                  : <a href={r.href || p.registerUrl} {...(isExternal(r.href || p.registerUrl) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 13px/1 var(--font-body)' }}>{r.cta} →</a>}
                 {r.classes?.length ? <ClassList classes={r.classes} /> : null}
               </div>
             ))}
@@ -183,18 +190,20 @@ function Tryouts({ p, rm, data, today, n }) {
           </div>
         ) : season ? <p style={{ margin: 0, fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rm.label} {p.name} sessions will be posted here soon.</p> : null}
       </div>
-      <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
-        {trial ? <TrialForm p={p} rm={rm} /> : <RegisterForm p={p} choices={rows.filter((r) => !r.closed).map((r) => r.pick)} />}
-      </div>
+      {wide ? null : (
+        <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
+          {trial ? <TrialForm p={p} rm={rm} /> : <RegisterForm p={p} rm={rm} choices={rows.filter((r) => !r.closed).map((r) => r.pick)} />}
+        </div>
+      )}
     </section>
   );
 }
 
 function TrialForm({ p, rm }) {
-  const [sent, setSent] = useState(false);
-  if (sent) return <Sent head="Application received." copy={`The ${rm.label} ${p.name} staff will review it and contact you to schedule a trial.`} again="Submit another" onAgain={() => setSent(false)} />;
+  const f = useSubmit({ form: 'trial', program: p.id, region: rm.id });
+  if (f.sent) return <Sent head="Application received." copy={`The ${rm.label} ${p.name} staff will review it and contact you to schedule a trial.`} again="Submit another" onAgain={f.reset} />;
   return (
-    <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <form onSubmit={f.onSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--color-neutral-300)' }}><span style={{ width: '7px', height: '7px', flex: 'none', borderRadius: '50%', background: '#78b7b3', boxShadow: '0 0 8px #78b7b3' }} />Player trial application · reviewed by the {rm.label} {p.name} staff</span>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
         <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
@@ -205,18 +214,19 @@ function TrialForm({ p, rm }) {
         <Field label="Primary position"><select className="ua-input" name="position"><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option></select></Field>
       </div>
       <Field label="Highlight video link"><input className="ua-input" name="video" type="url" placeholder="Optional · YouTube, Veo, Hudl" /></Field>
-      <SubmitButton>Submit trial application</SubmitButton>
+      <FormGuard error={f.error} />
+      <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : 'Submit trial application'}</SubmitButton>
     </form>
   );
 }
 
-function RegisterForm({ p, choices }) {
-  const [sent, setSent] = useState(false);
+function RegisterForm({ p, rm, choices }) {
   const [pick, setPick] = useState(0);
   const choice = choices[pick] || choices[0];
-  if (sent) return <Sent head={p.cta === 'Register' ? "You're registered." : "You're on the list."} copy={choice ? `Confirmation for ${choice} is on its way to your inbox.` : 'Confirmation is on its way to your inbox.'} again="Submit another" onAgain={() => setSent(false)} />;
+  const f = useSubmit({ form: 'register', program: p.id, region: rm.id, session: choice ?? '' });
+  if (f.sent) return <Sent head="Request received." copy={`The ${rm.label} ${p.name} team will email you${choice ? ` about ${choice}` : ''} with next steps.`} again="Submit another" onAgain={f.reset} />;
   return (
-    <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <form onSubmit={f.onSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {choices.length ? (
         <fieldset style={{ border: 0, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <legend style={{ padding: 0, marginBottom: '10px', fontSize: '12px', color: 'var(--color-neutral-400)' }}>{p.sessionLabel}</legend>
@@ -233,26 +243,28 @@ function RegisterForm({ p, choices }) {
         <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
         <Field label="Current club"><input className="ua-input" name="club" placeholder="Optional" /></Field>
       </div>
-      <SubmitButton>{p.cta}{choice ? ` · ${choice}` : ''}</SubmitButton>
+      <FormGuard error={f.error} />
+      <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : <>{p.cta}{choice ? ` · ${choice}` : ''}</>}</SubmitButton>
     </form>
   );
 }
 
 function InterestForm({ p, rm, to, title }) {
-  const [sent, setSent] = useState(false);
+  const f = useSubmit({ form: 'interest', program: p.id, region: rm.id });
   return (
     <div style={{ borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
-      {sent ? (
-        <Sent pad="44px 28px" head="You're on the list." copy={`The ${rm.label} team will contact you first when ${p.name} ${p.kind === 'season' ? 'sign-up opens' : 'tryouts open'}.`} onAgain={() => setSent(false)} />
+      {f.sent ? (
+        <Sent pad="44px 28px" head="You're on the list." copy={`The ${rm.label} team will contact you first when ${p.name} ${p.kind === 'season' ? 'sign-up opens' : 'tryouts open'}.`} onAgain={f.reset} />
       ) : (
-        <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form onSubmit={f.onSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <span style={{ fontSize: '12px', color: 'var(--color-neutral-400)' }}>To: {title} leadership · {to.email}</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
             <Field label="Parent name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
             <Field label="Email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
           </div>
           <Field label={p.kind === 'season' ? 'Player age group' : 'Player birth year'}><select className="ua-input" name="age">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
-          <SubmitButton>Register interest · {title}</SubmitButton>
+          <FormGuard error={f.error} />
+          <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : `Register interest · ${title}`}</SubmitButton>
         </form>
       )}
     </div>

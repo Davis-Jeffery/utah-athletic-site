@@ -123,7 +123,11 @@ export const program = defineType({
     }),
 
     // Registration
-    link('registerUrl', 'Ollie registration link', { required: true, group: 'join', description: 'Every Register button for this program uses this link.' }),
+    {
+      ...link('registerUrl', 'Ollie registration link', { required: true, group: 'join', description: 'Every Register button for this program uses this link.' }),
+      // Futures registers on the site and pays with Stripe.
+      hidden: ({ document }: any) => document?.key === 'futures',
+    },
     defineField({
       name: 'enrollment', title: 'Enrollment', type: 'string', group: 'join',
       options: { list: [{ title: 'Accepting trial applications', value: 'trial' }, { title: 'Open tryout registration', value: 'tryouts' }], layout: 'radio' },

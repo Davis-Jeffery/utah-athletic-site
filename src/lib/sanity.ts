@@ -77,7 +77,7 @@ const sessionBase = {
 };
 const recSession = z.object({ ...sessionBase, status: z.enum(['auto', 'open', 'closed', 'full']).default('auto') });
 const futuresSession = z.object({
-  ...sessionBase, status: z.enum(['auto', 'open', 'inseason', 'closed', 'full']).default('auto'),
+  ...sessionBase, capacity: z.number().optional(), status: z.enum(['auto', 'open', 'inseason', 'closed', 'full']).default('auto'),
   classes: z.array(z.object({ date: isoDate, startTime: hhmm, endTime: hhmm, note: z.string().optional() })).default([]),
 });
 const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -122,6 +122,7 @@ const settings = z.object({
   collage: z.array(keyedImage).min(11),
   videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: z.string().url() })).default([]),
   tryoutBring: z.array(z.string()).default([]),
+  futuresWaiver: z.string().optional(),
   eventReel: z.array(z.object({ photo: image, event: z.string(), caption: z.string() })).default([]),
   development: z.object({ technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
   ...settingsHome,

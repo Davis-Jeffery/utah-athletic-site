@@ -7,5 +7,7 @@ import { event } from './event';
 import { siteSettings } from './siteSettings';
 import { networkPage } from './networkPage';
 import { staff } from './staff';
+import { submission } from './submission';
+import { futuresRegistration } from './futuresRegistration';
 
-export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, region, siteSettings, networkPage];
+export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, region, siteSettings, networkPage, submission, futuresRegistration];

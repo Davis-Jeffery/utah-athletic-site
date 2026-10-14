@@ -1,5 +1,5 @@
 // Small building blocks shared by every page. Styles match the design's inline styles.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { todayIso, fmtDate } from '../lib/schedule';
 
 export const ACC = '#78b7b3';
@@ -51,9 +51,9 @@ export function Field({ label, children, style }) {
   );
 }
 
-export function SubmitButton({ children, style }) {
+export function SubmitButton({ children, style, busy = false }) {
   return (
-    <button type="submit" className="hv-t16" style={{ cursor: 'pointer', minHeight: '48px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '15px', borderRadius: '8px', ...style }}>
+    <button type="submit" disabled={busy} aria-busy={busy} className="hv-t16" style={{ opacity: busy ? 0.6 : 1, cursor: 'pointer', minHeight: '48px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '15px', borderRadius: '8px', ...style }}>
       {children}
     </button>
   );
@@ -120,4 +120,66 @@ export function ClassList({ classes }) {
       </ul>
     </details>
   );
+}
+
+// ---------- Form sending ----------
+// Every form posts to an API route (/api/submit, or /api/futures/checkout). `extra` adds what the
+// form knows that isn't an input (form name, program, region). Returns the state to render.
+export function useSubmit(extra, url = '/api/submit/') {
+  const [state, setState] = useState({ busy: false, error: '', sent: false, result: null });
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const fields = Object.fromEntries(new FormData(e.currentTarget));
+    setState({ busy: true, error: '', sent: false, result: null });
+    try {
+      const r = await fetch(url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...fields, ...(typeof extra === 'function' ? extra(fields) : extra), page: location.pathname + location.search }),
+      });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+      setState({ busy: false, error: '', sent: true, result: out });
+      return out;
+    } catch (err) {
+      try { window.turnstile?.reset(); } catch { /* no widget */ }
+      setState({ busy: false, error: err instanceof TypeError ? 'We couldn\'t reach the server. Check your connection and try again.' : err.message, sent: false, result: null });
+    }
+  };
+  return { ...state, onSubmit, reset: () => setState({ busy: false, error: '', sent: false, result: null }) };
+}
+
+// Spam protection and the error line, placed just above a form's submit button: a hidden field
+// people never fill in (bots do), and Cloudflare Turnstile when PUBLIC_TURNSTILE_SITE_KEY is set.
+export function FormGuard({ error }) {
+  return (
+    <>
+      <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        <label>Leave this empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
+      </div>
+      <Turnstile />
+      {error ? <span role="alert" style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--color-error)' }}>{error}</span> : null}
+    </>
+  );
+}
+
+const TURNSTILE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+function Turnstile() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!TURNSTILE_KEY || !ref.current) return;
+    let id, gone = false;
+    const render = () => { if (!gone && window.turnstile && ref.current) id = window.turnstile.render(ref.current, { sitekey: TURNSTILE_KEY, theme: 'dark' }); };
+    if (window.turnstile) render();
+    else {
+      let tag = document.querySelector('script[data-turnstile]');
+      if (!tag) {
+        tag = Object.assign(document.createElement('script'), { src: 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit', async: true });
+        tag.dataset.turnstile = '';
+        document.head.appendChild(tag);
+      }
+      tag.addEventListener('load', render);
+    }
+    return () => { gone = true; if (id !== undefined) try { window.turnstile.remove(id); } catch { /* already gone */ } };
+  }, []);
+  return TURNSTILE_KEY ? <div ref={ref} style={{ minHeight: '65px' }} /> : null;
 }

@@ -3,7 +3,7 @@
 // leadership and regions. Region tabs render RegionTab.
 import React, { useState } from 'react';
 import { ORDER, MONTHS, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
-import { fmtDate, tryoutsFor, money } from '../../lib/schedule';
+import { fmtDate, tryoutsFor, money, sessionLabel } from '../../lib/schedule';
 import { ACC, Kicker, SectionHead, Rule, Headshot } from '../ui.jsx';
 import { RegionMenu } from '../SiteHeader.jsx';
 import DevModel from './DevModel.jsx';
@@ -31,6 +31,12 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
     next: p.enrollment === 'trial' ? p.nextTryout : firstTryout ? `${fmtDate(firstTryout.date)} · ${firstTryout.time}` : 'To be announced',
     reg: p.enrollment === 'trial' ? `Opens ${p.registrationOpens}` : 'Open now',
   } : null;
+  // Rec and Futures list every region's open sessions in the hero; with none open it shows the program facts.
+  const regionLabel = (k) => data.regions.find((r) => r.id === k)?.label ?? k;
+  const openSessions = p.id === 'futures' || p.id === 'rec'
+    ? data.sessions.filter((s) => s.program === p.id && s.end >= today && sessionLabel(s, today).canJoin)
+      .sort((a, b) => a.start.localeCompare(b.start) || a.region.localeCompare(b.region))
+    : [];
 
   return (
     <>
@@ -76,6 +82,20 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
                 <StatusCell k="Next open tryouts">{status.next}</StatusCell>
                 <StatusCell k="Tryout registration">{status.reg}</StatusCell>
                 <button type="button" onClick={onJoin} className="hv-t26" style={{ flex: '1 1 220px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', minHeight: '64px', padding: '16px 20px', border: 0, background: 'rgba(120,183,179,.16)', color: '#b5e1dd', font: '500 16px/1.2 var(--font-body)', textAlign: 'left', transition: 'background .2s' }}>{en.cta}<span style={{ fontSize: '20px' }}>→</span></button>
+              </div>
+            ) : openSessions.length ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>
+                <span style={{ padding: '12px 18px', background: 'rgba(27,29,36,.92)', fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Registration open</span>
+                {openSessions.map((s) => (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px 20px', padding: '14px 18px', background: 'rgba(27,29,36,.92)' }}>
+                    <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
+                      <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{s.name} · {regionLabel(s.region)}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{[s.ages, s.dates, s.venueName, sessionLabel(s, today).text].filter(Boolean).join(' · ')}</span>
+                    </div>
+                    <span style={{ flex: 'none', font: '500 20px/1 var(--font-heading)', letterSpacing: '-.02em' }}>{money(s.cost)}</span>
+                    <a href={s.url} {...(/^https?:/.test(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 16px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Register →</a>
+                  </div>
+                ))}
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>

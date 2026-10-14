@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER } from '../data/site';
 import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
-import { ACC, Field, ClassList, useToday } from './ui.jsx';
+import { ACC, Field, ClassList, FormGuard, useSubmit, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
 const seg = (on) => ({ background: on ? 'rgba(120,183,179,.16)' : 'transparent', color: on ? '#b5e1dd' : 'var(--color-neutral-300)', boxShadow: on ? 'inset 0 0 0 1px #78b7b3' : 'none' });
@@ -16,7 +16,6 @@ export default function TryoutsApp({ data }) {
   const [region, setRegion] = useState('north');
   const [level, setLevel] = useState('');
   const [fade, setFade] = useState(false);
-  const [inviteSent, setInviteSent] = useState(false);
 
   useEffect(() => {
     const r = readRegion();
@@ -29,7 +28,7 @@ export default function TryoutsApp({ data }) {
     setFade(true);
     setTimeout(() => {
       const r = patch.region ?? region, l = patch.level ?? level;
-      setRegion(r); setLevel(l); setFade(false); setInviteSent(false);
+      setRegion(r); setLevel(l); setFade(false); invite.reset();
       rememberRegion(r);
       const u = new URL(location.href);
       u.searchParams.set('region', r);
@@ -38,6 +37,7 @@ export default function TryoutsApp({ data }) {
     }, 140);
   };
 
+  const invite = useSubmit({ form: 'invite', program: 'academy', region });
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
   const R = data.regions.find((x) => x.id === region);
   // Contact card: the picked level's leaders here when it has some, else the region's.
@@ -167,7 +167,7 @@ export default function TryoutsApp({ data }) {
                         </span>
                         {s.classes.length ? <ClassList classes={s.classes} /> : null}
                         {l.canJoin
-                          ? <a href={s.url} target="_blank" rel="noopener" className="hv-t14" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Sign up for {s.name} →</a>
+                          ? <a href={s.url} {...(/^https?:/.test(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Sign up for {s.name} →</a>
                           : <span style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', borderRadius: '8px', boxShadow: 'inset 0 0 0 1px var(--color-divider)', color: 'var(--color-neutral-400)', font: '500 14px/1 var(--font-body)' }}>{l.text}</span>}
                       </div>
                     );
@@ -186,18 +186,19 @@ export default function TryoutsApp({ data }) {
               <h2 style={{ margin: 0, font: '500 clamp(28px,3.2vw,40px)/1.02 var(--font-heading)', letterSpacing: '-.035em', textWrap: 'balance' }}>Request an invitation to trial</h2>
               <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Can't make a posted date, or want to be seen sooner? Apply and the {R.label} Academy staff will invite you to a training session.</p>
             </div>
-            {inviteSent ? (
+            {invite.sent ? (
               <div role="status" style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
                 <span style={{ font: '500 26px/1.1 var(--font-heading)' }}>Request sent.</span>
                 <span style={{ fontSize: '14px', color: 'var(--color-neutral-400)' }}>The {R.label} Academy staff will reply within 5 days.</span>
               </div>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setInviteSent(true); }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '10px', alignContent: 'start' }}>
+              <form onSubmit={invite.onSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '10px', alignContent: 'start' }}>
                 <Field label="Player name"><input className="ua-input" name="player" required style={{ minHeight: '44px' }} /></Field>
                 <Field label="Birth year"><input className="ua-input" name="birthYear" required inputMode="numeric" pattern="20[0-9]{2}" placeholder="2013" style={{ minHeight: '44px' }} /></Field>
                 <Field label="Parent email"><input className="ua-input" name="email" required type="email" autoComplete="email" style={{ minHeight: '44px' }} /></Field>
                 <Field label="Current club"><input className="ua-input" name="club" placeholder="Optional" style={{ minHeight: '44px' }} /></Field>
-                <button type="submit" className="hv-t16" style={{ gridColumn: '1 / -1', cursor: 'pointer', minHeight: '48px', borderRadius: '8px', border: '1px solid #78b7b3', background: 'rgba(120,183,179,.08)', color: '#b5e1dd', font: '500 15px/1 var(--font-body)' }}>Send to {R.label} Academy →</button>
+                <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}><FormGuard error={invite.error} /></div>
+                <button type="submit" disabled={invite.busy} className="hv-t16" style={{ opacity: invite.busy ? 0.6 : 1, gridColumn: '1 / -1', cursor: 'pointer', minHeight: '48px', borderRadius: '8px', border: '1px solid #78b7b3', background: 'rgba(120,183,179,.08)', color: '#b5e1dd', font: '500 15px/1 var(--font-body)' }}>{invite.busy ? 'Sending…' : `Send to ${R.label} Academy →`}</button>
               </form>
             )}
           </section>

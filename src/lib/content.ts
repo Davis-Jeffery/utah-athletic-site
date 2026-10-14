@@ -113,7 +113,8 @@ async function build() {
         ages: s.minAge != null && s.maxAge != null ? fmtAges(s.minAge, s.maxAge) : p.ages,
         cost: s.cost, venueName: v.name, mapUrl: v.mapUrl,
         opens: s.registrationOpens, closes: s.registrationCloses, start: s.start, end: s.end, dates: fmtRange(s.start, s.end),
-        status: s.status, url: s.registerUrl ?? p.registerUrl,
+        // Futures registers on the site (Stripe); Recreation uses its own link or the program's Ollie link.
+        status: s.status, url: s.program === 'futures' ? `/futures/register/?session=${idOf(s._id)}` : s.registerUrl ?? p.registerUrl,
         classes: [...s.classes].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
           .map((x) => ({ date: x.date, time: fmtTimeRange(x.startTime, x.endTime), note: x.note })),
       };
@@ -210,6 +211,8 @@ async function build() {
       tryoutBring: settings.tryoutBring,
       eventReel: settings.eventReel.map((r) => ({ photo: img(r.photo, W.section, 66)!, event: r.event, caption: r.caption })),
     },
+    // Only the Futures registration page uses this.
+    futuresWaiver: settings.futuresWaiver?.trim() || '',
     logo: A.logo,
     // Today at build time. Islands swap in the visitor's date after they load.
     builtOn,
