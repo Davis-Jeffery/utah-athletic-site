@@ -22,6 +22,13 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 - `docs/` is internal and never published. `docs/rec-program-plan.md` holds rec program decisions.
 - **Design updates:** follow `docs/DESIGN-SYNC.md`. Content changes from a handoff are made in the Studio, not in code. Run `npm run design:extract -- <handoff.zip, handoff folder or export.html>`, diff `docs/design-reference`, and port only what changed using the map in that doc.
 
+## Forms and payments
+
+- Pages are static; only `src/pages/api/*` runs on the server (Vercel adapter, `prerender = false`). Server-only helpers and the env vars they read are in `src/lib/server/index.ts`; never import it from a page or island. API URLs end in a slash (`trailingSlash: 'always'`).
+- Every form uses `useSubmit` and `FormGuard` from `ui.jsx` (honeypot field plus Cloudflare Turnstile when its keys are set). `/api/submit/` saves a `submission` (contact, trial, invite, interest, register) and emails the leaders the page shows (`recipients()`: the program's region leaders, else the region's, else the main email).
+- Futures registers and pays on the site: `/futures/register/?session=<id>` (`FuturesRegister.jsx`) posts to `/api/futures/checkout/`, which checks the session is open and has spots, saves a pending `futuresRegistration` and returns a Stripe Checkout link priced from Sanity. `/api/stripe/webhook/` marks it paid (emails family and leaders, sets the session Full when `capacity` is reached), expired, failed or refunded. Recreation still uses Ollie.
+- `submission` and `futuresRegistration` ids contain a dot (hidden from anonymous reads), use `liveEdit` (no drafts) and can't be created in the Studio; registrations can't be deleted. Emails are skipped quietly without `RESEND_API_KEY`; the Studio is the record.
+
 ## Deploying
 
 - Push to `main` deploys to production automatically on Vercel.
@@ -35,7 +42,7 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 
 ## Open work
 
-- Forms (trial application, registration, register interest, Academy invitation, contact) show a success message but don't submit anywhere yet. The handoff recommends form → Zapier/Make → Airtable plus a confirmation email and a routing sheet (program × age × region → coach and director emails).
+- Futures payments: needs Stripe keys and the webhook (`/api/stripe/webhook/`) set up in Stripe and Vercel, plus Resend for emails and Turnstile keys (see `.env.example`). Test end to end in Stripe test mode before switching to live keys. The Sanity publish webhook that rebuilds the site should ignore `submission` and `futuresRegistration`.
 - Placeholders to replace before launch: Ollie URLs (`ollie.example`), tryout dates, times and venues, Rec/Futures session dates, event details, colors and URLs (`example.com`), event logos, staff names, emails and headshots, network copy, RC Vichy crest and photos.
 - Photos: program heroes for Club, Rec and Futures are still Unsplash-derived; section photos use club photography (`collage-*`). The ECNL badge source is low-res; get a vector.
 - Rec page: formats for U5 to U9 are defined; U10+ still to be decided.

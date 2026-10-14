@@ -80,7 +80,7 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
       href: `/tryouts/?region=${region}&level=${program}`, cta: 'Get notified', external: false,
     };
     const l = sessionLabel(s, today);
-    return { kind: 'season', title: s.name, when: `${s.dates} · ${l.text}`, where: s.venueName, href: l.canJoin ? s.url : `/tryouts/?region=${region}&level=${program}`, cta: l.canJoin ? 'Sign up' : 'See details', external: l.canJoin };
+    return { kind: 'season', title: s.name, when: `${s.dates} · ${l.text}`, where: s.venueName, href: l.canJoin ? s.url : `/tryouts/?region=${region}&level=${program}`, cta: l.canJoin ? (program === 'futures' ? 'Register' : 'Sign up') : 'See details', external: l.canJoin && /^https?:/.test(s.url) };
   }
   const t = tryoutsFor(data, { program, region }, today)[0];
   if (!t) return {

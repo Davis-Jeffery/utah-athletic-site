@@ -3,7 +3,7 @@ import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemaTypes';
-import { structure, FIXED_TYPES } from './structure';
+import { structure, FIXED_TYPES, SITE_CREATED_TYPES } from './structure';
 
 export default defineConfig({
   name: 'default',
@@ -20,15 +20,19 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
     // Programs, regions and site settings are fixed documents: never offer "create new".
-    templates: (templates) => templates.filter((t) => !FIXED_TYPES.has(t.schemaType)),
+    // Submissions and Futures registrations are created only by the site's forms.
+    templates: (templates) => templates.filter((t) => !FIXED_TYPES.has(t.schemaType) && !SITE_CREATED_TYPES.has(t.schemaType)),
   },
 
   document: {
     // Fixed documents can be edited and published, but not deleted, duplicated or unpublished.
+    // Submissions can be deleted (spam); Futures registrations are payment records and can't.
     actions: (actions, { schemaType }) =>
       FIXED_TYPES.has(schemaType)
         ? actions.filter((a) => ['publish', 'discardChanges', 'restore'].includes(a.action ?? ''))
-        : actions,
-    newDocumentOptions: (items) => items.filter((i) => !FIXED_TYPES.has(i.templateId)),
+        : schemaType === 'submission' ? actions.filter((a) => a.action === 'delete')
+          : schemaType === 'futuresRegistration' ? []
+            : actions,
+    newDocumentOptions: (items) => items.filter((i) => !FIXED_TYPES.has(i.templateId) && !SITE_CREATED_TYPES.has(i.templateId)),
   },
 });

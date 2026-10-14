@@ -2,11 +2,11 @@
 // ?region=&program= prefill the form. Leaders come from Staff via each program's regions: with a
 // program picked the form offers that program's leaders there, otherwise the region's. Picking one
 // updates the live "To:" line.
-// The form is front-end only for now (see "Open work" in CLAUDE.md).
+// Sending saves a Submission in the Studio and emails the same leaders (see src/pages/api/submit.ts).
 import React, { useEffect, useState } from 'react';
 import { EnvelopeSimple, Check } from '@phosphor-icons/react';
 import { ORDER } from '../data/site';
-import { Field, ROW_RULE } from './ui.jsx';
+import { Field, FormGuard, useSubmit, ROW_RULE } from './ui.jsx';
 
 const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
 
@@ -14,7 +14,6 @@ export default function ContactApp({ regions, programs, mainEmail }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
   const [leader, setLeader] = useState(null); // a person's id, or null for whoever's first
-  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     const q = new URLSearchParams(location.search);
@@ -31,6 +30,7 @@ export default function ContactApp({ regions, programs, mainEmail }) {
   const to = !options.length ? `Main office · ${mainEmail}`
     : pick ? `${pick.name}, ${pick.role} · ${pick.email}`
       : `${team} leadership · ${options[0].email}`;
+  const f = useSubmit({ form: 'contact', program, region: region ?? '', leader: pick?.id ?? '' });
   const programOpts = [...programs.map((p) => [p.id, p.name]), ['', 'Not sure yet']];
 
   return (
@@ -59,15 +59,15 @@ export default function ContactApp({ regions, programs, mainEmail }) {
       </div>
 
       <div style={{ borderRadius: '16px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md),0 0 0 1px var(--color-divider)', overflow: 'hidden' }}>
-        {sent ? (
+        {f.sent ? (
           <div role="status" style={{ padding: '56px 32px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px' }}>
             <span style={{ width: '48px', height: '48px', borderRadius: '50%', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}><Check aria-hidden="true" /></span>
             <span style={{ font: '500 34px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>Message sent.</span>
             <span style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{rm ? `The ${rm.label} regional team` : 'Our main office'} will reply within 48 hours.</span>
-            <button type="button" onClick={() => setSent(false)} className="hv-ghost" style={{ cursor: 'pointer', marginTop: '6px', minHeight: '44px', background: 'transparent', border: '1px solid var(--color-divider)', color: 'var(--color-text)', padding: '0 16px', borderRadius: '8px', font: '500 14px/1 var(--font-body)' }}>Send another</button>
+            <button type="button" onClick={f.reset} className="hv-ghost" style={{ cursor: 'pointer', marginTop: '6px', minHeight: '44px', background: 'transparent', border: '1px solid var(--color-divider)', color: 'var(--color-text)', padding: '0 16px', borderRadius: '8px', font: '500 14px/1 var(--font-body)' }}>Send another</button>
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ padding: 'clamp(22px,3vw,32px)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <form onSubmit={f.onSubmit} style={{ padding: 'clamp(22px,3vw,32px)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <h2 style={{ margin: 0, font: '500 26px/1.1 var(--font-heading)', letterSpacing: '-.03em' }}>Send a message</h2>
               <span aria-live="polite" style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>To: <span style={{ color: 'var(--color-accent-300)' }}>{to}</span></span>
@@ -96,7 +96,8 @@ export default function ContactApp({ regions, programs, mainEmail }) {
               </Choice>
             ) : null}
             <Field label="Message"><textarea className="ua-input" name="message" required rows={5} placeholder="How can we help?" /></Field>
-            <button type="submit" className="hv-t16" style={{ cursor: 'pointer', minHeight: '50px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', borderRadius: '8px' }}>Send message →</button>
+            <FormGuard error={f.error} />
+            <button type="submit" disabled={f.busy} className="hv-t16" style={{ opacity: f.busy ? 0.6 : 1, cursor: 'pointer', minHeight: '50px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', borderRadius: '8px' }}>{f.busy ? 'Sending…' : 'Send message →'}</button>
           </form>
         )}
       </div>

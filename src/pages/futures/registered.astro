@@ -1,0 +1,22 @@
+---
+// Where Stripe sends families after paying. The registration is confirmed by Stripe's webhook, not
+// by this page, so it only says what happens next.
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import SiteHeader from '../../components/SiteHeader.jsx';
+import SiteFooter from '../../components/SiteFooter.jsx';
+import { loadSite } from '../../lib/content';
+
+const data = await loadSite();
+---
+<Base title="You're registered | Utah Athletic" description="Your Futures registration is complete.">
+  <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+    <SiteHeader current="futures" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
+    <PageHero kicker="Futures registration" maxWidth="1360px" bottom="96px">
+      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">You're <span style="color:#78b7b3">registered.</span></h1>
+      <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Thanks for joining Futures. Stripe is emailing your payment receipt, and we'll send a confirmation with your session dates and field. Questions? Write to <a href={`mailto:${data.settings.mainEmail}`}>{data.settings.mainEmail}</a>.</p>
+      <p style="margin:8px 0 0"><a href="/futures/" style="color:var(--color-accent-300)">Back to Futures →</a></p>
+    </PageHero>
+    <SiteFooter social={data.settings.social} />
+  </div>
+</Base>

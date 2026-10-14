@@ -10,8 +10,14 @@ import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
 import { CogIcon } from '@sanity/icons/Cog';
 import { EarthAmericasIcon } from '@sanity/icons/EarthAmericas';
 import { UsersIcon } from '@sanity/icons/Users';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { CreditCardIcon } from '@sanity/icons/CreditCard';
+import { FORM_OPTIONS } from './schemaTypes/submission';
 
 export const FIXED_TYPES = new Set(['program', 'region', 'siteSettings', 'networkPage']);
+
+// Created by the site's forms, never in the Studio.
+export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration']);
 
 export const PROGRAMS = [
   ['academy', 'Academy'],
@@ -26,8 +32,15 @@ export const REGIONS = [
   ['west', 'West'],
 ] as const;
 
-export const structure: StructureResolver = (S) =>
-  S.list()
+const NEWEST = [{ field: 'receivedAt', direction: 'desc' as const }];
+
+export const structure: StructureResolver = (S) => {
+  // A filtered list of submissions or registrations, newest first.
+  const list = (type: string, title: string, filter: string, params: Record<string, string> = {}) =>
+    S.listItem().title(title).id(title.toLowerCase().replace(/\W+/g, '-')).child(
+      S.documentList().title(title).schemaType(type).filter(`_type == $type && ${filter}`).params({ type, ...params }).defaultOrdering(NEWEST),
+    );
+  return S.list()
     .title('Content')
     .items([
       S.listItem()
@@ -80,4 +93,38 @@ export const structure: StructureResolver = (S) =>
         .title('Site settings')
         .icon(CogIcon)
         .child(S.document().schemaType('siteSettings').documentId('siteSettings').title('Site settings')),
+      S.divider(),
+      S.listItem()
+        .title('Submissions')
+        .icon(EnvelopeIcon)
+        .child(
+          S.list().title('Submissions').items([
+            list('submission', 'New', 'status == "new"'),
+            list('submission', 'In progress', 'status == "inprogress"'),
+            list('submission', 'Done', 'status == "done"'),
+            list('submission', 'All submissions', 'true'),
+            S.divider(),
+            ...FORM_OPTIONS.map((f) => list('submission', f.title, 'form == $form', { form: f.value })),
+          ]),
+        ),
+      S.listItem()
+        .title('Futures registrations')
+        .icon(CreditCardIcon)
+        .child(
+          S.list().title('Futures registrations').items([
+            list('futuresRegistration', 'Paid', 'payment == "paid"'),
+            list('futuresRegistration', 'Checkout started, not paid', 'payment in ["pending", "expired", "failed"]'),
+            list('futuresRegistration', 'Refunded', 'payment in ["refunded", "partiallyRefunded"]'),
+            list('futuresRegistration', 'All registrations', 'true'),
+            S.divider(),
+            S.listItem().title('By session').id('by-session').child(
+              S.documentTypeList('futuresSession').title('Pick a session').child((sid) =>
+                S.documentList().title('Registrations').schemaType('futuresRegistration')
+                  .filter('_type == "futuresRegistration" && session._ref in [$sid, "drafts." + $sid] && payment in ["paid", "refunded", "partiallyRefunded"]')
+                  .params({ sid: sid.replace(/^drafts\./, '') }).defaultOrdering(NEWEST),
+              ),
+            ),
+          ]),
+        ),
     ]);
+};

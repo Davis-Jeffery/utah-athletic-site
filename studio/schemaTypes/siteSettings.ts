@@ -16,10 +16,15 @@ export const siteSettings = defineType({
     { name: 'pro', title: 'Professional tier' },
     { name: 'tryouts', title: 'Tryouts page' },
     { name: 'events', title: 'Events page' },
+    { name: 'futures', title: 'Futures registration' },
     { name: 'dev', title: 'Development model' },
   ],
   fields: [
     defineField({ name: 'mainEmail', title: 'Main contact email', type: 'email', group: 'general', validation: (r) => r.required() }),
+    txt('futuresWaiver', 'Waiver', {
+      group: 'futures', rows: 14,
+      description: 'Families must accept this to register for Futures. Each registration keeps a copy of the text they accepted, so editing it later doesn\'t change past registrations.',
+    }),
     str('tryoutsLabel', 'Header Tryouts button', { required: true, group: 'general', description: 'e.g. "Tryouts 2027".' }),
     defineField({
       name: 'social', title: 'Social links', type: 'array', group: 'general',
