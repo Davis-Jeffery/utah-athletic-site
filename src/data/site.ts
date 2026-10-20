@@ -9,6 +9,14 @@ export const REGION_ORDER: RegionKey[] = ['north', 'south', 'west'];
 // Programs coached by volunteers: no coaching staff section on their region tabs (leaders still show).
 export const NO_COACH_LIST: ProgramKey[] = ['rec'];
 
+// Adult leagues (Studio > Adult leagues), in home page order. `slug` is the page under /adult/;
+// `form` is the program value their form messages are saved with (Submissions).
+export type AdultKey = 'upsl' | 'rec';
+export const ADULT: { key: AdultKey; slug: string; form: string }[] = [
+  { key: 'upsl', slug: 'upsl', form: 'upsl' },
+  { key: 'rec', slug: 'recreation', form: 'adultrec' },
+];
+
 export const NAV = [
   { key: 'programs', label: 'Programs', href: '/#programs' },
   { key: 'network', label: 'Network', href: '/network/' },

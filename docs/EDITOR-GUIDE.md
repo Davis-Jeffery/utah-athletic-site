@@ -32,6 +32,8 @@ The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures se
 | A program photo | **Programs**, pick the program, **Photos** tab |
 | Home page wording (big heading, section headings, "Where the pathway leads", "Want to play for us?") | **Site settings**, **Home page** tab. Sections are in the same order as on the page. |
 | Home page collage or video thumbnails | **Site settings**, **Home page** tab |
+| UPSL and Adult Recreation pages, and their boxes under the home pyramid | **Adult leagues**, then pick the league. The box uses its Name and Home page line. The small heading above the boxes is in **Site settings**, **Home page** tab, **Adult pathways**. |
+| Adult league staff (shown on the page; they get that league's form messages) | **Adult leagues**, the league, **Staff and fields** tab |
 | The "Professional" top of the pyramid and its row in the program list | **Site settings**, **Professional tier** tab |
 | Anything on the Network page | **Network page**. Tabs follow the page from top to bottom. |
 | Add or remove an affiliate academy card | **Network page**, **The network** tab, **Affiliate academies in development** |

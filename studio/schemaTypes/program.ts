@@ -5,10 +5,10 @@ import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
 import { MONTH_OPTIONS, link, photo, str, txt } from './helpers';
 
-const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
+export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
 
-const daySessions = (name: string, title: string) =>
+export const daySessions = (name: string, title: string) =>
   defineField({
     name, title, type: 'array',
     of: [defineArrayMember({
@@ -25,7 +25,7 @@ const daySessions = (name: string, title: string) =>
 // A list of staff picked from Staff (program leadership, a region's leaders, a region's coaches).
 // People are entered once under Staff; here editors pick them, in display order, and can give
 // them a different title for this spot.
-const people = (name: string, title: string, o: { description?: string; group?: string; hidden?: any; titleHint: string }) =>
+export const people = (name: string, title: string, o: { description?: string; group?: string; hidden?: any; titleHint: string }) =>
   defineField({
     name, title, type: 'array', group: o.group, description: o.description, hidden: o.hidden,
     of: [defineArrayMember({
@@ -40,6 +40,22 @@ const people = (name: string, title: string, o: { description?: string; group?: 
       },
     })],
     validation: (r) => r.unique(),
+  });
+
+// Season timeline on an August to July axis (programs and adult leagues).
+export const phasesField = (group: string) =>
+  defineField({
+    name: 'phases', title: 'Season timeline', type: 'array', group,
+    of: [defineArrayMember({
+      type: 'object', name: 'phase',
+      fields: [
+        str('label', 'Phase', { required: true }),
+        defineField({ name: 'startMonth', title: 'From', type: 'number', options: { list: MONTH_OPTIONS }, validation: (r) => r.required() }),
+        defineField({ name: 'endMonth', title: 'Through', type: 'number', options: { list: MONTH_OPTIONS }, validation: (r) => r.required().min(r.valueOfField('startMonth')) }),
+        txt('d', 'Description', { required: true, rows: 2 }),
+      ],
+      preview: { select: { title: 'label', subtitle: 'd' } },
+    })],
   });
 
 // Programs priced and scheduled by their sessions (Recreation sessions, Futures sessions).
@@ -161,19 +177,7 @@ export const program = defineType({
     txt('commitNote', 'Commitment note', { required: true, group: 'cost', rows: 2 }),
 
     // Season and week
-    defineField({
-      name: 'phases', title: 'Season timeline', type: 'array', group: 'season',
-      of: [defineArrayMember({
-        type: 'object', name: 'phase',
-        fields: [
-          str('label', 'Phase', { required: true }),
-          defineField({ name: 'startMonth', title: 'From', type: 'number', options: { list: MONTH_OPTIONS }, validation: (r) => r.required() }),
-          defineField({ name: 'endMonth', title: 'Through', type: 'number', options: { list: MONTH_OPTIONS }, validation: (r) => r.required().min(r.valueOfField('startMonth')) }),
-          txt('d', 'Description', { required: true, rows: 2 }),
-        ],
-        preview: { select: { title: 'label', subtitle: 'd' } },
-      })],
-    }),
+    phasesField('season'),
     defineField({ name: 'week', title: 'Typical week', type: 'object', group: 'season', fields: DAYS.map(([k, t]) => daySessions(k, t)) }),
 
     // Development and compare

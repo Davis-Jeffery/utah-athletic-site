@@ -4,7 +4,7 @@
 import { buildAssets } from './assets';
 import { fetchContent, imageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
-import { NO_COACH_LIST } from '../data/site';
+import { ADULT, NO_COACH_LIST } from '../data/site';
 
 // Image widths, matching the sizes the design uses.
 const W = { hero: 2000, section: 760, logo: 320, headshot: 400, video: 960 } as const;
@@ -159,6 +159,30 @@ async function build() {
     regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
   }));
 
+  // Adult leagues (UPSL, Adult Recreation): one page each under /adult/. Photos are optional and
+  // fall back to club photos from the home collage.
+  const adult = ADULT.flatMap(({ key, slug, form }, i) => {
+    const a = c.adultLeague.find((x) => x.key === key);
+    if (!a) return [];
+    const stand = (n: number) => img(settings.collage[(i * 3 + n) % settings.collage.length], W.section)!;
+    return [{
+      id: key, slug, form, href: `/adult/${slug}/`,
+      name: a.name, tier: a.tier, ages: a.ages, homeLine: a.homeLine, tagline: a.tagline, stats: a.stats,
+      forHead: a.forHead, intro: a.intro, expect: a.expect, placeholderNote: a.placeholderNote?.trim() || undefined,
+      leagues: a.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
+      join: a.join,
+      phases: a.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
+      week: DAYS.map(([k, day]) => ({ day, items: (a.week as Record<string, { time: string; label: string; kind: string }[]>)[k] ?? [] })),
+      commitNote: a.commitNote,
+      cost: a.cost ?? null, unit: a.unit, costNote: a.costNote, includes: a.includes,
+      leadership: staff(a.leadership),
+      venues: a.venues.map((v) => venue(v._ref)),
+      faqs: a.faqs,
+      img: img(a.img, W.hero) ?? img(settings.collage[(i * 3) % settings.collage.length], W.hero)!,
+      photos: { who: img(a.who, W.section) ?? stand(1), cta: img(a.cta, W.section) ?? stand(2) },
+    }];
+  });
+
   // Each region's leaders across every program that runs there (each person once, program order,
   // with their Staff title), for /contact and /tryouts.
   const regions = [...c.region].sort((a, b) => a.order - b.order).map((r) => {
@@ -182,9 +206,9 @@ async function build() {
 
   // Home page and Professional tier copy (Site settings), and the Network page.
   const note = (s?: string) => s?.trim() || undefined;
-  const { homeHero, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
+  const { homeHero, homeAdult, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
   const home = {
-    hero: homeHero, tryouts: homeTryouts, events: homeEvents, inside: homeInside, play: homePlay,
+    hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: homeEvents, inside: homeInside, play: homePlay,
     pathway: {
       ...homePathway, placeholderNote: note(homePathway.placeholderNote),
       cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
@@ -201,7 +225,7 @@ async function build() {
 
   return {
     home, pro: proTier, network,
-    programs, regions, venues, tryouts, sessions, events,
+    programs, adult, regions, venues, tryouts, sessions, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),
     settings: {

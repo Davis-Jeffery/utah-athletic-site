@@ -12,7 +12,10 @@ export const FORM_OPTIONS = [
   { title: 'Academy invitation request', value: 'invite' },
   { title: 'Register interest', value: 'interest' },
   { title: 'Registration request', value: 'register' },
+  { title: 'Adult league question', value: 'adult' },
 ];
+// Programs plus the adult leagues. Keep in step with ADULT_PROGRAMS in src/pages/api/submit.ts.
+const SUBMISSION_PROGRAMS = [...PROGRAM_OPTIONS, { title: 'UPSL', value: 'upsl' }, { title: 'Adult Recreation', value: 'adultrec' }];
 const label = (opts: { title: string; value: string }[], v?: string) => opts.find((o) => o.value === v)?.title ?? v ?? '';
 const ro = (name: string, title: string, type = 'string', extra: Record<string, unknown> = {}) =>
   defineField({ name, title, type, readOnly: true, group: 'submitted', ...extra } as never);
@@ -34,7 +37,7 @@ export const submission = defineType({
     defineField({ name: 'notes', title: 'Internal notes', type: 'text', rows: 4, group: 'track', description: 'Only staff see these.' }),
     ro('form', 'Form', 'string', { options: { list: FORM_OPTIONS } }),
     ro('receivedAt', 'Received', 'datetime'),
-    ro('program', 'Program', 'string', { options: { list: PROGRAM_OPTIONS } }),
+    ro('program', 'Program', 'string', { options: { list: SUBMISSION_PROGRAMS } }),
     ro('region', 'Region', 'string', { options: { list: REGION_OPTIONS } }),
     ro('session', 'Session'),
     ro('name', 'Name'),
@@ -55,7 +58,7 @@ export const submission = defineType({
     select: { form: 'form', name: 'name', player: 'player', email: 'email', program: 'program', region: 'region', at: 'receivedAt', status: 'status' },
     prepare: ({ form, name, player, email, program, region, at, status }) => ({
       title: `${status === 'new' ? '● ' : ''}${player || name || email}`,
-      subtitle: [label(FORM_OPTIONS, form), label(PROGRAM_OPTIONS, program), label(REGION_OPTIONS, region), at && new Date(at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })].filter(Boolean).join(' · '),
+      subtitle: [label(FORM_OPTIONS, form), label(SUBMISSION_PROGRAMS, program), label(REGION_OPTIONS, region), at && new Date(at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })].filter(Boolean).join(' · '),
     }),
   },
 });
