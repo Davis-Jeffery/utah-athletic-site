@@ -56,7 +56,7 @@ Line numbers drift, so search for the anchor text in each file.
 | `extra/Events.dc.html` | `src/pages/events.astro` + `src/components/EventsApp.jsx` | |
 | `extra/Contact Us.dc.html` | `src/pages/contact.astro` + `src/components/ContactApp.jsx` | |
 | `extra/Athletic Network.dc.html`, `extra/Network Map.html` | `src/pages/network.astro` + `src/components/NetworkMap.jsx` | |
-| `extra/Utah Map.html` | `src/components/UtahMap.jsx`, `src/styles/utah-map.css`, `src/data/locations.ts` | `const SITES` maps to `HUBS` |
+| `extra/Utah Map.html` | `src/components/UtahMap.jsx`, `src/styles/utah-map.css`, `src/data/locations.ts` | `const SITES` maps to each program's Map pins in the Studio (towns in `studio/schemaTypes/towns.ts`) |
 | Footer | `src/components/SiteFooter.jsx` | `<footer` |
 | `style-hover` / `style-focus` | `.hv-*` classes and `.ua-input` in `src/styles/global.css` | `.hv-lift` |
 | Design tokens (`<helmet>` styles, `:root` colors) | top of `src/styles/global.css` | `:root` |

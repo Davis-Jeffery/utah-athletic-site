@@ -4,6 +4,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
 import { MONTH_OPTIONS, link, photo, str, txt } from './helpers';
+import { TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
@@ -125,6 +126,8 @@ export const program = defineType({
     { name: 'dev', title: 'Development and compare' },
     { name: 'staff', title: 'Staff' },
     { name: 'regions', title: 'Regions' },
+    { name: 'map', title: 'Map pins' },
+    { name: 'formats', title: 'How we play', hidden: ({ document }: any) => document?.key !== 'rec' },
     { name: 'dev-only', title: 'Developer' },
   ],
   fields: [
@@ -251,6 +254,50 @@ export const program = defineType({
     regionStatus('north', 'North'),
     regionStatus('south', 'South'),
     regionStatus('west', 'West'),
+
+    // Map pins on the program page's locations map.
+    defineField({
+      name: 'mapHubs', title: 'Map pins', type: 'array', group: 'map',
+      description: 'Where this program trains, as pins on the "Choose your region" map. Each town on the map is matched to its nearest pin. Pins with the same label share a color.',
+      of: [defineArrayMember({
+        type: 'object', name: 'mapHub',
+        fields: [
+          str('label', 'Label', { required: true, description: 'Small heading on the pin, e.g. "West Club".' }),
+          defineField({ name: 'town', title: 'Town', type: 'string', description: 'Places the pin. Missing a town? Ask for it to be added to the map.', options: { list: TOWN_OPTIONS }, validation: (r) => r.required() }),
+          str('shownAs', 'Shown as', { description: 'Optional. The place name on the pin if it isn\'t just the town, e.g. "Saratoga Springs / Lehi".' }),
+          defineField({ name: 'side', title: 'Label side', type: 'string', initialValue: 'right', options: { list: [{ title: 'Right of the pin', value: 'right' }, { title: 'Left of the pin', value: 'left' }], layout: 'radio', direction: 'horizontal' } }),
+        ],
+        preview: { select: { title: 'label', town: 'town', shownAs: 'shownAs' }, prepare: ({ title, town, shownAs }: any) => ({ title, subtitle: shownAs || town }) },
+      })],
+    }),
+
+    // Recreation only: the "How we play" block under Where we play.
+    defineField({
+      name: 'formats', title: 'How we play', type: 'object', group: 'formats',
+      hidden: ({ document }: any) => document?.key !== 'rec',
+      fields: [
+        txt('intro', 'Intro', { rows: 2 }),
+        defineField({
+          name: 'divisions', title: 'Divisions', type: 'array',
+          of: [defineArrayMember({
+            type: 'object', name: 'division',
+            fields: [
+              str('division', 'Division', { required: true, description: 'e.g. "U7".' }),
+              str('format', 'Format', { required: true, description: 'e.g. "4v4".' }),
+              defineField({ name: 'keepers', title: 'Goalkeepers', type: 'boolean', initialValue: false }),
+              str('field', 'Field (yards)', { description: 'Width x length, e.g. "25 x 35".' }),
+              str('goals', 'Goals (feet)', { description: 'Height x width, e.g. "6 x 12".' }),
+              defineField({ name: 'ball', title: 'Ball size', type: 'number', options: { list: [3, 4, 5] } }),
+              str('roster', 'Roster', { description: 'e.g. "5 to 7".' }),
+              str('referees', 'Referees', { description: 'e.g. "None. Coaches guide play on the field."' }),
+            ],
+            preview: { select: { title: 'division', subtitle: 'format' } },
+          })],
+        }),
+        defineField({ name: 'rules', title: 'Game rules', type: 'array', of: [{ type: 'string' }], description: 'Short cards under the table.' }),
+        txt('combining', 'Divisions note', { rows: 3, description: 'Small print under the rules, e.g. how small divisions are combined.' }),
+      ],
+    }),
 
     // Developer only: these change how pages behave, so they're locked.
     defineField({ name: 'key', title: 'Program id', type: 'string', group: 'dev-only', readOnly: true }),

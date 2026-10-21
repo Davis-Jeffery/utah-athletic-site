@@ -16,11 +16,25 @@ export const siteSettings = defineType({
     { name: 'pro', title: 'Professional tier' },
     { name: 'tryouts', title: 'Tryouts page' },
     { name: 'events', title: 'Events page' },
+    { name: 'contact', title: 'Contact page' },
     { name: 'futures', title: 'Futures registration' },
     { name: 'dev', title: 'Development model' },
   ],
   fields: [
     defineField({ name: 'mainEmail', title: 'Main contact email', type: 'email', group: 'general', validation: (r) => r.required() }),
+    section('contactPage', 'Contact page', 'contact', [
+      str('kicker', 'Small heading', { required: true, description: 'e.g. "Contact us".' }),
+      ...headingPair(),
+      txt('intro', 'Intro', { required: true, rows: 2 }),
+      defineField({ name: 'topics', title: 'Form topics', type: 'array', of: [{ type: 'string' }], description: 'The Topic choices on the contact form, in order.', validation: (r) => r.required().min(1) }),
+    ]),
+    section('futuresPages', 'Registration pages', 'futures', [
+      ...headingPair(),
+      txt('intro', 'Intro', { required: true, rows: 2, description: 'Top of /futures/register/.' }),
+      str('thanksHeading', 'Thank-you heading', { required: true, description: 'After paying, e.g. "You\'re".' }),
+      str('thanksHeadingAccent', 'Thank-you heading, teal part', { description: 'e.g. "registered."' }),
+      txt('thanksBody', 'Thank-you text', { required: true, rows: 3, description: 'The main email is added after it for questions.' }),
+    ]),
     txt('futuresWaiver', 'Waiver', {
       group: 'futures', rows: 14,
       description: 'Families must accept this to register for Futures. Each registration keeps a copy of the text they accepted, so editing it later doesn\'t change past registrations.',
@@ -109,7 +123,33 @@ export const siteSettings = defineType({
       str('hint', 'Pyramid hover hint', { required: true, description: 'Shown under the pyramid when someone points at the top tier.' }),
     ], 'Both places open the Network page.'),
 
+    section('tryoutsPage', 'Page intro', 'tryouts', [
+      ...headingPair(),
+      txt('intro', 'Intro', { required: true, rows: 2 }),
+    ], 'The top of /tryouts. The small heading above it is the Header Tryouts button label (General tab).'),
     defineField({ name: 'tryoutBring', title: 'What to bring', type: 'array', group: 'tryouts', of: [{ type: 'string' }] }),
+    section('eventsPage', 'Page intro and cards', 'events', [
+      str('kicker', 'Small heading', { required: true, description: 'e.g. "Tournaments & Events".' }),
+      ...headingPair(),
+      txt('intro', 'Intro', { required: true, rows: 2 }),
+      defineField({
+        name: 'cards', title: 'Cards under the events', type: 'array', validation: (r) => r.max(3),
+        of: [defineArrayMember({
+          type: 'object', name: 'eventsCard',
+          fields: [
+            defineField({ name: 'icon', title: 'Icon', type: 'string', initialValue: 'flag', options: { list: [{ title: 'Flag', value: 'flag' }, { title: 'Handshake', value: 'handshake' }, { title: 'None', value: 'none' }], layout: 'radio', direction: 'horizontal' } }),
+            str('kicker', 'Small heading', { required: true, description: 'e.g. "Bring your club".' }),
+            str('heading', 'Heading', { required: true }),
+            txt('body', 'Text', { required: true, rows: 2 }),
+            str('button', 'Button label', { required: true, description: 'The arrow is added for you.' }),
+            str('href', 'Button link', { required: true, description: 'A page on this site, e.g. "/contact/", or a full web address.' }),
+          ],
+          preview: { select: { title: 'heading', subtitle: 'kicker' } },
+        })],
+      }),
+      str('reelKicker', 'Highlight reel small heading', { required: true, description: 'e.g. "Highlights".' }),
+      str('reelHeading', 'Highlight reel heading', { required: true, description: 'e.g. "From the touchline".' }),
+    ]),
 
     defineField({
       name: 'eventReel', title: 'Highlight reel', type: 'array', group: 'events',

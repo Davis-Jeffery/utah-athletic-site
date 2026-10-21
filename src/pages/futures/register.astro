@@ -8,6 +8,7 @@ import FuturesRegister from '../../components/FuturesRegister.jsx';
 import { loadSite } from '../../lib/content';
 
 const data = await loadSite();
+const pg = data.pages.futures;
 const p = data.programs.find((x) => x.id === 'futures')!;
 const regions = Object.fromEntries(data.regions.map((r) => [r.id, r.label]));
 const sessions = data.sessions.filter((s) => s.program === 'futures').map((s) => ({ ...s, regionLabel: regions[s.region] }));
@@ -16,8 +17,8 @@ const sessions = data.sessions.filter((s) => s.program === 'futures').map((s) =>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="futures" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker={`Futures · ${p.ages}`} maxWidth="1360px" bottom="32px">
-      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">Register for <span style="color:#78b7b3">Futures.</span></h1>
-      <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Pick a session, add your player's details and pay securely by card. Everyone who registers plays.</p>
+      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">{pg.heading}{pg.headingAccent ? <> <span style="color:#78b7b3">{pg.headingAccent}</span></> : null}</h1>
+      <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
     <FuturesRegister client:load sessions={sessions} waiver={data.futuresWaiver} builtOn={data.builtOn} />
     <SiteFooter social={data.settings.social} note="Payments are handled securely by Stripe." />

@@ -5,6 +5,7 @@ import { buildAssets } from './assets';
 import { fetchContent, imageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
 import { ADULT, NO_COACH_LIST } from '../data/site';
+import { CITIES } from '../data/locations';
 
 // Image widths, matching the sizes the design uses.
 const W = { hero: 2000, section: 760, logo: 320, headshot: 400, video: 960 } as const;
@@ -166,6 +167,12 @@ async function build() {
       yearRound: p.compare.yearRound ?? null, evaluations: p.compare.evaluations ?? null, strength: p.compare.strength ?? null,
       film: p.compare.film ?? null, mental: p.compare.mental ?? null, next: p.compare.next,
     },
+    // Map pins: each town picked in the Studio placed at its coordinates (src/data/locations.ts).
+    mapHubs: p.mapHubs.flatMap((h) => {
+      const town = CITIES.find(([name]) => name === h.town);
+      return town ? [{ id: h._key, label: h.label, city: h.shownAs || h.town, ll: [town[1], town[2]] as [number, number], side: h.side === 'left' ? -1 : 1 }] : [];
+    }),
+    formats: p.formats?.divisions.length ? p.formats : null,
     leadership: staff(p.leadership), leadershipHeading: p.leadershipHeading || 'Program leadership', leadershipIntro: p.leadershipIntro,
     joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel, years: p.years,
     regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
@@ -237,6 +244,8 @@ async function build() {
 
   return {
     home, pro: proTier, network,
+    // Page copy for /tryouts, /events, /contact and the Futures registration pages.
+    pages: { tryouts: settings.tryoutsPage, events: settings.eventsPage, contact: settings.contactPage, futures: settings.futuresPages },
     programs, adult, regions, venues, tryouts, sessions, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),

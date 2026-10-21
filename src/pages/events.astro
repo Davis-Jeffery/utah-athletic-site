@@ -9,6 +9,8 @@ import { buildAssets } from '../lib/assets';
 import { FlagBanner, Handshake } from '@phosphor-icons/react';
 
 const data = await loadSite();
+const pg = data.pages.events;
+const ICONS = { flag: FlagBanner, handshake: Handshake };
 const A = await buildAssets();
 const card = 'display:flex;flex-direction:column;gap:12px;padding:clamp(20px,3vw,32px);border-radius:14px';
 const kicker = 'display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)';
@@ -17,33 +19,35 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
 <Base title="Tournaments & Events | Utah Athletic" description="Every Utah Athletic tournament in one place: Copa Athletic, Summer Night Lights, Pioneer Cup and Chaos Cup." preload={A['collage-c18@lg']}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="events" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
-    <PageHero kicker="Tournaments & Events" photo={A['collage-c18@lg']} position="center 45%" bottom="clamp(36px,5vw,56px)">
-      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6.6vw,100px)/.92 var(--font-heading);letter-spacing:-.05em;text-wrap:balance">Where Utah <span style="color:#78b7b3">comes to play.</span></h1>
-      <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">Every Utah Athletic tournament in one place. Each event runs its own site for schedules, rules and team registration.</p>
+    <PageHero kicker={pg.kicker} photo={A['collage-c18@lg']} position="center 45%" bottom="clamp(36px,5vw,56px)">
+      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6.6vw,100px)/.92 var(--font-heading);letter-spacing:-.05em;text-wrap:balance">{pg.heading}{pg.headingAccent ? <> <span style="color:#78b7b3">{pg.headingAccent}</span></> : null}</h1>
+      <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
     <main style="max-width:1280px;margin:0 auto;padding:8px clamp(16px,4vw,56px) 48px;display:flex;flex-direction:column;gap:56px">
       <EventsApp client:load events={data.events} builtOn={data.builtOn} />
 
-      <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px">
-        <div style={`${card};background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)`}>
-          <span style={kicker}><FlagBanner size={18} aria-hidden="true" />Bring your club</span>
-          <h2 style="margin:0;font:500 clamp(24px,2.6vw,32px)/1.08 var(--font-heading);letter-spacing:-.03em">Visiting teams welcome at every event.</h2>
-          <p style="margin:0;font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">Clubs from across the Mountain West enter our tournaments. Tell us your age groups and we'll point you to the right event and hotel blocks.</p>
-          <a href="/contact/" class="hv-t14" style={btn}>Enquire for your club →</a>
-        </div>
-        <div style={`${card};background:var(--color-surface);box-shadow:var(--shadow-sm)`}>
-          <span style={kicker}><Handshake size={18} aria-hidden="true" />Sponsor an event</span>
-          <h2 style="margin:0;font:500 clamp(24px,2.6vw,32px)/1.08 var(--font-heading);letter-spacing:-.03em">Put your brand in front of thousands of families.</h2>
-          <p style="margin:0;font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">Field naming, vendor booths and digital packages are available across all four tournaments.</p>
-          <a href="/contact/" class="hv-t14" style={btn}>Request the sponsor deck →</a>
-        </div>
-      </section>
+      {pg.cards.length ? (
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px">
+          {pg.cards.map((c, i) => {
+            const Icon = ICONS[c.icon];
+            const ext = /^https?:/.test(c.href);
+            return (
+              <div style={`${card};` + (i === 0 ? 'background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)' : 'background:var(--color-surface);box-shadow:var(--shadow-sm)')}>
+                <span style={kicker}>{Icon ? <Icon size={18} aria-hidden="true" /> : null}{c.kicker}</span>
+                <h2 style="margin:0;font:500 clamp(24px,2.6vw,32px)/1.08 var(--font-heading);letter-spacing:-.03em">{c.heading}</h2>
+                <p style="margin:0;font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">{c.body}</p>
+                <a href={c.href} {...(ext ? { target: '_blank', rel: 'noopener' } : {})} class="hv-t14" style={btn}>{c.button} →</a>
+              </div>
+            );
+          })}
+        </section>
+      ) : null}
 
       <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="reel-title">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
           <div style="display:flex;flex-direction:column;gap:8px">
-            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">Highlights</span>
-            <h2 id="reel-title" style="margin:0;font:500 clamp(28px,3.2vw,44px)/1 var(--font-heading);letter-spacing:-.04em">From the touchline</h2>
+            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">{pg.reelKicker}</span>
+            <h2 id="reel-title" style="margin:0;font:500 clamp(28px,3.2vw,44px)/1 var(--font-heading);letter-spacing:-.04em">{pg.reelHeading}</h2>
           </div>
           <span aria-hidden="true" style="font-size:13px;color:var(--color-neutral-500)">Scroll →</span>
         </div>
