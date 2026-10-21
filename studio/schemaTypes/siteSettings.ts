@@ -45,10 +45,13 @@ export const siteSettings = defineType({
       options: { layout: 'grid' },
       validation: (r) => r.required().min(11),
     }),
-    section('homeTryouts', 'Tryouts near you', 'home', [
-      str('kicker', 'Small heading', { required: true, description: 'The region name is added after it, e.g. "Tryouts near you · North region".' }),
+    section('homeAdult', 'Adult pathways', 'home', [
+      str('kicker', 'Small heading', { required: true, description: 'Above the boxes under the pyramid, e.g. "Adult pathways".' }),
+    ], 'The boxes come from Adult leagues (name and home page line) and open each league\'s page.'),
+    section('homeTryouts', 'Play for us', 'home', [
+      str('kicker', 'Small heading', { required: true, description: 'The region name is added after it, e.g. "Near you · North region".' }),
       ...headingPair(),
-    ], 'The cards come from Tryout sessions and Rec and Futures sessions.'),
+    ], 'The cards come from Tryout sessions and Rec and Futures sessions. Academy and Club link to tryouts; Recreation and Futures link to registration.'),
     section('homeEvents', 'Tournaments', 'home', [
       str('kicker', 'Small heading', { required: true }),
       ...headingPair(),

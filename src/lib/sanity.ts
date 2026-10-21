@@ -48,10 +48,14 @@ const opt = z.string().optional();
 const venue = z.object({ _id: z.string(), name: z.string(), address: z.string() });
 const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string() });
 
+const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
   name: z.string(), tier: z.string(), ages: z.string(), kicker: z.string(), line: z.string(), tagline: z.string(), forHead: z.string(), intro: z.string(),
-  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
+  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
+  includedIntro: opt, included: feeItems, notIncluded: feeItems,
+  showSeason: z.boolean().default(true), showWeek: z.boolean().default(true),
+  leadershipHeading: opt, leadershipIntro: opt,
   img: image,
   photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).length(4) }),
   registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
@@ -90,6 +94,7 @@ const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.st
 const heading = { heading: z.string(), headingAccent: opt };
 const settingsHome = {
   homeHero: z.object({ kicker: z.string(), heading: z.string(), headingAccent: z.string(), intro: z.string() }),
+  homeAdult: z.object({ kicker: z.string() }).optional(),
   homeTryouts: z.object({ kicker: z.string(), ...heading }),
   homeEvents: z.object({ kicker: z.string(), ...heading }),
   homePathway: z.object({
@@ -128,7 +133,24 @@ const settings = z.object({
   ...settingsHome,
 });
 
-const SCHEMAS = { venue, staff, region, program, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
+const adultLeague = z.object({
+  _id: z.string(), key: z.enum(['upsl', 'rec']), name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(),
+  stats: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
+  forHead: z.string(), intro: z.string(),
+  expect: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
+  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), logo: image.optional() })).default([]),
+  placeholderNote: opt,
+  join: z.object({ status: z.string(), heading: z.string(), headingAccent: opt, body: z.string(), button: z.string(), url: z.string().url().optional(), formHeading: z.string() }),
+  phases: z.array(z.object({ label: z.string(), d: z.string(), startMonth: z.number().min(0).max(11), endMonth: z.number().min(0).max(11) })).default([]),
+  week: z.object(Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, z.array(session).default([])]))).default({}),
+  commitNote: opt,
+  cost: z.number().optional(), unit: opt, costNote: opt, includes: z.array(z.string()).default([]),
+  leadership: people, venues: z.array(ref).default([]),
+  faqs: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
+  img: image.optional(), who: image.optional(), cta: image.optional(),
+});
+
+const SCHEMAS = { venue, staff, region, program, adultLeague, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 
 // ---------- fetch ----------

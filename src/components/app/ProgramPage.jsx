@@ -1,15 +1,16 @@
 // A program page (Academy, Club, Recreation, Futures), shown full screen over the home page.
 // Overview tab: who it's for, development model, competition, season, week, comparison,
 // leadership and regions. Region tabs render RegionTab.
-import React, { useState } from 'react';
-import { ORDER, MONTHS, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
+import React from 'react';
+import { ORDER, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
 import { fmtDate, tryoutsFor, money, sessionLabel } from '../../lib/schedule';
-import { ACC, Kicker, SectionHead, Rule, Headshot } from '../ui.jsx';
+import { ACC, Kicker, SectionHead, Rule } from '../ui.jsx';
 import { RegionMenu } from '../SiteHeader.jsx';
 import DevModel from './DevModel.jsx';
 import CompareTable from './CompareTable.jsx';
 import RegionTab from './RegionTab.jsx';
 import RecFormats from '../RecFormats.jsx';
+import { Season, WeekGrid, StaffGrid } from './sections.jsx';
 
 // The map (d3 + geometry) loads only in the browser, after the page is up.
 const UtahMap = React.lazy(() => import('../UtahMap.jsx'));
@@ -170,6 +171,9 @@ const StatusCell = ({ k, children, flex = '1 1 180px' }) => (
 
 function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onRegion }) {
   const isAcademy = p.id === 'academy';
+  // Section numbers follow the sections shown (Season overview and A typical week can be switched off).
+  const shown = ['who', 'dev', 'leagues', ...(p.showSeason && p.phases.length ? ['season'] : []), ...(p.showWeek ? ['week'] : []), 'cost', 'staff', 'regions'];
+  const num = (k) => String(shown.indexOf(k) + 1).padStart(2, '0');
   return (
     <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
       <section id="sec-overview" style={{ padding: '88px 0 64px' }}>
@@ -224,56 +228,40 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       <section id="sec-leagues" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <SectionHead kicker="03 · Competition" title="Where we play" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '12px' }}>
-          {p.leagues.map((l) => (
-            <div key={l.name} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .25s,transform .25s' }}>
+          {p.leagues.map((l) => {
+            // A league with a website is a link to it.
+            const Box = l.url ? 'a' : 'div';
+            return (
+            <Box key={l.name} {...(l.url ? { href: l.url, target: '_blank', rel: 'noopener' } : {})} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', transition: 'box-shadow .25s,transform .25s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{l.level}</span>
                 {l.logo ? <img src={l.logo.src} alt={l.logo.alt || `${l.name} logo`} width={l.lw} height={l.lh} loading="lazy" style={{ flex: 'none', width: l.lw + 'px', height: l.lh + 'px', objectFit: 'contain', objectPosition: l.logo.pos, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
               </div>
               <span style={{ font: '500 34px/1 var(--font-heading)', letterSpacing: '-.035em' }}>{l.name}</span>
               <span style={{ marginTop: 'auto', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{l.d}</span>
-            </div>
-          ))}
+              {l.url ? <span style={{ fontSize: '13px', color: ACC }}>League website ↗</span> : null}
+            </Box>
+            );
+          })}
         </div>
         {p.id === 'rec' ? <RecFormats /> : null}
       </section>
 
-      <Season p={p} />
+      {shown.includes('season') ? <Season p={p} kicker={`${num('season')} · The year`} /> : null}
 
-      <section id="sec-schedule" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '20px', flexWrap: 'wrap' }}>
-          <SectionHead kicker="05 · Commitment" title="A typical week" />
-          <div style={{ display: 'flex', gap: '18px', fontSize: '12px', color: 'var(--color-neutral-400)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '10px', height: '10px', borderRadius: '3px', border: '1px solid var(--color-accent)' }} />Training</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'var(--color-accent-700)' }} />Match</span>
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: '8px' }}>
-          {p.week.map((d) => (
-            <div key={d.day} style={{ display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '170px', padding: '12px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
-              <span style={{ font: '500 15px/1 var(--font-heading)', color: 'var(--color-neutral-300)' }}>{d.day}</span>
-              {(d.items.length ? d.items : [null]).map((it, i) => {
-                const m = it && it.kind === 'match';
-                return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '9px 10px', borderRadius: '6px', background: !it ? 'transparent' : m ? 'var(--color-accent-700)' : 'rgba(120,183,179,.06)', color: !it ? 'var(--color-neutral-600)' : m ? 'var(--color-accent-100)' : 'var(--color-text)', boxShadow: `inset 0 0 0 1px ${!it ? 'rgba(233,233,237,.06)' : m ? 'transparent' : 'rgba(120,183,179,.55)'}` }}>
-                    <span style={{ fontSize: '10px', letterSpacing: '.04em', opacity: 0.8, minHeight: '10px' }}>{it ? it.time : ''}</span>
-                    <span style={{ font: '500 13px/1.25 var(--font-body)' }}>{it ? it.label : 'Rest'}</span>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        <p style={{ margin: 0, fontSize: '15px', color: 'var(--color-neutral-400)' }}>{p.commitNote}</p>
-      </section>
+      {shown.includes('week') ? <WeekGrid week={p.week} note={p.commitNote} kicker={`${num('week')} · Commitment`} /> : null}
 
       <section id="sec-cost" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '680px' }}>
-          <Kicker>06 · Compare programs</Kicker>
-          <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>What's included at <span style={{ color: ACC }}>every level</span></h2>
-          <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Every program is built on the same standard. Here's how the experience grows as players move up the pathway.</p>
-        </div>
-        <CompareTable programs={data.programs} current={p.id} onPick={onSwitch} />
+        {p.fees ? <Fees p={p} kicker={`${num('cost')} · What's included`} /> : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '680px' }}>
+              <Kicker>{num('cost')} · Compare programs</Kicker>
+              <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>What's included at <span style={{ color: ACC }}>every level</span></h2>
+              <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Every program is built on the same standard. Here's how the experience grows as players move up the pathway.</p>
+            </div>
+            <CompareTable programs={data.programs} current={p.id} onPick={onSwitch} />
+          </>
+        )}
         {!isAcademy ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
@@ -300,25 +288,13 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       </section>
 
       <section id="sec-staff" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <SectionHead kicker="07 · Leadership" title="Program leadership" maxWidth="640px" intro={`Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
+        <SectionHead kicker={`${num('staff')} · Leadership`} title={p.leadershipHeading} maxWidth="640px" intro={p.leadershipIntro || `Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
         {p.leadership.length ? null : <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Program leadership will be listed here soon.</p>}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '12px' }}>
-          {p.leadership.map((d) => (
-            <div key={d.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(90px,140px) 1fr', gap: '20px', padding: '14px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
-              <Headshot pic={d.headshot} name={d.name} style={{ aspectRatio: '4 / 5', borderRadius: '6px' }} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '6px 6px 6px 0' }}>
-                <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{d.role}</span>
-                <span style={{ font: '500 26px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>{d.name}</span>
-                {d.bio ? <span style={{ fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{d.bio}</span> : null}
-                {d.email ? <a href={'mailto:' + d.email} style={{ marginTop: 'auto', fontSize: '13px', overflowWrap: 'anywhere' }}>{d.email}</a> : null}
-              </div>
-            </div>
-          ))}
-        </div>
+        <StaffGrid people={p.leadership} />
       </section>
 
       <section id="sec-regions" style={{ padding: '64px 0 96px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <SectionHead kicker="08 · Regions" title="Choose your region" maxWidth="640px" intro="Tryouts, staff, locations and registration are run by region. Pick yours and we'll remember it across every program." />
+        <SectionHead kicker={`${num('regions')} · Regions`} title="Choose your region" maxWidth="640px" intro="Tryouts, staff, locations and registration are run by region. Pick yours and we'll remember it across every program." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '12px' }}>
           {REGION_ORDER.map((k) => {
             const r = p.regions[k], rm = data.regions.find((x) => x.id === k);
@@ -346,39 +322,28 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
   );
 }
 
-// 04 · The year: month axis with clickable phases and the selected phase's detail.
-function Season({ p }) {
-  const [sel, setSel] = useState(0);
-  const range = (ph) => MONTHS[ph.from] + (ph.to - ph.from > 1 ? ' – ' + MONTHS[ph.to - 1] : '');
-  const cur = p.phases[sel] || p.phases[0];
+// What's included: the program fee's breakdown (Studio > Programs > Cost), in place of the compare table.
+function Fees({ p, kicker }) {
+  const list = (title, items, dot, color) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <span style={{ paddingBottom: '10px', fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase', color }}>{title}</span>
+      {items.map((x) => (
+        <div key={x.item} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '4px 24px', padding: '14px 4px', borderTop: '1px solid var(--color-divider)' }}>
+          <span style={{ display: 'flex', alignItems: 'baseline', gap: '12px', font: '500 17px/1.3 var(--font-heading)', letterSpacing: '-.01em' }}>
+            <span aria-hidden="true" style={{ flex: 'none', width: '8px', height: '8px', borderRadius: '50%', background: dot, transform: 'translateY(-1px)' }} />{x.item}
+          </span>
+          {x.detail ? <span style={{ paddingLeft: '20px', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{x.detail}</span> : null}
+        </div>
+      ))}
+    </div>
+  );
   return (
-    <section id="sec-season" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <SectionHead kicker="04 · The year" title="Season overview" />
-      <div style={{ overflowX: 'auto' }}>
-        <div style={{ minWidth: '760px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)' }}>
-            {MONTHS.map((m) => <span key={m} style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-neutral-500)', padding: '0 0 8px 8px', borderLeft: '1px solid var(--color-divider)' }}>{m}</span>)}
-          </div>
-          <div style={{ position: 'relative', height: '72px' }}>
-            {p.phases.map((ph, i) => {
-              const on = sel === i;
-              return (
-                <button key={ph.label} type="button" aria-pressed={on} onClick={() => setSel(i)} onMouseEnter={() => setSel(i)} style={{ position: 'absolute', top: 0, bottom: 0, left: (ph.from / 12) * 100 + '%', width: ((ph.to - ph.from) / 12) * 100 + '%', cursor: 'pointer', border: `1px solid ${on ? ACC : 'transparent'}`, borderRadius: '8px', background: on ? 'rgba(120,183,179,.18)' : 'var(--color-surface)', color: on ? 'var(--color-accent-200)' : 'var(--color-neutral-300)', padding: '0 12px', textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '5px', overflow: 'hidden', boxShadow: '0 0 0 2px var(--color-bg)', transition: 'all .25s' }}>
-                  <span style={{ fontSize: '10px', letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.75 }}>{range(ph)}</span>
-                  <span style={{ font: '500 15px/1 var(--font-heading)', whiteSpace: 'nowrap' }}>{ph.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+    <>
+      <SectionHead kicker={kicker} title={<>What your fee <span style={{ color: ACC }}>covers</span></>} maxWidth="720px" intro={p.fees.intro} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '36px', padding: 'clamp(22px,3vw,36px)', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)' }}>
+        {list(`Included in your ${p.name} fee`, p.fees.included, ACC, 'var(--color-accent)')}
+        {p.fees.notIncluded.length ? list('Not included in the fee', p.fees.notIncluded, 'var(--color-error)', 'var(--color-error)') : null}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,300px),1fr))', gap: '28px', padding: '24px 26px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{range(cur)}</span>
-          <span style={{ font: '500 30px/1 var(--font-heading)', letterSpacing: '-.03em' }}>{cur.label}</span>
-        </div>
-        <p style={{ margin: 0, alignSelf: 'center', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-300)' }}>{cur.d}</p>
-      </div>
-    </section>
+    </>
   );
 }
