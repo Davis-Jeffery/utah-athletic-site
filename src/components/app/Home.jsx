@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, MapPin, ArrowUpRight } from '@phosphor-icons/react';
 import { ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
-import { eventsWithStatus, nextFor, money, EVENT_STATUS_LABEL } from '../../lib/schedule';
+import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
 import { ACC, Kicker, Rule, OutlineLink, Placeholder } from '../ui.jsx';
 import SiteFooter from '../SiteFooter.jsx';
 
@@ -53,13 +53,12 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
                 onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
               {ORDER.map((id) => {
                 const p = P[id];
-                const line = id === 'academy' ? p.line : `${p.line} · ${p.costFrom ? 'from ' : ''}${money(p.cost)}${p.unit === 'per year' ? '/yr' : '/season'}`;
-                return <LevelRow key={id} num={p.num} name={p.name} line={line} right={`${p.ages} →`} on={focus === id}
+                return <LevelRow key={id} num={p.num} name={p.name} line={p.line} right={`${p.ages} →`} on={focus === id}
                   onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
               })}
             </div>
           </div>
-          <Pyramid P={P} proTier={pro} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
+          <Pyramid P={P} proTier={pro} adult={home.adult} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
         </section>
       </div>
 
@@ -206,7 +205,7 @@ function NetworkRow({ crest, name, sub, tag, dashed }) {
 }
 
 // The pathway pyramid. Each slice is keyboard-focusable and opens its program.
-function Pyramid({ P, proTier, hover, focus, intro, introDone, tilt, onHover, onOpen, onNetwork }) {
+function Pyramid({ P, proTier, adult, hover, focus, intro, introDone, tilt, onHover, onOpen, onNetwork }) {
   const slice = (id, open) => {
     const on = hover === id, dim = hover && !on;
     const row = { pro: -1, academy: 0, club: 1, rec: 2, futures: 2 }[id];
@@ -261,7 +260,33 @@ function Pyramid({ P, proTier, hover, focus, intro, introDone, tilt, onHover, on
           );
         })}
       </div>
+      {adult ? <AdultPathways adult={adult} show={intro} dim={!!hover} /> : null}
       <div style={{ position: 'relative', fontSize: '12px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-300)' }}>{hint}</div>
+    </div>
+  );
+}
+
+// Adult pathways: boxes set apart under the pyramid, styled like its slices.
+function AdultPathways({ adult, show, dim }) {
+  return (
+    <div style={{ position: 'relative', width: 'min(100%,600px)', display: 'flex', flexDirection: 'column', gap: '10px', opacity: !show ? 0 : dim ? 0.45 : 1, transform: show ? 'none' : 'translateY(24px)', transition: 'opacity .5s .5s,transform .55s cubic-bezier(.2,.8,.2,1) .5s' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>
+        {adult.kicker}<span style={{ flex: 1, height: '1px', background: 'linear-gradient(to right,rgba(120,183,179,.5),transparent)' }} />
+      </span>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(adult.items.length, 2)},1fr)`, gap: '12px' }}>
+        {adult.items.map((a) => {
+          const body = (
+            <>
+              <span style={{ font: '500 19px/1 var(--font-heading)', letterSpacing: '-.03em', color: 'var(--color-text)' }}>{a.name}</span>
+              <span style={{ fontSize: '11px', color: 'var(--color-neutral-300)' }}>{a.details}{a.href ? ' →' : ''}</span>
+            </>
+          );
+          const style = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', minHeight: '76px', padding: '14px 12px', textAlign: 'center', background: 'linear-gradient(180deg,rgba(27,29,36,.88),rgba(17,19,24,.82))', boxShadow: 'inset 0 0 0 1.5px rgba(120,183,179,.5),0 24px 48px rgba(0,0,0,.45)', transition: 'box-shadow .25s,transform .25s' };
+          return a.href
+            ? <a key={a.name} href={a.href} {...(/^https?:/.test(a.href) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-adult" style={style}>{body}</a>
+            : <div key={a.name} style={style}>{body}</div>;
+        })}
+      </div>
     </div>
   );
 }

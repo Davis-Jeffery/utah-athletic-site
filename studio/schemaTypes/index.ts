@@ -9,5 +9,6 @@ import { networkPage } from './networkPage';
 import { staff } from './staff';
 import { submission } from './submission';
 import { futuresRegistration } from './futuresRegistration';
+import { adultLeague } from './adultLeague';
 
-export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, region, siteSettings, networkPage, submission, futuresRegistration];
+export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, networkPage, submission, futuresRegistration];

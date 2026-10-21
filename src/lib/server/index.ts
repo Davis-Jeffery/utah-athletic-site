@@ -29,7 +29,14 @@ export const FORMS = {
   invite: 'Academy invitation request',
   interest: 'Register interest',
   register: 'Registration request',
+  adult: 'Adult league question',
 } as const;
+
+/** Adult leagues' form program values (see ADULT in src/data/site.ts) and their Studio documents. */
+export const ADULT_PROGRAMS: Record<string, { doc: string; name: string }> = {
+  upsl: { doc: 'adultLeague.upsl', name: 'UPSL' },
+  adultrec: { doc: 'adultLeague.rec', name: 'Adult Recreation' },
+};
 
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -57,6 +64,14 @@ type Leader = { id: string; name?: string; email?: string };
  * region, else every leader in the region, else the main office. `leader` narrows it to one person.
  */
 export async function recipients(o: { program?: string; region?: string; leader?: string }) {
+  // Adult leagues: their own staff, else the main email.
+  const adult = o.program ? ADULT_PROGRAMS[o.program] : undefined;
+  if (adult) {
+    const d = await sanity().fetch<{ main: string; staff: (string | null)[] | null }>(
+      `{ "main": *[_id == "siteSettings"][0].mainEmail, "staff": *[_id == $doc][0].leadership[].person->email }`, { doc: adult.doc });
+    const emails = [...new Set((d.staff ?? []).filter((e): e is string => !!e))];
+    return emails.length ? emails : [d.main];
+  }
   const q = `{
     "main": *[_id == "siteSettings"][0].mainEmail,
     "programs": *[_type == "program"]{ key, "north": select(north.status != "none" => north.leaders[].person->{ "id": _id, name, email }),

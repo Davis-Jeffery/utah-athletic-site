@@ -13,8 +13,9 @@ import { UsersIcon } from '@sanity/icons/Users';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { CreditCardIcon } from '@sanity/icons/CreditCard';
 import { FORM_OPTIONS } from './schemaTypes/submission';
+import { ADULT_LEAGUES } from './schemaTypes/adultLeague';
 
-export const FIXED_TYPES = new Set(['program', 'region', 'siteSettings', 'networkPage']);
+export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage']);
 
 // Created by the site's forms, never in the Studio.
 export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration']);
@@ -76,6 +77,14 @@ export const structure: StructureResolver = (S) => {
           S.list()
             .title('Programs')
             .items(PROGRAMS.map(([id, title]) => S.listItem().title(title).id(id).child(S.document().schemaType('program').documentId(`program.${id}`)))),
+        ),
+      S.listItem()
+        .title('Adult leagues')
+        .icon(UsersIcon)
+        .child(
+          S.list()
+            .title('Adult leagues')
+            .items(ADULT_LEAGUES.map(([id, title]) => S.listItem().title(title).id(`adult-${id}`).child(S.document().schemaType('adultLeague').documentId(`adultLeague.${id}`)))),
         ),
       S.listItem()
         .title('Region settings')

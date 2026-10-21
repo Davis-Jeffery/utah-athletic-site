@@ -1,0 +1,26 @@
+---
+// Adult league pages: /adult/upsl/ and /adult/recreation/ (Studio > Adult leagues).
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.jsx';
+import SiteFooter from '../../components/SiteFooter.jsx';
+import AdultPage from '../../components/AdultPage.jsx';
+import { ADULT } from '../../data/site';
+import { loadSite } from '../../lib/content';
+
+export function getStaticPaths() {
+  return ADULT.map(({ slug }) => ({ params: { league: slug } }));
+}
+
+const data = await loadSite();
+const league = data.adult.find((a) => a.slug === Astro.params.league);
+if (!league) return Astro.redirect('/');
+const o = data.adult.find((a) => a !== league);
+const other = o ? { name: o.name, tagline: o.homeLine, href: o.href } : null;
+---
+<Base title={`${league.name} | Utah Athletic`} description={league.tagline} preload={league.img.src}>
+  <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+    <SiteHeader current="programs" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
+    <AdultPage client:load league={league} other={other} />
+    <SiteFooter social={data.settings.social} />
+  </div>
+</Base>

@@ -71,23 +71,27 @@ export function tryoutsFor(data: SiteData, f: { program?: string; region?: strin
 export function nextFor(data: SiteData, program: string, region: string, today: string) {
   const p = data.programs.find((x) => x.id === program)!;
   const r = data.regions.find((x) => x.id === region)!;
+  const tryoutsPage = `/tryouts/?region=${region}&level=${program}`;
   if (p.kind === 'season') {
+    // Rec and Futures link to registration: the open session's sign-up, else the program's.
+    const reg = program === 'futures' ? '/futures/register/' : p.registerUrl;
     // The first session families can still join, else the next one coming.
     const list = sessionsFor(data, program, region, today);
     const s = list.find((x) => sessionLabel(x, today).canJoin) || list.find((x) => sessionStatus(x, today) === 'upcoming') || list[0];
     if (!s) return {
       kind: 'none', title: 'No posted sessions', when: 'Dates to be announced', where: `${r.label} region`,
-      href: `/tryouts/?region=${region}&level=${program}`, cta: 'Get notified', external: false,
+      href: reg, cta: 'Register', external: /^https?:/.test(reg),
     };
     const l = sessionLabel(s, today);
-    return { kind: 'season', title: s.name, when: `${s.dates} · ${l.text}`, where: s.venueName, href: l.canJoin ? s.url : `/tryouts/?region=${region}&level=${program}`, cta: l.canJoin ? (program === 'futures' ? 'Register' : 'Sign up') : 'See details', external: l.canJoin && /^https?:/.test(s.url) };
+    const href = l.canJoin ? s.url : reg;
+    return { kind: 'season', title: s.name, when: `${s.dates} · ${l.text}`, where: s.venueName, href, cta: 'Register', external: /^https?:/.test(href) };
   }
   const t = tryoutsFor(data, { program, region }, today)[0];
   if (!t) return {
     kind: 'none', title: 'No posted dates', when: p.invite ? 'Request an invitation to trial' : 'Dates to be announced', where: `${r.label} region`,
-    href: `/tryouts/?region=${region}&level=${program}`, cta: p.invite ? 'Request invitation' : 'Get notified', external: false,
+    href: tryoutsPage, cta: p.invite ? 'Request invitation' : 'See tryouts', external: false,
   };
-  return { kind: 'tryout', title: `${t.age} ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, href: p.registerUrl, cta: 'Register', external: true };
+  return { kind: 'tryout', title: `${t.age} ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, href: tryoutsPage, cta: 'See tryouts', external: false };
 }
 
 // Region choice: ?region= wins, then the ua_region cookie.
