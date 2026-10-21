@@ -9,17 +9,16 @@ import { easeCubicInOut } from 'd3-ease';
 import { Delaunay } from 'd3-delaunay';
 import 'd3-transition';
 import GEO from '../data/utah-geo.json';
-import { HUBS, HUB_TONES, SERVICE_COUNTIES, CITIES, REFERENCE_TOWNS, FIND_LABEL } from '../data/locations';
+import { HUB_TONES, SERVICE_COUNTIES, CITIES, REFERENCE_TOWNS, FIND_LABEL } from '../data/locations';
 import '../styles/utah-map.css';
 
 const W = 800, H = 640;
 let uid = 0;
 
-export default function UtahMap({ program = 'academy' }) {
+export default function UtahMap({ program = 'academy', hubs = [] }) {
   const svgRef = useRef(null);
   const api = useRef({});
   const [ids] = useState(() => { uid += 1; return { glow: `uamGlow${uid}`, clip: `uamSvc${uid}`, list: `uamCities${uid}` }; });
-  const hubs = HUBS[program] || HUBS.academy;
   const labels = [...new Set(hubs.map((h) => h.label))];
   const sites = hubs.map((s) => ({ ...s, tone: HUB_TONES[labels.indexOf(s.label) % HUB_TONES.length] }));
   const [active, setActive] = useState(null);

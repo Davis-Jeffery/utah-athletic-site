@@ -57,6 +57,11 @@ const program = z.object({
   includedIntro: opt, included: feeItems, notIncluded: feeItems,
   showSeason: z.boolean().default(true), showWeek: z.boolean().default(true),
   leadershipHeading: opt, leadershipIntro: opt,
+  mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: z.string(), shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
+  formats: z.object({
+    intro: opt, combining: opt, rules: z.array(z.string()).default([]),
+    divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), roster: opt, referees: opt })).default([]),
+  }).optional(),
   img: image,
   photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).length(4) }),
   registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
@@ -97,6 +102,13 @@ const settingsHome = {
   homeHero: z.object({ kicker: z.string(), heading: z.string(), headingAccent: z.string(), intro: z.string() }),
   homeAdult: z.object({ kicker: z.string() }).optional(),
   homeTryouts: z.object({ kicker: z.string(), ...heading }),
+  tryoutsPage: z.object({ ...heading, intro: z.string() }),
+  eventsPage: z.object({
+    kicker: z.string(), ...heading, intro: z.string(), reelKicker: z.string(), reelHeading: z.string(),
+    cards: z.array(z.object({ icon: z.enum(['flag', 'handshake', 'none']).default('flag'), kicker: z.string(), heading: z.string(), body: z.string(), button: z.string(), href: z.string() })).default([]),
+  }),
+  contactPage: z.object({ kicker: z.string(), ...heading, intro: z.string(), topics: z.array(z.string()).min(1) }),
+  futuresPages: z.object({ ...heading, intro: z.string(), thanksHeading: z.string(), thanksHeadingAccent: opt, thanksBody: z.string() }),
   homeEvents: z.object({ kicker: z.string(), ...heading }),
   homePathway: z.object({
     kicker: z.string(), heading: z.string(), body: z.string(), placeholderNote: opt, button: z.string(),

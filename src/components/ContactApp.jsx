@@ -10,7 +10,7 @@ import { Field, FormGuard, useSubmit, ROW_RULE } from './ui.jsx';
 
 const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
 
-export default function ContactApp({ regions, programs, mainEmail }) {
+export default function ContactApp({ regions, programs, mainEmail, topics }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
   const [leader, setLeader] = useState(null); // a person's id, or null for whoever's first
@@ -77,7 +77,7 @@ export default function ContactApp({ regions, programs, mainEmail }) {
               <Field label="Email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
               <Field label="Phone"><input className="ua-input" name="phone" type="tel" placeholder="Optional" autoComplete="tel" /></Field>
               <Field label="Topic">
-                <select className="ua-input" name="topic"><option>General question</option><option>Tryouts &amp; player trials</option><option>Registration &amp; billing</option><option>Coaching opportunities</option><option>Partnerships &amp; media</option></select>
+                <select className="ua-input" name="topic">{topics.map((t) => <option key={t}>{t}</option>)}</select>
               </Field>
             </div>
             <Choice label="Program">

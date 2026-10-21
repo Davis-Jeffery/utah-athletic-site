@@ -248,7 +248,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             );
           })}
         </div>
-        {p.id === 'rec' ? <RecFormats /> : null}
+        {p.formats ? <RecFormats formats={p.formats} /> : null}
       </section>
 
       {shown.includes('season') ? <Season p={p} kicker={`${num('season')} · The year`} /> : null}
@@ -293,9 +293,10 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             );
           })}
         </div>
-        {mounted ? (
+        {/* The map needs at least one pin (Studio > Programs > Map pins). */}
+        {!p.mapHubs.length ? null : mounted ? (
           <React.Suspense fallback={<div className="uamap-placeholder" />}>
-            <UtahMap key={p.id} program={p.id} />
+            <UtahMap key={p.id} program={p.id} hubs={p.mapHubs} />
           </React.Suspense>
         ) : <div className="uamap-placeholder" />}
       </section>

@@ -29,6 +29,12 @@ The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures se
 | Put someone on a program's leaders or coaches in one region | **Programs**, pick the program, **Regions** tab, then **Leaders** or **Coaches** under **North**, **South** or **West**. Click **Add item** and pick the person (or **Create new** to add them to Staff on the spot). Drag to reorder. **Title here** shows a different title on this program only. Coaches show only when the region is **Running**. Recreation has no **Coaches** list: its coaches are volunteers, so its region pages show leaders only. |
 | Program leadership (the people in the program page's "Program leadership" section) | **Programs**, pick the program, **Staff** tab, **Program leadership**. Pick people from Staff the same way. **Leadership heading** changes the section title, e.g. "Academy Leadership". |
 | Which regions a program runs in | **Programs**, pick the program, **Regions** tab |
+| Page intros on Tryouts, Events and Contact | **Site settings**, the **Tryouts page**, **Events page** or **Contact page** tab |
+| The two cards under the events ("Bring your club", "Sponsor an event") and the highlight reel heading | **Site settings**, **Events page** tab |
+| Contact form topics | **Site settings**, **Contact page** tab, **Form topics** |
+| Futures registration and thank-you page wording | **Site settings**, **Futures registration** tab, **Registration pages** |
+| Rec "How we play" (divisions table, game rules, small print) | **Programs**, **Recreation**, **How we play** tab |
+| Map pins on a program's "Choose your region" map | **Programs**, pick the program, **Map pins** tab. Pick the town for each pin; **Shown as** changes the place name on it. Pins with the same label share a color. A town missing from the list has to be added in code. |
 | Prices by region and age group | **Programs**, pick the program, **Regions** tab, **Fees by age group** under North, South or West. Add a row per age group with its price and an optional note (e.g. the town). The region tab lists them; the top of the overview shows "From" the lowest. **Ages in this region** changes the ages shown on that region's tab. |
 | A program photo | **Programs**, pick the program, **Photos** tab |
 | Home page wording (big heading, section headings, "Where the pathway leads", "Want to play for us?") | **Site settings**, **Home page** tab. Sections are in the same order as on the page. |
