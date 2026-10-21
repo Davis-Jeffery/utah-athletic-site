@@ -144,6 +144,9 @@ async function build() {
     // Session programs: the lowest current session price, falling back to the program's own cost.
     ...(() => { const sp = p.kind === 'season' ? sessionPrice(p.key) : null; return { cost: sp?.cost ?? p.cost, costFrom: sp?.from ?? false }; })(),
     unit: p.unit, costNote: p.costNote, includes: p.includes, commit: p.commit, commitNote: p.commitNote,
+    // Fee breakdown: when `included` has items, it replaces the Compare programs table.
+    fees: p.included.length ? { intro: p.includedIntro, included: p.included, notIncluded: p.notIncluded } : null,
+    showSeason: p.showSeason, showWeek: p.showWeek,
     // The timeline axis runs Aug (0) to Jul (11); `to` is the end of the last month.
     phases: p.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
@@ -154,7 +157,7 @@ async function build() {
       yearRound: p.compare.yearRound ?? null, evaluations: p.compare.evaluations ?? null, strength: p.compare.strength ?? null,
       film: p.compare.film ?? null, mental: p.compare.mental ?? null, next: p.compare.next,
     },
-    leadership: staff(p.leadership),
+    leadership: staff(p.leadership), leadershipHeading: p.leadershipHeading || 'Program leadership', leadershipIntro: p.leadershipIntro,
     joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel, years: p.years,
     regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
   }));

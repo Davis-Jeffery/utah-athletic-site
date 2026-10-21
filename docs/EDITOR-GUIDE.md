@@ -22,12 +22,12 @@ The left sidebar has: **Tryout sessions**, **Recreation sessions**, **Futures se
 | Remove a tryout session | **Tryout sessions**, open it, **⋯** menu, **Delete**. Past sessions disappear from the site on their own. |
 | A field or park (new or renamed) | **Venues** |
 | The Ollie registration link | **Programs**, pick the program, **Registration** tab, **Ollie registration link**. Every Register button for that program uses it. |
-| Program wording (tagline, intro, leagues) | **Programs**, pick the program, **Overview** tab |
-| Program cost and what's included | **Programs**, pick the program, **Cost** tab. Academy prices are never shown on the site. Recreation and Futures prices are set on each session instead. |
-| Season timeline and typical week | **Programs**, pick the program, **Season and week** tab |
+| Program wording (tagline, intro, leagues) | **Programs**, pick the program, **Overview** tab. Give a league a **League website** and its box links there. |
+| Program cost and what's included | **Programs**, pick the program, **Cost** tab. Academy prices are never shown on the site. Recreation and Futures prices are set on each session instead. Fill in **Included in the fee** (and **Not included in the fee**) and the page shows that breakdown in place of the Compare programs table, as Academy does. |
+| Season timeline and typical week | **Programs**, pick the program, **Season and week** tab. Untick **Show "Season overview"** or **Show "A typical week"** to hide that section (Academy hides both). |
 | Add a staff member, or change someone's name, title, description, email or headshot | **Staff**. Each person is entered once; every page that shows them updates. **Assigned to** at the bottom lists where they appear. |
 | Put someone on a program's leaders or coaches in one region | **Programs**, pick the program, **Regions** tab, then **Leaders** or **Coaches** under **North**, **South** or **West**. Click **Add item** and pick the person (or **Create new** to add them to Staff on the spot). Drag to reorder. **Title here** shows a different title on this program only. Coaches show only when the region is **Running**. Recreation has no **Coaches** list: its coaches are volunteers, so its region pages show leaders only. |
-| Program leadership (the people in the program page's "Program leadership" section) | **Programs**, pick the program, **Staff** tab, **Program leadership**. Pick people from Staff the same way. |
+| Program leadership (the people in the program page's "Program leadership" section) | **Programs**, pick the program, **Staff** tab, **Program leadership**. Pick people from Staff the same way. **Leadership heading** changes the section title, e.g. "Academy Leadership". |
 | Which regions a program runs in | **Programs**, pick the program, **Regions** tab |
 | A program photo | **Programs**, pick the program, **Photos** tab |
 | Home page wording (big heading, section headings, "Where the pathway leads", "Want to play for us?") | **Site settings**, **Home page** tab. Sections are in the same order as on the page. |

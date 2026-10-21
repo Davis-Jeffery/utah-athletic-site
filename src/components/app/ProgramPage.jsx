@@ -170,6 +170,9 @@ const StatusCell = ({ k, children, flex = '1 1 180px' }) => (
 
 function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onRegion }) {
   const isAcademy = p.id === 'academy';
+  // Section numbers follow the sections shown (Season overview and A typical week can be switched off).
+  const shown = ['who', 'dev', 'leagues', ...(p.showSeason && p.phases.length ? ['season'] : []), ...(p.showWeek ? ['week'] : []), 'cost', 'staff', 'regions'];
+  const num = (k) => String(shown.indexOf(k) + 1).padStart(2, '0');
   return (
     <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
       <section id="sec-overview" style={{ padding: '88px 0 64px' }}>
@@ -224,25 +227,31 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       <section id="sec-leagues" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <SectionHead kicker="03 · Competition" title="Where we play" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '12px' }}>
-          {p.leagues.map((l) => (
-            <div key={l.name} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .25s,transform .25s' }}>
+          {p.leagues.map((l) => {
+            // A league with a website is a link to it.
+            const Box = l.url ? 'a' : 'div';
+            return (
+            <Box key={l.name} {...(l.url ? { href: l.url, target: '_blank', rel: 'noopener' } : {})} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', transition: 'box-shadow .25s,transform .25s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{l.level}</span>
                 {l.logo ? <img src={l.logo.src} alt={l.logo.alt || `${l.name} logo`} width={l.lw} height={l.lh} loading="lazy" style={{ flex: 'none', width: l.lw + 'px', height: l.lh + 'px', objectFit: 'contain', objectPosition: l.logo.pos, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
               </div>
               <span style={{ font: '500 34px/1 var(--font-heading)', letterSpacing: '-.035em' }}>{l.name}</span>
               <span style={{ marginTop: 'auto', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{l.d}</span>
-            </div>
-          ))}
+              {l.url ? <span style={{ fontSize: '13px', color: ACC }}>League website ↗</span> : null}
+            </Box>
+            );
+          })}
         </div>
         {p.id === 'rec' ? <RecFormats /> : null}
       </section>
 
-      <Season p={p} />
+      {shown.includes('season') ? <Season p={p} kicker={`${num('season')} · The year`} /> : null}
 
+      {shown.includes('week') ? (
       <section id="sec-schedule" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '20px', flexWrap: 'wrap' }}>
-          <SectionHead kicker="05 · Commitment" title="A typical week" />
+          <SectionHead kicker={`${num('week')} · Commitment`} title="A typical week" />
           <div style={{ display: 'flex', gap: '18px', fontSize: '12px', color: 'var(--color-neutral-400)' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '10px', height: '10px', borderRadius: '3px', border: '1px solid var(--color-accent)' }} />Training</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'var(--color-accent-700)' }} />Match</span>
@@ -266,14 +275,19 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
         </div>
         <p style={{ margin: 0, fontSize: '15px', color: 'var(--color-neutral-400)' }}>{p.commitNote}</p>
       </section>
+      ) : null}
 
       <section id="sec-cost" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '680px' }}>
-          <Kicker>06 · Compare programs</Kicker>
-          <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>What's included at <span style={{ color: ACC }}>every level</span></h2>
-          <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Every program is built on the same standard. Here's how the experience grows as players move up the pathway.</p>
-        </div>
-        <CompareTable programs={data.programs} current={p.id} onPick={onSwitch} />
+        {p.fees ? <Fees p={p} kicker={`${num('cost')} · What's included`} /> : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '680px' }}>
+              <Kicker>{num('cost')} · Compare programs</Kicker>
+              <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>What's included at <span style={{ color: ACC }}>every level</span></h2>
+              <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)', textWrap: 'pretty' }}>Every program is built on the same standard. Here's how the experience grows as players move up the pathway.</p>
+            </div>
+            <CompareTable programs={data.programs} current={p.id} onPick={onSwitch} />
+          </>
+        )}
         {!isAcademy ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
@@ -300,7 +314,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       </section>
 
       <section id="sec-staff" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <SectionHead kicker="07 · Leadership" title="Program leadership" maxWidth="640px" intro={`Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
+        <SectionHead kicker={`${num('staff')} · Leadership`} title={p.leadershipHeading} maxWidth="640px" intro={p.leadershipIntro || `Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
         {p.leadership.length ? null : <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Program leadership will be listed here soon.</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '12px' }}>
           {p.leadership.map((d) => (
@@ -318,7 +332,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
       </section>
 
       <section id="sec-regions" style={{ padding: '64px 0 96px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <SectionHead kicker="08 · Regions" title="Choose your region" maxWidth="640px" intro="Tryouts, staff, locations and registration are run by region. Pick yours and we'll remember it across every program." />
+        <SectionHead kicker={`${num('regions')} · Regions`} title="Choose your region" maxWidth="640px" intro="Tryouts, staff, locations and registration are run by region. Pick yours and we'll remember it across every program." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '12px' }}>
           {REGION_ORDER.map((k) => {
             const r = p.regions[k], rm = data.regions.find((x) => x.id === k);
@@ -347,13 +361,39 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
 }
 
 // 04 · The year: month axis with clickable phases and the selected phase's detail.
-function Season({ p }) {
+// What's included: the program fee's breakdown (Studio > Programs > Cost), in place of the compare table.
+function Fees({ p, kicker }) {
+  const list = (title, items, dot, color) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <span style={{ paddingBottom: '10px', fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase', color }}>{title}</span>
+      {items.map((x) => (
+        <div key={x.item} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '4px 24px', padding: '14px 4px', borderTop: '1px solid var(--color-divider)' }}>
+          <span style={{ display: 'flex', alignItems: 'baseline', gap: '12px', font: '500 17px/1.3 var(--font-heading)', letterSpacing: '-.01em' }}>
+            <span aria-hidden="true" style={{ flex: 'none', width: '8px', height: '8px', borderRadius: '50%', background: dot, transform: 'translateY(-1px)' }} />{x.item}
+          </span>
+          {x.detail ? <span style={{ paddingLeft: '20px', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{x.detail}</span> : null}
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <>
+      <SectionHead kicker={kicker} title={<>What your fee <span style={{ color: ACC }}>covers</span></>} maxWidth="720px" intro={p.fees.intro} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '36px', padding: 'clamp(22px,3vw,36px)', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)' }}>
+        {list(`Included in your ${p.name} fee`, p.fees.included, ACC, 'var(--color-accent)')}
+        {p.fees.notIncluded.length ? list('Not included in the fee', p.fees.notIncluded, 'var(--color-error)', 'var(--color-error)') : null}
+      </div>
+    </>
+  );
+}
+
+function Season({ p, kicker }) {
   const [sel, setSel] = useState(0);
   const range = (ph) => MONTHS[ph.from] + (ph.to - ph.from > 1 ? ' – ' + MONTHS[ph.to - 1] : '');
   const cur = p.phases[sel] || p.phases[0];
   return (
     <section id="sec-season" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <SectionHead kicker="04 · The year" title="Season overview" />
+      <SectionHead kicker={kicker} title="Season overview" />
       <div style={{ overflowX: 'auto' }}>
         <div style={{ minWidth: '760px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)' }}>

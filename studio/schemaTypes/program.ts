@@ -42,6 +42,17 @@ const people = (name: string, title: string, o: { description?: string; group?: 
     validation: (r) => r.unique(),
   });
 
+// A fee breakdown list: what the program fee covers, or what it doesn't.
+const feeList = (name: string, title: string, description: string) =>
+  defineField({
+    name, title, type: 'array', group: 'cost', description,
+    of: [defineArrayMember({
+      type: 'object', name: 'feeItem',
+      fields: [str('item', 'Item', { required: true, description: 'e.g. "Technical training sessions".' }), str('detail', 'Detail', { description: 'e.g. "3× per week (U14 and under), year-round".' })],
+      preview: { select: { title: 'item', subtitle: 'detail' } },
+    })],
+  });
+
 // Programs priced and scheduled by their sessions (Recreation sessions, Futures sessions).
 const SESSION_PROGRAMS = ['rec', 'futures'];
 
@@ -102,6 +113,7 @@ export const program = defineType({
         type: 'object', name: 'league',
         fields: [
           str('name', 'Name', { required: true }), str('level', 'Level', { required: true }), txt('d', 'Description', { required: true, rows: 2 }),
+          link('url', 'League website', { description: 'Optional. The box links here.' }),
           photo('logo', 'Logo'),
           defineField({ name: 'lw', title: 'Logo width (px)', type: 'number' }),
           defineField({ name: 'lh', title: 'Logo height (px)', type: 'number' }),
@@ -157,6 +169,9 @@ export const program = defineType({
     defineField({ name: 'unit', title: 'Billed', type: 'string', group: 'cost', options: { list: ['per year', 'per season'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
     txt('costNote', 'Cost note', { required: true, group: 'cost', rows: 2 }),
     defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', of: [{ type: 'string' }] }),
+    txt('includedIntro', 'Fee breakdown intro', { group: 'cost', rows: 2, description: 'Optional. Shown above the breakdown below.' }),
+    feeList('included', 'Included in the fee', 'When this has items, the program page shows this breakdown in place of the Compare programs table.'),
+    feeList('notIncluded', 'Not included in the fee', 'e.g. kit package, tournament travel.'),
     str('commit', 'Commitment', { required: true, group: 'cost', description: 'e.g. "3× / week".' }),
     txt('commitNote', 'Commitment note', { required: true, group: 'cost', rows: 2 }),
 
@@ -175,6 +190,8 @@ export const program = defineType({
       })],
     }),
     defineField({ name: 'week', title: 'Typical week', type: 'object', group: 'season', fields: DAYS.map(([k, t]) => daySessions(k, t)) }),
+    defineField({ name: 'showSeason', title: 'Show "Season overview" on the program page', type: 'boolean', group: 'season', initialValue: true }),
+    defineField({ name: 'showWeek', title: 'Show "A typical week" on the program page', type: 'boolean', group: 'season', initialValue: true }),
 
     // Development and compare
     defineField({
@@ -198,6 +215,8 @@ export const program = defineType({
     }),
 
     // Staff
+    str('leadershipHeading', 'Leadership heading', { group: 'staff', description: 'Optional. Defaults to "Program leadership", e.g. "Academy Leadership".' }),
+    txt('leadershipIntro', 'Leadership intro', { group: 'staff', rows: 2, description: 'Optional. Under the heading; leave empty for the standard line about regional leaders.' }),
     people('leadership', 'Program leadership', {
       group: 'staff',
       description: 'The "Program leadership" section on the program page: people who lead the whole program. Pick people from Staff; add as many as you need and drag to reorder. Regional leaders and coaches are on the Regions tab.',

@@ -48,10 +48,14 @@ const opt = z.string().optional();
 const venue = z.object({ _id: z.string(), name: z.string(), address: z.string() });
 const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string() });
 
+const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
   name: z.string(), tier: z.string(), ages: z.string(), kicker: z.string(), line: z.string(), tagline: z.string(), forHead: z.string(), intro: z.string(),
-  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
+  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
+  includedIntro: opt, included: feeItems, notIncluded: feeItems,
+  showSeason: z.boolean().default(true), showWeek: z.boolean().default(true),
+  leadershipHeading: opt, leadershipIntro: opt,
   img: image,
   photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).length(4) }),
   registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
