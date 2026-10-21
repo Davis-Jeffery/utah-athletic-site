@@ -19,7 +19,9 @@ export default function UtahMap({ program = 'academy' }) {
   const svgRef = useRef(null);
   const api = useRef({});
   const [ids] = useState(() => { uid += 1; return { glow: `uamGlow${uid}`, clip: `uamSvc${uid}`, list: `uamCities${uid}` }; });
-  const sites = (HUBS[program] || HUBS.academy).map((s, i) => ({ ...s, tone: HUB_TONES[i] }));
+  const hubs = HUBS[program] || HUBS.academy;
+  const labels = [...new Set(hubs.map((h) => h.label))];
+  const sites = hubs.map((s) => ({ ...s, tone: HUB_TONES[labels.indexOf(s.label) % HUB_TONES.length] }));
   const [active, setActive] = useState(null);
   const [hover, setHover] = useState(null);
   const [view, setView] = useState('state');

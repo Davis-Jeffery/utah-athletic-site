@@ -30,10 +30,10 @@ export const event = defineType({
     str('format', 'Format', { required: true, group: 'details', description: 'e.g. "7v7 · 9v9 · 11v11".' }),
     str('ages', 'Ages', { required: true, group: 'details', description: 'e.g. "U9 to U19 · Boys and Girls".' }),
     link('url', 'Registration or info link', { required: true, group: 'details' }),
-    photo('logo', 'Logo', { group: 'look', description: 'Optional. Shown in the card\'s logo slot.' }),
+    photo('logo', 'Logo', { group: 'look', description: 'Fills the top of the event card, edge to edge. Use a wide image (about 16 by 10); set the hotspot to keep the logo centered.' }),
     defineField({
       name: 'brand', title: 'Card colors', type: 'object', group: 'look', options: { columns: 2 },
-      fields: [hex('bg', 'Background'), hex('bg2', 'Background 2'), hex('ink', 'Text'), hex('accent', 'Accent'), defineField({ name: 'mono', title: 'Monogram', type: 'string', description: '2 or 3 letters, e.g. CA.', validation: (r) => r.required().max(3) })],
+      fields: [hex('bg', 'Background'), hex('bg2', 'Background 2'), hex('ink', 'Text'), hex('accent', 'Accent'), defineField({ name: 'mono', title: 'Monogram (no longer shown)', type: 'string', hidden: true })],
     }),
   ],
   orderings: [{ title: 'Start date', name: 'start', by: [{ field: 'start', direction: 'asc' }] }],

@@ -92,10 +92,13 @@ async function build() {
       return s ? [{ id: s.id, name: s.name, role: title || s.title, bio: s.bio, email: s.email, headshot: s.headshot }] : [];
     });
   const regionFor = (p: (typeof c.program)[number], k: 'north' | 'south' | 'west') => {
-    const { leaders, coaches, feeDelta, ...r } = p[k];
-    // `price`: what a family pays in this region (null when no session is posted yet).
-    const price = p.kind === 'season' ? sessionPrice(p.key, k) : { cost: p.cost + (feeDelta || 0), from: false };
-    return { ...r, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
+    const { leaders, coaches, feeDelta, fees, ages, ...r } = p[k];
+    // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
+    // region's Fees by age group when set, else its sessions (Rec, Futures) or the program cost.
+    // Null when no price is posted yet.
+    const price = fees.length ? priceOf(fees)
+      : p.kind === 'season' ? sessionPrice(p.key, k) : { cost: p.cost + (feeDelta || 0), from: false };
+    return { ...r, ages: ages || p.ages, fees, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
   };
 
   // Recreation and Futures sessions, each in one region at its own venue and price. Status is the
@@ -142,7 +145,13 @@ async function build() {
     tagline: p.tagline, forHead: p.forHead, intro: p.intro,
     leagues: p.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
     // Session programs: the lowest current session price, falling back to the program's own cost.
-    ...(() => { const sp = p.kind === 'season' ? sessionPrice(p.key) : null; return { cost: sp?.cost ?? p.cost, costFrom: sp?.from ?? false }; })(),
+    // The lowest price across running regions ("from" when prices differ), falling back to the program's own cost.
+    ...(() => {
+      const keys = (['north', 'south', 'west'] as const).filter((k) => p[k].status === 'active');
+      const prices = keys.map((k) => regionFor(p, k).price).filter((x): x is { cost: number; from: boolean } => !!x);
+      const low = prices.length ? Math.min(...prices.map((x) => x.cost)) : null;
+      return { cost: low ?? p.cost, costFrom: low != null && (prices.some((x) => x.from) || new Set(prices.map((x) => x.cost)).size > 1) };
+    })(),
     unit: p.unit, costNote: p.costNote, includes: p.includes, commit: p.commit, commitNote: p.commitNote,
     // Fee breakdown: when `included` has items, it replaces the Compare programs table.
     fees: p.included.length ? { intro: p.includedIntro, included: p.included, notIncluded: p.notIncluded } : null,
@@ -205,7 +214,7 @@ async function build() {
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.startTime.localeCompare(b.startTime));
 
-  const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.logo, 80), dates: fmtRange(e.start, e.end) }));
+  const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end) }));
 
   // Home page and Professional tier copy (Site settings), and the Network page.
   const note = (s?: string) => s?.trim() || undefined;

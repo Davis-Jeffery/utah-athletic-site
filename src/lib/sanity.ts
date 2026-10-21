@@ -40,6 +40,7 @@ const people = z.array(z.object({ person: ref, title: z.string().optional() })).
 const staff = z.object({ _id: z.string(), name: z.string(), title: z.string(), bio: z.string().optional(), email: z.string().email().optional(), headshot: image.optional() });
 const regionStatus = z.object({
   status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(), feeDelta: z.number().optional(),
+  ages: z.string().optional(), fees: z.array(z.object({ ages: z.string(), cost: z.number(), note: z.string().optional() })).default([]),
   leaders: people, coaches: people,
 });
 const session = z.object({ time: z.string(), label: z.string(), kind: z.enum(['training', 'match']) });
@@ -88,7 +89,7 @@ const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
 const event = z.object({
   _id: z.string(), name: z.string(), tagline: z.string(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate,
   location: z.string(), format: z.string(), ages: z.string(), url: z.string().url(), logo: image.optional(),
-  brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex, mono: z.string() }),
+  brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex }),
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });
 const heading = { heading: z.string(), headingAccent: opt };

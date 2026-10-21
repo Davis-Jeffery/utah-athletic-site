@@ -27,6 +27,11 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
   const en = p.enrollment ? ENROLLMENT[p.enrollment] : null;
   const ctaLabel = en ? en.cta : p.cta;
   const firstTryout = p.enrollment === 'tryouts' ? tryoutsFor(data, { program: p.id }, today)[0] : null;
+  // On a region tab the ages and price follow that region (Studio > Programs > Regions).
+  const rr = region && p.regions[region].status === 'active' ? p.regions[region] : null;
+  const ages = rr ? rr.ages : p.ages;
+  const price = rr ? rr.price : { cost: p.cost, from: p.costFrom };
+  const investment = price ? (price.from ? 'From ' : '') + money(price.cost) + (p.unit === 'per year' ? ' / year' : ' / season') : 'To be announced';
   const status = en ? {
     label: en.label,
     next: p.enrollment === 'trial' ? p.nextTryout : firstTryout ? `${fmtDate(firstTryout.date)} · ${firstTryout.time}` : 'To be announced',
@@ -72,7 +77,7 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
               <span style={{ width: '36px', height: '1px', background: 'var(--color-accent)' }} />
               <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px', padding: '6px 11px', borderRadius: '8px', background: 'rgba(17,19,24,.55)', backdropFilter: 'blur(10px)', boxShadow: 'inset 0 0 0 1px rgba(120,183,179,.45)' }}>
                 <span style={{ fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Age groups</span>
-                <span style={{ font: '500 15px/1 var(--font-heading)', letterSpacing: '-.01em', color: ACC, whiteSpace: 'nowrap' }}>{p.ages}</span>
+                <span style={{ font: '500 15px/1 var(--font-heading)', letterSpacing: '-.01em', color: ACC, whiteSpace: 'nowrap' }}>{ages}</span>
               </span>
             </div>
             <h1 style={{ margin: 0, font: '500 clamp(72px,14vw,220px)/.86 var(--font-heading)', letterSpacing: '-.06em' }}>{p.name}</h1>
@@ -100,7 +105,7 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>
-                {[['Ages', p.ages], ['Competes in', p.line], ['Investment', (p.costFrom ? 'From ' : '') + money(p.cost) + (p.unit === 'per year' ? ' / year' : ' / season')], ['Training', p.commit]].map(([k, v]) => (
+                {[['Ages', ages], ['Competes in', p.line], ['Investment', investment], ['Training', p.commit]].map(([k, v]) => (
                   <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 18px', background: 'rgba(27,29,36,.92)' }}>
                     <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>{k}</span>
                     <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{v}</span>
@@ -170,7 +175,6 @@ const StatusCell = ({ k, children, flex = '1 1 180px' }) => (
 );
 
 function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onRegion }) {
-  const isAcademy = p.id === 'academy';
   // Section numbers follow the sections shown (Season overview and A typical week can be switched off).
   const shown = ['who', 'dev', 'leagues', ...(p.showSeason && p.phases.length ? ['season'] : []), ...(p.showWeek ? ['week'] : []), 'cost', 'staff', 'regions'];
   const num = (k) => String(shown.indexOf(k) + 1).padStart(2, '0');
@@ -235,7 +239,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             <Box key={l.name} {...(l.url ? { href: l.url, target: '_blank', rel: 'noopener' } : {})} className="hv-lift" style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: '220px', padding: '26px', borderRadius: '8px', background: 'linear-gradient(160deg,rgba(120,183,179,.1),transparent 50%),var(--color-surface)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', transition: 'box-shadow .25s,transform .25s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{l.level}</span>
-                {l.logo ? <img src={l.logo.src} alt={l.logo.alt || `${l.name} logo`} width={l.lw} height={l.lh} loading="lazy" style={{ flex: 'none', width: l.lw + 'px', height: l.lh + 'px', objectFit: 'contain', objectPosition: l.logo.pos, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
+                {l.logo ? <img src={l.logo.src} alt={l.logo.alt || `${l.name} logo`} width={l.lw || undefined} height={l.lh || undefined} loading="lazy" style={{ flex: 'none', width: l.lw ? l.lw + 'px' : 'auto', height: (l.lh || 72) + 'px', maxWidth: '120px', objectFit: 'contain', objectPosition: l.logo.pos, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,.45))' }} /> : null}
               </div>
               <span style={{ font: '500 34px/1 var(--font-heading)', letterSpacing: '-.035em' }}>{l.name}</span>
               <span style={{ marginTop: 'auto', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{l.d}</span>
@@ -262,29 +266,6 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             <CompareTable programs={data.programs} current={p.id} onPick={onSwitch} />
           </>
         )}
-        {!isAcademy ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
-              <span style={{ font: '500 22px/1.1 var(--font-heading)', letterSpacing: '-.02em' }}>Fees by region</span>
-              <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>Fees reflect local field and facility costs.</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '12px' }}>
-              {REGION_ORDER.map((k) => {
-                const r = p.regions[k], act = r.status === 'active', rm = data.regions.find((x) => x.id === k);
-                return (
-                  <button key={k} type="button" onClick={() => onRegion(k)} className="hv-lift-sm" style={{ all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '10px', padding: '22px', borderRadius: '8px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .25s,transform .25s' }}>
-                    <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{rm.label} · {r.hub || rm.area}</span>
-                    <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                      <span style={{ font: `500 ${act ? '44px' : '22px'}/1 var(--font-heading)`, letterSpacing: '-.04em', color: act ? ACC : 'var(--color-neutral-400)', fontVariantNumeric: 'tabular-nums' }}>{act ? (r.price ? money(r.price.cost) : 'TBA') : r.status === 'soon' ? 'Coming ' + r.season : 'Not offered'}</span>
-                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{act && r.price ? (r.price.from ? 'and up, ' : '') + p.unit : ''}</span>
-                    </span>
-                    <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>View {rm.label} →</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
       </section>
 
       <section id="sec-staff" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
