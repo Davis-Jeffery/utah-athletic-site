@@ -69,8 +69,8 @@ export const REGION_OPTIONS = [
   { title: 'West', value: 'west' },
 ];
 
-/** U5 to U19. Stored as numbers so the site formats "U9 to U11" consistently and sorts correctly. */
-export const AGE_OPTIONS = Array.from({ length: 15 }, (_, i) => ({ title: `U${i + 5}`, value: i + 5 }));
+/** U3 to U19. Stored as numbers so the site formats "U9 to U11" consistently and sorts correctly. */
+export const AGE_OPTIONS = Array.from({ length: 17 }, (_, i) => ({ title: `U${i + 3}`, value: i + 3 }));
 
 /** 6:00 AM to 10:00 PM in 15 minute steps, stored as 24h "HH:MM" so it sorts and formats cleanly. */
 export const TIME_OPTIONS = Array.from({ length: (22 - 6) * 4 + 1 }, (_, i) => {

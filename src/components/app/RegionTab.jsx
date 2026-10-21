@@ -73,10 +73,26 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
             <section id="sec-rfee" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <Kicker>{num('fee')} · Fees</Kicker>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', flexWrap: 'wrap' }}>
-                  <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{rd.price ? money(rd.price.cost) : 'TBA'}</span>
-                  <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rd.price ? (rd.price.from ? 'and up, ' : '') + p.unit : 'Prices post with the first session'}</span>
-                </div>
+                {rd.fees.length > 1 ? (
+                  // Prices by age group (Studio > Programs > Regions > Fees by age group).
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)', paddingBottom: '8px' }}>By age group, {p.unit}</span>
+                    {rd.fees.map((f) => (
+                      <div key={f.ages + f.note} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', padding: '16px 0', background: ROW_RULE }}>
+                        <span style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span style={{ font: '500 20px/1.1 var(--font-heading)', letterSpacing: '-.02em' }}>{f.ages}</span>
+                          {f.note ? <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{f.note}</span> : null}
+                        </span>
+                        <span style={{ font: '500 40px/1 var(--font-heading)', letterSpacing: '-.04em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{money(f.cost)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', flexWrap: 'wrap' }}>
+                    <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{rd.price ? money(rd.price.cost) : 'TBA'}</span>
+                    <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rd.fees.length ? [rd.fees[0].ages, p.unit, rd.fees[0].note].filter(Boolean).join(', ') : rd.price ? (rd.price.from ? 'and up, ' : '') + p.unit : 'Prices post with the first session'}</span>
+                  </div>
+                )}
                 <p style={{ margin: 0, maxWidth: '460px', fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{p.costNote}</p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
@@ -157,8 +173,13 @@ function Tryouts({ p, rm, data, today, n }) {
   // Futures has no form beside the dates: each session's button opens the registration page.
   const wide = p.id === 'futures';
   const trial = !season && p.enrollment !== 'tryouts';
+  // Recreation shows one season at a time: the one open now, else the next to open.
+  const all = season ? sessionsFor(data, p.id, rm.id, today) : [];
+  const list = p.id === 'rec'
+    ? [all.find((s) => sessionLabel(s, today).canJoin) || all.find((s) => sessionLabel(s, today).status === 'upcoming') || all[0]].filter(Boolean)
+    : all;
   const rows = season
-    ? sessionsFor(data, p.id, rm.id, today).map((s) => {
+    ? list.map((s) => {
       const l = sessionLabel(s, today);
       return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: wide ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
     })

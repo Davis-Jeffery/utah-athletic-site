@@ -21,9 +21,14 @@ export const HUBS: Record<'academy' | 'club' | 'rec' | 'futures', Hub[]> = {
   club: [
     { id: 'north', label: 'North Club', city: 'Draper / Sandy', ll: [-111.851, 40.545], side: 1 },
     { id: 'west', label: 'West Club', city: 'Saratoga Springs', ll: [-111.9047, 40.3491], side: -1 },
+    { id: 'west-tooele', label: 'West Club', city: 'Tooele', ll: [-112.2983, 40.5308], side: -1 },
     { id: 'south', label: 'South Club', city: 'Orem', ll: [-111.6946, 40.2969], side: 1 },
   ],
-  rec: [{ id: 'hub', label: 'Primary Hub', city: 'Saratoga Springs / Lehi', ll: [-111.878, 40.372], side: 1 }],
+  rec: [
+    { id: 'hub', label: 'West Rec', city: 'Saratoga Springs / Lehi', ll: [-111.878, 40.372], side: 1 },
+    { id: 'tooele', label: 'West Rec', city: 'Tooele', ll: [-112.2983, 40.5308], side: -1 },
+    { id: 'stansbury', label: 'West Rec', city: 'Stansbury Park', ll: [-112.2966, 40.6377], side: -1 },
+  ],
   futures: [{ id: 'hub', label: 'Futures Hub', city: 'Saratoga Springs / Lehi', ll: [-111.878, 40.372], side: 1 }],
 };
 
@@ -35,7 +40,7 @@ export const FIND_LABEL: Record<string, string> = {
   futures: 'Find your nearest field',
 };
 
-// Zone colors, in hub order (teal ramp).
+// Zone colors, one per hub label in order (teal ramp); hubs sharing a label share a color.
 export const HUB_TONES = ['#78b7b3', '#d6f0ee', '#4f8a86'];
 
 // Wasatch Front counties shaded as service zones (FIPS codes).
@@ -50,7 +55,7 @@ export const CITIES: [string, number, number][] = [
   ['Millcreek', -111.8755, 40.6869], ['Holladay', -111.8247, 40.6688], ['Taylorsville', -111.9388, 40.6677],
   ['Murray', -111.8879, 40.6669], ['Kearns', -111.9963, 40.66], ['Park City', -111.498, 40.6461],
   ['Cottonwood Heights', -111.8102, 40.6197], ['Midvale', -111.8999, 40.6111], ['West Jordan', -111.9391, 40.6097],
-  ['Sandy', -111.8389, 40.5649], ['South Jordan', -111.9297, 40.5622], ['Tooele', -112.2983, 40.5308],
+  ['Sandy', -111.8389, 40.5649], ['South Jordan', -111.9297, 40.5622], ['Tooele', -112.2983, 40.5308], ['Stansbury Park', -112.2966, 40.6377],
   ['Draper', -111.8638, 40.5247], ['Riverton', -111.9391, 40.5219], ['Herriman', -112.033, 40.5141],
   ['Heber City', -111.4132, 40.507], ['Bluffdale', -111.9388, 40.4897], ['Alpine', -111.7777, 40.4533],
   ['Highland', -111.7949, 40.4252], ['Cedar Hills', -111.7585, 40.4141], ['Lehi', -111.8508, 40.3916],

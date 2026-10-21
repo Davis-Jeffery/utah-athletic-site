@@ -82,7 +82,21 @@ const regionStatus = (name: string, title: string) =>
       }),
       str('hub', 'Hub', { description: 'Where it runs, e.g. "Draper / Sandy".', hidden: ({ parent }: any) => parent?.status === 'none' }),
       str('season', 'Launching', { description: 'e.g. "Fall 2027".', hidden: ({ parent }: any) => parent?.status !== 'soon' }),
-      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || SESSION_PROGRAMS.includes(document?.key) }),
+      str('ages', 'Ages in this region', { description: 'Optional, e.g. "U3 to U15". Shown at the top of the page on this region\'s tab; leave empty to use the program\'s ages.', hidden: ({ parent }: any) => parent?.status !== 'active' }),
+      defineField({
+        name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent }: any) => parent?.status !== 'active',
+        description: 'This region\'s prices, shown on its tab. Add a row per age group (or one row for everyone). The overview shows "From" the lowest price across regions.',
+        of: [defineArrayMember({
+          type: 'object', name: 'fee',
+          fields: [
+            str('ages', 'Age group', { required: true, description: 'e.g. "U9 to U12" or "All ages".' }),
+            defineField({ name: 'cost', title: 'Price ($)', type: 'number', validation: (r) => r.required().min(0) }),
+            str('note', 'Note', { description: 'Optional, e.g. "Tooele and Stansbury Park" or "Includes uniform".' }),
+          ],
+          preview: { select: { title: 'ages', cost: 'cost', note: 'note' }, prepare: ({ title, cost, note }: any) => ({ title, subtitle: [cost != null ? `$${cost}` : '', note].filter(Boolean).join(' · ') }) },
+        })],
+      }),
+      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Only used when Fees by age group is empty: added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || parent?.fees?.length || SESSION_PROGRAMS.includes(document?.key) }),
       people('leaders', 'Leaders', {
         description: 'This program\'s leaders in this region, e.g. a managing director and a director of coaching. Pick people from Staff; add as many as you need and drag to reorder.',
         hidden: ({ parent }: any) => parent?.status === 'none',
