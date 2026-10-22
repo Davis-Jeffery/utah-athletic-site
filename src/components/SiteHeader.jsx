@@ -1,7 +1,10 @@
 // Site header used on every page. The region menu only appears on the home and program
 // pages (inside the app); elsewhere the header renders as static HTML.
+// On phones and small tablets (900px and under) the links and Tryouts button move into a
+// hamburger menu: a <details> element, so it opens without any JavaScript. A small script in
+// Base.astro closes it on a link click, Escape or a tap outside.
 import React, { useEffect, useRef } from 'react';
-import { CaretDown } from '@phosphor-icons/react';
+import { CaretDown, List, X } from '@phosphor-icons/react';
 import { NAV } from '../data/site';
 import { Rule } from './ui.jsx';
 
@@ -19,6 +22,20 @@ export default function SiteHeader({ current, tryoutsLabel = 'Tryouts', logo = '
         </nav>
         {regionMenu ? <RegionMenu {...regionMenu} /> : null}
         <a href={tryoutsHref} data-tryouts-link className="site-tryouts hv-t12" style={{ flex: 'none', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 14px/1 var(--font-body)', padding: '13px 16px', borderRadius: '8px' }}>{tryoutsLabel} →</a>
+        <details className="site-menu">
+          <summary aria-label="Menu" className="site-menu-btn">
+            <List size={22} className="site-menu-open" aria-hidden="true" />
+            <X size={22} className="site-menu-close" aria-hidden="true" />
+          </summary>
+          <div className="site-menu-panel">
+            <nav aria-label="Main menu" style={{ display: 'flex', flexDirection: 'column' }}>
+              {NAV.map((n) => (
+                <a key={n.key} href={n.href} aria-current={n.key === current ? 'page' : undefined} className="site-menu-link" style={{ color: n.key === current ? 'var(--color-accent)' : 'var(--color-text)' }}>{n.label}</a>
+              ))}
+            </nav>
+            <a href={tryoutsHref} data-tryouts-link className="hv-t12" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '52px', marginTop: '20px', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 16px/1 var(--font-body)', borderRadius: '10px' }}>{tryoutsLabel} →</a>
+          </div>
+        </details>
       </header>
       <Rule />
     </>

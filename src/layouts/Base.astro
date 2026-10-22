@@ -46,6 +46,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           if (!a.closest('astro-island') && a.getAttribute('href') === '/tryouts/') a.setAttribute('href', '/tryouts/?region=' + r);
         });
       })();
+      // Hamburger menu (SiteHeader): close it on a link click, Escape or a tap outside.
+      (function () {
+        var shut = function () { document.querySelectorAll('details.site-menu[open]').forEach(function (d) { d.open = false; }); };
+        document.addEventListener('click', function (e) {
+          var open = document.querySelector('details.site-menu[open]');
+          if (!open) return;
+          if (e.target.closest('.site-menu a') || !e.target.closest('details.site-menu')) shut();
+        });
+        // Capture phase, so Escape closes the menu and not the program page underneath.
+        window.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && document.querySelector('details.site-menu[open]')) { e.preventDefault(); e.stopPropagation(); shut(); }
+        }, true);
+      })();
     </script>
   </body>
 </html>
