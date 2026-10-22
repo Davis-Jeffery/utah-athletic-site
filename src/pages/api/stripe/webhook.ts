@@ -6,7 +6,7 @@
 // checkout.session.expired, charge.refunded.
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { env, json, lines, recipients, sanity, sendEmail } from '../../../lib/server';
+import { env, futuresConfirmation, futuresStaffNotice, json, recipients, sanity, sendEmail } from '../../../lib/server';
 import { fmtDate, fmtRange } from '../../../lib/schedule';
 
 export const prerender = false;
@@ -70,30 +70,20 @@ export const POST: APIRoute = async ({ request }) => {
 
     const s = reg.session;
     const region = s ? s.region[0].toUpperCase() + s.region.slice(1) : '';
-    const player = `${reg.playerFirst} ${reg.playerLast}`;
-    const classes = (s?.classes ?? []).slice().sort((a, b) => a.date.localeCompare(b.date))
-      .map((x) => `  ${fmtDate(x.date)}, ${clock(x.startTime)}${x.note ? ` (${x.note})` : ''}`).join('\n');
-    const details = lines([
-      ['Session', s && `Futures · ${s.name} · ${region}`], ['Dates', s && fmtRange(s.start, s.end)],
-      ['Where', s?.venue && `${s.venue}${s.address ? `, ${s.address}` : ''}`], ['Paid', `$${(c.amount_total ?? 0) / 100}`],
-    ]);
+    const leads = s ? await recipients({ program: 'futures', region: s.region }) : [];
+    const r = {
+      parentName: reg.parentName, player: `${reg.playerFirst} ${reg.playerLast}`,
+      session: s ? `${s.name} · ${region}` : 'Futures', dates: s && fmtRange(s.start, s.end),
+      where: s?.venue && `${s.venue}${s.address ? `, ${s.address}` : ''}`, paid: `$${(c.amount_total ?? 0) / 100}`,
+      classes: (s?.classes ?? []).slice().sort((a, b) => a.date.localeCompare(b.date)).map((x) => `${fmtDate(x.date)}, ${clock(x.startTime)}${x.note ? ` (${x.note})` : ''}`),
+      contact: leads[0]?.role === 'Main office' ? undefined : leads[0],
+      birthDate: reg.birthDate, gender: reg.gender, email: reg.email, phone: reg.phone, medical: reg.medical,
+      emergency: `${reg.emergencyName}, ${reg.emergencyPhone}`,
+    };
 
-    await sendEmail({
-      to: [reg.email],
-      subject: `${player} is registered for Futures${s ? ` · ${s.name}` : ''}`,
-      text: `Hi ${reg.parentName},\n\n${player} is registered. Stripe sends your payment receipt separately.\n\n${details}${classes ? `\n\nClasses:\n${classes}` : ''}\n\nQuestions? Reply to this email.\n\nUtah Athletic`,
-      replyTo: s ? (await recipients({ program: 'futures', region: s.region }))[0] : undefined,
-    });
+    await sendEmail({ to: [reg.email], replyTo: leads[0]?.email, ...futuresConfirmation(r) });
     if (s) {
-      await sendEmail({
-        to: await recipients({ program: 'futures', region: s.region }),
-        replyTo: reg.email,
-        subject: `New Futures registration · ${s.name} · ${region}: ${player}`,
-        text: `${lines([
-          ['Player', player], ['Birth date', reg.birthDate], ['Gender', reg.gender], ['Parent', reg.parentName], ['Email', reg.email], ['Phone', reg.phone],
-          ['Medical notes', reg.medical], ['Emergency contact', `${reg.emergencyName}, ${reg.emergencyPhone}`],
-        ])}\n\n${details}\n\nSee every registration in the Studio under Futures registrations.`,
-      });
+      await sendEmail({ to: leads.map((p) => p.email), replyTo: reg.email, ...futuresStaffNotice(r) });
 
       // Full once paid registrations reach the session's spots. Patches the draft too, if one is open.
       if (s.capacity) {

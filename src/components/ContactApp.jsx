@@ -1,8 +1,7 @@
 // /contact: main office, regional leadership cards and the message form.
-// ?region=&program= prefill the form. Leaders come from Staff via each program's regions: with a
-// program picked the form offers that program's leaders there, otherwise the region's. Picking one
-// updates the live "To:" line.
-// Sending saves a Submission in the Studio and emails the same leaders (see src/pages/api/submit.ts).
+// ?region=&program= prefill the form. Every message goes to the main contact email (Site settings);
+// the program and region picked travel with it so the team can pass it on. Sending saves a
+// Submission in the Studio and emails the sender a confirmation (see src/pages/api/submit.ts).
 import React, { useEffect, useState } from 'react';
 import { EnvelopeSimple, Check } from '@phosphor-icons/react';
 import { ORDER } from '../data/site';
@@ -13,7 +12,6 @@ const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divid
 export default function ContactApp({ regions, programs, mainEmail, topics }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
-  const [leader, setLeader] = useState(null); // a person's id, or null for whoever's first
 
   useEffect(() => {
     const q = new URLSearchParams(location.search);
@@ -21,16 +19,7 @@ export default function ContactApp({ regions, programs, mainEmail, topics }) {
     if (ORDER.includes(q.get('program'))) setProgram(q.get('program'));
   }, [regions]);
 
-  const rm = regions.find((r) => r.id === region);
-  const pm = programs.find((p) => p.id === program);
-  const own = rm && pm ? pm.leads[rm.id] : [];
-  const options = (own.length ? own : rm?.leaders ?? []).filter((l) => l.email);
-  const pick = options.find((l) => l.id === leader);
-  const team = own.length ? `${rm.label} ${pm.name}` : `${rm?.label} region`;
-  const to = !options.length ? `Main office · ${mainEmail}`
-    : pick ? `${pick.name}, ${pick.role} · ${pick.email}`
-      : `${team} leadership · ${options[0].email}`;
-  const f = useSubmit({ form: 'contact', program, region: region ?? '', leader: pick?.id ?? '' });
+  const f = useSubmit({ form: 'contact', program, region: region ?? '' });
   const programOpts = [...programs.map((p) => [p.id, p.name]), ['', 'Not sure yet']];
 
   return (
@@ -63,14 +52,14 @@ export default function ContactApp({ regions, programs, mainEmail, topics }) {
           <div role="status" style={{ padding: '56px 32px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px' }}>
             <span style={{ width: '48px', height: '48px', borderRadius: '50%', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}><Check aria-hidden="true" /></span>
             <span style={{ font: '500 34px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>Message sent.</span>
-            <span style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{rm ? `The ${rm.label} regional team` : 'Our main office'} will reply within 48 hours.</span>
+            <span style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>Someone from our team will reply within 48 hours. We've emailed you a copy.</span>
             <button type="button" onClick={f.reset} className="hv-ghost" style={{ cursor: 'pointer', marginTop: '6px', minHeight: '44px', background: 'transparent', border: '1px solid var(--color-divider)', color: 'var(--color-text)', padding: '0 16px', borderRadius: '8px', font: '500 14px/1 var(--font-body)' }}>Send another</button>
           </div>
         ) : (
           <form onSubmit={f.onSubmit} style={{ padding: 'clamp(22px,3vw,32px)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <h2 style={{ margin: 0, font: '500 26px/1.1 var(--font-heading)', letterSpacing: '-.03em' }}>Send a message</h2>
-              <span aria-live="polite" style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>To: <span style={{ color: 'var(--color-accent-300)' }}>{to}</span></span>
+              <span aria-live="polite" style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>To: <span style={{ color: 'var(--color-accent-300)' }}>{mainEmail}</span></span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
               <Field label="Your name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
@@ -83,18 +72,13 @@ export default function ContactApp({ regions, programs, mainEmail, topics }) {
             <Choice label="Program">
               {programOpts.map(([k, l]) => <button key={l} type="button" aria-pressed={program === k} onClick={() => setProgram(k)} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 13px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', ...pill(program === k) }}>{l}</button>)}
             </Choice>
-            <Choice label="Do you want to reach a specific regional leader?" grid>
-              {[{ id: null, label: 'No', area: 'Main office' }, ...regions].map((r) => (
+            <Choice label="Which region are you in?" grid>
+              {[{ id: null, label: 'Not sure', area: 'Any region' }, ...regions].map((r) => (
                 <button key={r.label} type="button" aria-pressed={region === r.id} onClick={() => setRegion(r.id)} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', padding: '11px 13px', borderRadius: '8px', textAlign: 'left', transition: 'all .2s', ...pill(region === r.id) }}>
                   <span style={{ font: '500 14px/1 var(--font-body)' }}>{r.label}</span><span style={{ fontSize: '11px', color: 'var(--color-neutral-500)' }}>{r.area}</span>
                 </button>
               ))}
             </Choice>
-            {options.length > 1 ? (
-              <Choice label="Which leader?">
-                {[{ id: null, name: 'Anyone' }, ...options].map((l) => <button key={l.id ?? 'any'} type="button" aria-pressed={(pick?.id ?? null) === l.id} onClick={() => setLeader(l.id)} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 13px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', ...pill((pick?.id ?? null) === l.id) }}>{l.name}{l.role ? <span style={{ color: 'var(--color-neutral-500)' }}> · {l.role}</span> : null}</button>)}
-              </Choice>
-            ) : null}
             <Field label="Message"><textarea className="ua-input" name="message" required rows={5} placeholder="How can we help?" /></Field>
             <FormGuard error={f.error} />
             <button type="submit" disabled={f.busy} className="hv-t16" style={{ opacity: f.busy ? 0.6 : 1, cursor: 'pointer', minHeight: '50px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', borderRadius: '8px' }}>{f.busy ? 'Sending…' : 'Send message →'}</button>
