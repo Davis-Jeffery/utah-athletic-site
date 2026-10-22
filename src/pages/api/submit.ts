@@ -1,7 +1,9 @@
 // POST /api/submit: every site form except Futures registration (which pays through Stripe).
-// Saves a Submission in Sanity (Studio > Submissions) and emails the leaders it's addressed to.
+// Saves a Submission in Sanity (Studio > Submissions), emails the people it's addressed to, and
+// sends the person who filled it in a confirmation naming who will get back to them
+// (src/lib/server/email.ts). The contact form always goes to the main contact email.
 import type { APIRoute } from 'astro';
-import { ADULT_PROGRAMS, FORMS, env, isEmail, json, lines, privateId, recipients, s, sanity, sendEmail, spamCheck } from '../../lib/server';
+import { ADULT_PROGRAMS, FORMS, autoReply, isEmail, json, privateId, recipients, s, sanity, sendEmail, spamCheck, staffNotice } from '../../lib/server';
 
 export const prerender = false;
 
@@ -9,6 +11,7 @@ type Form = keyof typeof FORMS;
 
 const PROGRAMS = ['academy', 'club', 'rec', 'futures', ...Object.keys(ADULT_PROGRAMS)];
 const REGIONS = ['north', 'south', 'west'];
+const NAMES: Record<string, string> = { academy: 'Academy', club: 'Club', rec: 'Recreation', futures: 'Futures', north: 'North', south: 'South', west: 'West' };
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   let body: Record<string, unknown>;
@@ -34,10 +37,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (form === 'contact' && (!f.name || !f.message)) return json({ error: 'Please add your name and a message.' }, 400);
   if ((form === 'trial' || form === 'invite' || form === 'register') && !f.player) return json({ error: 'Please add the player\'s name.' }, 400);
 
-  const to = await recipients({ program, region, leader: s(body.leader, 100) || undefined });
+  const to = await recipients(form === 'contact' ? { main: true } : { program, region, leader: s(body.leader, 100) || undefined });
   const doc = {
     _id: privateId('submission'), _type: 'submission', form, receivedAt: new Date().toISOString(), status: 'new',
-    program, region, sentTo: to, page: s(body.page, 300),
+    program, region, sentTo: to.map((p) => p.email), page: s(body.page, 300),
     ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)),
   };
   try {
@@ -47,15 +50,15 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     return json({ error: 'We couldn\'t send that just now. Please try again, or email us directly.' }, 500);
   }
 
-  const where = [program && (ADULT_PROGRAMS[program]?.name ?? program[0].toUpperCase() + program.slice(1)), region && region[0].toUpperCase() + region.slice(1)].filter(Boolean).join(' · ');
-  await sendEmail({
-    to, replyTo: f.email,
-    subject: `${FORMS[form]}${where ? ` · ${where}` : ''}${f.player ? `: ${f.player}` : f.name ? `: ${f.name}` : ''}`,
-    text: `${lines([
-      ['Form', FORMS[form]], ['Program and region', where], ['Session', f.session], ['Name', f.name], ['Player', f.player],
-      ['Birth year or age group', f.birthYear], ['Email', f.email], ['Phone', f.phone], ['Club', f.club], ['Position', f.position],
-      ['Video', f.video], ['Topic', f.topic],
-    ])}${f.message ? `\n\n${f.message}` : ''}\n\nReply to this email to answer them. Track it in the Studio under Submissions: ${env('PUBLIC_STUDIO_URL') || 'https://utah-athletic.sanity.studio'}`,
-  });
+  const sent = {
+    form, ...f,
+    programName: program ? ADULT_PROGRAMS[program]?.name ?? NAMES[program] : undefined,
+    regionName: region ? NAMES[region] : undefined,
+  };
+  const staff = staffNotice(sent, FORMS[form]);
+  await sendEmail({ to: to.map((p) => p.email), replyTo: f.email, ...staff });
+  // The confirmation goes out only when the message is saved; replies reach whoever will answer.
+  const reply = autoReply(sent, to[0]);
+  await sendEmail({ to: [f.email], replyTo: to[0].email, ...reply });
   return json({ ok: true });
 };
