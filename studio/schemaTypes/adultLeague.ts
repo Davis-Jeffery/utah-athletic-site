@@ -3,7 +3,7 @@
 // but can't add or delete leagues.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { UsersIcon } from '@sanity/icons/Users';
-import { link, photo, placeholderNote, seo, str, txt } from './helpers';
+import { hideSections, link, photo, placeholderNote, seo, str, txt } from './helpers';
 import { DAYS, daySessions, people, phasesField } from './program';
 
 // Keep in step with ADULT in src/data/site.ts.
@@ -19,6 +19,7 @@ export const adultLeague = defineType({
   icon: UsersIcon,
   groups: [
     { name: 'overview', title: 'Overview', default: true },
+    { name: 'sections', title: 'Hide sections' },
     { name: 'join', title: 'Joining' },
     { name: 'season', title: 'Season and week' },
     { name: 'cost', title: 'Cost' },
@@ -28,6 +29,7 @@ export const adultLeague = defineType({
   ],
   fields: [
     defineField({ name: 'key', title: 'Key', type: 'string', readOnly: true, hidden: true }),
+    hideSections('hide', 'adult', { group: 'sections' }),
 
     // Overview
     str('name', 'Name', { required: true, group: 'overview' }),

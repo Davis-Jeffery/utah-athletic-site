@@ -14,7 +14,7 @@ const A = await buildAssets();
 const tryData = {
   programs: data.programs.map(({ id, name, ages, ageGroups, kind, invite, registerUrl, regions }) => ({ id, name, ages, ageGroups, kind, invite, registerUrl, regions })),
   regions: data.regions, tryouts: data.tryouts, sessions: data.sessions, builtOn: data.builtOn,
-  bring: data.settings.tryoutBring,
+  bring: data.settings.tryoutBring, hide: pg.hide,
 };
 ---
 <Base title={data.seo.tryouts.title} description={data.seo.tryouts.description} image={data.seo.tryouts.image} preload={A['collage-c14@lg']}>

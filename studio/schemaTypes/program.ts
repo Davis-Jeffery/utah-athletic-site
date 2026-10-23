@@ -3,7 +3,7 @@
 // but can't add or delete programs.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
-import { MONTH_OPTIONS, link, photo, seo, str, txt } from './helpers';
+import { MONTH_OPTIONS, hideSections, link, photo, seo, str, txt } from './helpers';
 import { TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
@@ -128,6 +128,7 @@ export const program = defineType({
   icon: DocumentsIcon,
   groups: [
     { name: 'overview', title: 'Overview', default: true },
+    { name: 'sections', title: 'Hide sections' },
     { name: 'photos', title: 'Photos' },
     { name: 'join', title: 'Registration' },
     { name: 'cost', title: 'Cost and what\'s included' },
@@ -140,6 +141,9 @@ export const program = defineType({
     { name: 'dev-only', title: 'Developer', hidden: notAdmin },
   ],
   fields: [
+    hideSections('hide', 'program', { group: 'sections', title: 'Hide sections on the program page', description: 'Tick a section to hide it on this program\'s overview page. Untick it to show it again. The hero always shows. The development model is switched on or off per program in Site-wide components, Development model.' }),
+    hideSections('hideRegion', 'region', { group: 'sections', title: 'Hide sections on region tabs', description: 'Applies to this program\'s North, South and West tabs. The region heading always shows.' }),
+
     // Overview
     str('name', 'Name', { required: true, group: 'overview' }),
     str('tier', 'Tier label', { required: true, group: 'overview', description: 'e.g. "Tier 02 · Competitive".' }),
@@ -223,8 +227,9 @@ export const program = defineType({
     // Season and week
     phasesField('season'),
     defineField({ name: 'week', title: 'Typical week', type: 'object', group: 'season', fields: DAYS.map(([k, t]) => daySessions(k, t)) }),
-    defineField({ name: 'showSeason', title: 'Show "Season overview" on the program page', type: 'boolean', group: 'season', initialValue: true }),
-    defineField({ name: 'showWeek', title: 'Show "A typical week" on the program page', type: 'boolean', group: 'season', initialValue: true }),
+    // Replaced by Hide sections. Kept hidden until the old values are cleaned up.
+    defineField({ name: 'showSeason', title: 'Show "Season overview" on the program page (old)', type: 'boolean', group: 'season', hidden: true, readOnly: true }),
+    defineField({ name: 'showWeek', title: 'Show "A typical week" on the program page (old)', type: 'boolean', group: 'season', hidden: true, readOnly: true }),
 
     // Development and compare
     // The "We develop the complete player" section and each pillar's pop-up, all in one place.

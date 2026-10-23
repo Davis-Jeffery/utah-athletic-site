@@ -20,7 +20,7 @@ const programs = data.programs.map(({ id, name, regions }) => ({
       <h1 style="margin:0;max-width:900px;font:500 clamp(48px,6.4vw,96px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">{pg.heading}{pg.headingAccent ? <> <span style="color:#78b7b3">{pg.headingAccent}</span></> : null}</h1>
       <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
-    <ContactApp client:load regions={data.regions} programs={programs} mainEmail={data.settings.mainEmail} topics={pg.topics} />
+    {!pg.hide.includes('form') && <ContactApp client:load regions={data.regions} programs={programs} mainEmail={data.settings.mainEmail} topics={pg.topics} />}
     <SiteFooter social={data.settings.social} />
   </div>
 </Base>

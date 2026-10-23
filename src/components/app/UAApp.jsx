@@ -214,7 +214,9 @@ export default class UAApp extends React.Component {
     const r = this.state.region || this.state.myRegion || 'north';
     const st = p.regions[r].status;
     if (this.state.region !== r) this.setRegion(r);
-    setTimeout(() => this.goSec(st === 'active' ? 'rtry' : st === 'soon' ? 'rsoon' : 'rnone'), 380);
+    // An active region's sign-up, else its contact form when sign-up is hidden (Hide sections).
+    const active = ['try', 'contact'].find((k) => !p.hideRegion.includes(k));
+    setTimeout(() => this.goSec(st === 'active' ? (active ? 'r' + active : 'rnav') : st === 'soon' ? 'rsoon' : 'rnone'), 380);
   };
 
   // The pyramid's Professional tier zooms into the Athletic Network page.

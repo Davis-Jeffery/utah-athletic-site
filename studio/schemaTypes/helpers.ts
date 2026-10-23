@@ -1,6 +1,7 @@
 // Shared field builders and validation rules. Every text field goes through these, so the
 // writing rules (no em dashes) and placeholder checks apply everywhere without repeating them.
 import { defineField, type ImageRule, type StringRule, type TextRule, type UrlRule } from 'sanity';
+import { SECTIONS, type PageKind } from '../shared/sections';
 
 type Opts = { description?: string; required?: boolean; group?: string; fieldset?: string; hidden?: any; readOnly?: boolean; rows?: number };
 
@@ -100,4 +101,17 @@ export const seo = (name = 'seo', group?: string, title = 'Search and sharing') 
       txt('description', 'Description', { rows: 2, description: 'The line under the title in Google, about 140 to 160 characters.' }),
       photo('image', 'Share image', { description: 'Shown when the page is shared. Landscape works best; it\'s cropped to 1200 x 630 around the hotspot.' }),
     ],
+  });
+
+/**
+ * "Hide sections": a checkbox per section of a kind of page (studio/shared/sections.ts). A ticked
+ * section disappears from the website on the next publish; untick it to bring it back. The hero
+ * at the top always shows. Section numbers on the page (01, 02 ...) close up around hidden ones.
+ */
+export const hideSections = (name: string, kind: PageKind, o: { group?: string | string[]; title?: string; description?: string } = {}) =>
+  defineField({
+    name, title: o.title ?? 'Hide sections', type: 'array', group: o.group,
+    description: o.description ?? 'Tick a section to hide it on the website. Untick it to show it again. The top of the page (hero) always shows.',
+    of: [{ type: 'string' }],
+    options: { list: SECTIONS[kind].map(([value, title]) => ({ value, title })), layout: 'grid' },
   });
