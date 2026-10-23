@@ -16,6 +16,7 @@ export const staff = defineType({
     str('title', 'Title', { required: true, description: 'Their main title, e.g. "Managing Director, North" or "U12 Girls coach". A program can show a different title where it lists them.' }),
     txt('bio', 'Description', { rows: 3, description: 'Optional. A sentence or two about them.' }),
     defineField({ name: 'email', title: 'Email', type: 'email', description: 'Optional. Shown as a link.' }),
+    str('phone', 'Phone', { description: 'Optional. For staff use only: never shown on the website.' }),
     photo('headshot', 'Headshot'),
     defineField({
       name: 'assignedTo', title: 'Assigned to', type: 'string', readOnly: true,

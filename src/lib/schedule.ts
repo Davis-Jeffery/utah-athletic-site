@@ -79,8 +79,9 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
     const list = sessionsFor(data, program, region, today);
     const s = list.find((x) => sessionLabel(x, today).canJoin) || list.find((x) => sessionStatus(x, today) === 'upcoming') || list[0];
     if (!s) return {
-      kind: 'none', title: 'No posted sessions', when: 'Dates to be announced', where: `${r.label} region`,
-      href: reg, cta: 'Register', external: /^https?:/.test(reg),
+      // Nothing posted yet: send families to the region tab's "notify me" form (RegionTab, #notify).
+      kind: 'none', title: 'Coming soon!', when: 'Registration dates to be announced', where: `${r.label} region`,
+      href: `/${program}/${region}/#notify`, cta: 'Get notified when registration opens', external: false,
     };
     const l = sessionLabel(s, today);
     const href = l.canJoin ? s.url : reg;

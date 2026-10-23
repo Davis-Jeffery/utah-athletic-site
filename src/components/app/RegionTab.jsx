@@ -1,7 +1,7 @@
 // A program's region tab (/academy/north/ etc.). Three states, from the program's `regions`:
 // active (this program's regional leaders and coaches (not for volunteer-coached programs), tryouts, fees, contact), soon (register interest) and none
 // (point to the nearest region that runs it). Forms are front-end only for now.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER, NO_COACH_LIST } from '../../data/site';
 import { fmtDate, tryoutsFor, money, sessionsFor, sessionLabel } from '../../lib/schedule';
@@ -14,7 +14,8 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
   const rd = p.regions[regionId];
   const title = `${rm.label} ${p.name}`;
   const isAcademy = p.id === 'academy';
-  const showCoaches = !NO_COACH_LIST.includes(p.id);
+  // Volunteer-coached programs never list coaches; others only once a coach is added.
+  const showCoaches = !NO_COACH_LIST.includes(p.id) && rd.coaches.length > 0;
   // Section numbers follow the sections shown.
   // Futures registers online, so its sign-up comes first, right under the region heading.
   const signupFirst = p.id === 'futures';
@@ -26,6 +27,12 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
       : `This program does not run in the ${rm.label} region.`;
   // Where the register-interest form says it goes: the first leader with an email, else the main office.
   const contact = rd.leaders.find((l) => l.email) || { email: data.settings.mainEmail };
+  // Links like /rec/north/#notify (home page "Get notified") jump to the register-interest form.
+  useEffect(() => {
+    if (location.hash !== '#notify') return;
+    const t = setTimeout(() => document.getElementById('notify')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
@@ -170,8 +177,6 @@ function LeadCard({ lead }) {
 // 03 · Tryouts: posted dates on the left, the trial application or registration form on the right.
 function Tryouts({ p, rm, data, today, n }) {
   const season = p.kind === 'season';
-  // Futures has no form beside the dates: each session's button opens the registration page.
-  const wide = p.id === 'futures';
   const trial = !season && p.enrollment !== 'tryouts';
   // Recreation shows one season at a time: the one open now, else the next to open.
   const all = season ? sessionsFor(data, p.id, rm.id, today) : [];
@@ -181,9 +186,14 @@ function Tryouts({ p, rm, data, today, n }) {
   const rows = season
     ? list.map((s) => {
       const l = sessionLabel(s, today);
-      return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: wide ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
+      return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: p.id === 'futures' ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
     })
     : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, mapUrl: t.mapUrl, cta: 'Register', pick: `${fmtDate(t.date)}, ${t.age} ${t.gender}` }));
+  // Nothing posted yet: the register-interest form takes the place of sign-up.
+  const notify = season && !rows.length;
+  // Futures has no form beside its sessions: each session's button opens the registration page.
+  const wide = p.id === 'futures' && !notify;
+  const rd = p.regions[rm.id];
   const head = trial ? 'Player trial application' : season ? `Sign up in ${rm.label}` : `Next tryouts in ${rm.label}`;
   const copy = trial
     ? `Tryout registration opens ${p.registrationOpens}. Until then, apply for a private trial with ${rm.label} staff. We review every application.`
@@ -213,7 +223,8 @@ function Tryouts({ p, rm, data, today, n }) {
       </div>
       {wide ? null : (
         <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
-          {trial ? <TrialForm p={p} rm={rm} /> : <RegisterForm p={p} rm={rm} choices={rows.filter((r) => !r.closed).map((r) => r.pick)} />}
+          {notify ? <InterestForm p={p} rm={rm} to={rd.leaders.find((l) => l.email) || { email: data.settings.mainEmail }} title={`${rm.label} ${p.name}`} />
+            : trial ? <TrialForm p={p} rm={rm} /> : <RegisterForm p={p} rm={rm} choices={rows.filter((r) => !r.closed).map((r) => r.pick)} />}
         </div>
       )}
     </section>
@@ -273,7 +284,7 @@ function RegisterForm({ p, rm, choices }) {
 function InterestForm({ p, rm, to, title }) {
   const f = useSubmit({ form: 'interest', program: p.id, region: rm.id });
   return (
-    <div style={{ borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
+    <div id="notify" style={{ scrollMarginTop: '140px', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
       {f.sent ? (
         <Sent pad="44px 28px" head="You're on the list." copy={`The ${rm.label} team will contact you first when ${p.name} ${p.kind === 'season' ? 'sign-up opens' : 'tryouts open'}.`} onAgain={f.reset} />
       ) : (

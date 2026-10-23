@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, MapPin, ArrowUpRight } from '@phosphor-icons/react';
 import { ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
 import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
-import { ACC, Kicker, Rule, OutlineLink, Placeholder } from '../ui.jsx';
+import { ACC, Kicker, Rule, OutlineLink, Placeholder, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
 import SiteFooter from '../SiteFooter.jsx';
 
 const ptsAttr = (id) => PTS[id].slice(0, id === 'pro' ? 3 : 4).map((q) => q.join(',')).join(' ');
@@ -31,6 +31,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
   const region = data.regions.find((r) => r.id === (myRegion || 'north'));
   const tryoutsHref = `/tryouts/?region=${region.id}`;
+  // No tryout dates posted anywhere (past dates drop off on the visitor's date).
+  const noTryouts = !data.tryouts.some((t) => t.date >= today);
   const { home, pro } = data;
 
   return (
@@ -70,24 +72,14 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
           <OutlineLink href={tryoutsHref}>All tryouts →</OutlineLink>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '10px' }}>
-          {ORDER.map((id) => {
-            const n = nextFor(data, id, region.id, today);
-            return (
-              <div key={id} className="hv-lift-sm" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '18px', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s,transform .2s' }}>
-                <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{P[id].name}</span>
-                  <span style={{ fontSize: '11px', color: 'var(--color-neutral-500)' }}>{n.kind === 'season' ? 'Season sign-up' : n.kind === 'tryout' ? 'Next tryout' : 'Not yet posted'}</span>
-                </span>
-                <span style={{ font: '500 20px/1.15 var(--font-heading)', letterSpacing: '-.02em' }}>{n.title}</span>
-                <span style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', color: 'var(--color-neutral-300)' }}>
-                  <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />{n.when}</span>
-                  <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><MapPin color={ACC} aria-hidden="true" />{n.where}</span>
-                </span>
-                <OutlineLink href={n.href} external={n.external} className="hv-t10" style={{ marginTop: 'auto', border: '1px solid var(--color-accent-800)' }}>{n.cta} →</OutlineLink>
-              </div>
-            );
-          })}
+        {/* With no tryout dates posted anywhere, Academy and Club become a trial request form. */}
+        <div style={noTryouts ? { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'stretch' } : { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '10px' }}>
+          {noTryouts ? <TrialRequest key={region.id} data={data} region={region.id} /> : null}
+          {noTryouts ? (
+            <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {ORDER.filter((id) => P[id].kind === 'season').map((id) => <PlayCard key={id} P={P} id={id} n={nextFor(data, id, region.id, today)} />)}
+            </div>
+          ) : ORDER.map((id) => <PlayCard key={id} P={P} id={id} n={nextFor(data, id, region.id, today)} />)}
         </div>
       </section>
 
@@ -175,6 +167,71 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
       </section>
       <SiteFooter social={data.settings.social} />
     </>
+  );
+}
+
+// One "Play for us" card: the next tryout or session a family in the region can sign up for.
+function PlayCard({ P, id, n }) {
+  return (
+    <div className="hv-lift-sm" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '18px', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s,transform .2s' }}>
+      <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+        <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{P[id].name}</span>
+        <span style={{ fontSize: '11px', color: 'var(--color-neutral-500)' }}>{n.kind === 'season' || (n.kind === 'none' && P[id].kind === 'season') ? 'Season sign-up' : n.kind === 'tryout' ? 'Next tryout' : 'Not yet posted'}</span>
+      </span>
+      <span style={{ font: '500 20px/1.15 var(--font-heading)', letterSpacing: '-.02em' }}>{n.title}</span>
+      <span style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', color: 'var(--color-neutral-300)' }}>
+        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />{n.when}</span>
+        <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><MapPin color={ACC} aria-hidden="true" />{n.where}</span>
+      </span>
+      <OutlineLink href={n.href} external={n.external} className="hv-t10" style={{ marginTop: 'auto', border: '1px solid var(--color-accent-800)' }}>{n.cta} →</OutlineLink>
+    </div>
+  );
+}
+
+// "Play for us" with no tryout dates posted: a trial request for Academy or Club in a region. It goes to
+// that program's leaders there (src/pages/api/submit.ts), and the family gets a confirmation naming them.
+function TrialRequest({ data, region: start }) {
+  const tryoutPrograms = data.programs.filter((p) => p.kind === 'tryout');
+  const [program, setProgram] = useState(tryoutPrograms[tryoutPrograms.length - 1]?.id ?? 'club');
+  const [region, setRegion] = useState(start);
+  const p = tryoutPrograms.find((x) => x.id === program) ?? tryoutPrograms[0];
+  const rm = data.regions.find((r) => r.id === region);
+  const lead = (p.regions[region].status === 'none' ? [] : p.regions[region].leaders).find((l) => l.email) ?? rm.leaders.find((l) => l.email);
+  const f = useSubmit({ form: 'trial', program, region });
+  const pill = (on) => ({ cursor: 'pointer', minHeight: '40px', padding: '0 14px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
+  return (
+    <div style={{ flex: '2 1 520px', borderRadius: '12px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)', overflow: 'hidden' }}>
+      {f.sent ? (
+        <Sent pad="44px 28px" head="Request received." copy={`We've emailed you a confirmation. ${lead ? `${lead.name} from` : 'The'} ${rm.label} ${p.name} staff will contact you within 48 hours to set up a trial.`} again="Request another" onAgain={f.reset} />
+      ) : (
+        <form onSubmit={f.onSubmit} style={{ position: 'relative', padding: 'clamp(20px,2.6vw,28px)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>Tryout dates coming soon</span>
+            <span style={{ font: '500 clamp(24px,2.4vw,30px)/1.1 var(--font-heading)', letterSpacing: '-.03em' }}>Request a trial</span>
+            <span style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>Tryout dates aren't posted yet. Tell us about your player and our staff will invite them to a training session.</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 18px' }}>
+            <div role="group" aria-label="Program" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {tryoutPrograms.map((x) => <button key={x.id} type="button" aria-pressed={program === x.id} onClick={() => setProgram(x.id)} style={pill(program === x.id)}>{x.name}</button>)}
+            </div>
+            <div role="group" aria-label="Region" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {data.regions.map((r) => <button key={r.id} type="button" aria-pressed={region === r.id} onClick={() => setRegion(r.id)} style={pill(region === r.id)}>{r.label}</button>)}
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
+            <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
+            <Field label="Birth year"><select key={program} className="ua-input" name="birthYear">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
+            <Field label="Parent name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
+            <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
+            <Field label="Parent phone"><input className="ua-input" name="phone" type="tel" placeholder="Optional" autoComplete="tel" /></Field>
+            <Field label="Current club and team"><input className="ua-input" name="club" placeholder="Optional" /></Field>
+          </div>
+          <span style={{ fontSize: '12px', color: 'var(--color-neutral-400)' }}>Goes to: <span style={{ color: 'var(--color-accent-300)' }}>{lead ? `${lead.name}, ${lead.role}` : `${rm.label} ${p.name} staff`}</span></span>
+          <FormGuard error={f.error} />
+          <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : `Request a ${p.name} trial →`}</SubmitButton>
+        </form>
+      )}
+    </div>
   );
 }
 
