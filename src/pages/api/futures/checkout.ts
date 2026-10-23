@@ -6,6 +6,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { env, isEmail, json, privateId, s, sanity, spamCheck, utahToday } from '../../../lib/server';
 import { sessionStatus, fmtRange } from '../../../lib/schedule';
+import { ageLabel, ageNumber, seasonEnd, seasonLabel } from '../../../../studio/shared/registrants';
 
 export const prerender = false;
 
@@ -67,6 +68,8 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
   await db.create({
     _id: regId, _type: 'futuresRegistration', receivedAt: new Date().toISOString(), payment: 'pending',
     session: { _type: 'reference', _ref: session._id, _weak: true }, sessionName: `${session.name} · ${region}`, amount: session.cost,
+    // US Soccer age group for the session's season (Aug 1 to Jul 31), for filtering and group emails.
+    ...(() => { const end = seasonEnd(session.start); const n = ageNumber(f.birthDate, end); return { season: seasonLabel(end), seasonEnd: end, ageNumber: n, ageGroup: ageLabel(n) }; })(),
     ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)),
     waiverAcceptedAt: new Date().toISOString(), waiverText: waiver ?? '',
   });

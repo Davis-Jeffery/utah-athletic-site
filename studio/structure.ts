@@ -18,7 +18,7 @@ import { ADULT_LEAGUES } from './schemaTypes/adultLeague';
 export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage']);
 
 // Created by the site's forms, never in the Studio.
-export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration']);
+export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration', 'emailBroadcast']);
 
 export const PROGRAMS = [
   ['academy', 'Academy'],
@@ -135,5 +135,9 @@ export const structure: StructureResolver = (S) => {
             ),
           ]),
         ),
+      S.listItem()
+        .title('Sent emails')
+        .icon(EnvelopeIcon)
+        .child(S.documentTypeList('emailBroadcast').title('Sent emails').defaultOrdering([{ field: 'createdAt', direction: 'desc' }])),
     ]);
 };
