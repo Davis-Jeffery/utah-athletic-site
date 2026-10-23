@@ -166,13 +166,19 @@ export const siteSettings = defineType({
     }),
 
     defineField({
-      name: 'development', title: 'Development pillars (shared across programs)', type: 'object', group: 'dev',
-      fields: PILLARS.map(([k, t]) =>
+      name: 'development', title: 'Development model (shared by all programs)', type: 'object', group: 'dev',
+      description: 'The default text for the "We develop the complete player" section and each pillar\'s pop-up. A program can replace any of it on its own Development model.',
+      fields: [
+        str('heading', 'Heading', { description: 'e.g. "We develop the".' }),
+        str('headingAccent', 'Heading, teal part', { description: 'e.g. "complete player."' }),
+        txt('intro', 'Intro', { rows: 2 }),
+        ...PILLARS.map(([k, t]) =>
         defineField({
           name: k, title: t, type: 'object',
-          fields: [str('tag', 'Tag', { required: true }), txt('deep', 'Detail', { required: true }), defineField({ name: 'focus', title: 'Focus points', type: 'array', of: [{ type: 'string' }] })],
+          fields: [str('tag', 'Label', { required: true, description: 'Small label next to the name, e.g. "The foundation".' }), txt('deep', 'Detail', { required: true, description: 'The paragraph in the pop-up.' }), defineField({ name: 'focus', title: 'Focus areas', type: 'array', of: [{ type: 'string' }], description: 'The list in the pop-up.' })],
         }),
       ),
+      ],
     }),
   ],
   preview: { prepare: () => ({ title: 'Site settings' }) },

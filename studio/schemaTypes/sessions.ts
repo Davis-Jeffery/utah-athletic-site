@@ -55,7 +55,7 @@ function sessionType(o: { name: string; title: string; program: string; icon: ty
       ...(o.classes
         ? [defineField({ name: 'capacity', title: 'Spots', type: 'number', description: 'Optional. When this many families have paid, the session switches to Full by itself. Leave empty for no limit.', validation: (r) => r.min(1).integer() })]
         // Futures registers on the site with Stripe; Recreation still uses Ollie.
-        : [link('registerUrl', 'Registration link', { description: `Optional. Leave empty to use the ${o.program} program's Ollie link.` })]),
+        : [link('registerUrl', 'Registration link', { description: `Optional. Leave empty to use the ${o.program} program's Default Ollie link.` })]),
       ...(o.classes
         ? [defineField({
           name: 'classes', title: 'Classes', type: 'array',

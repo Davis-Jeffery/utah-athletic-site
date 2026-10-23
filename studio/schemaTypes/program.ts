@@ -70,6 +70,15 @@ export const phasesField = (group: string) =>
     })],
   });
 
+// The Developer tab (program id, order, number label, kind, invitation only) ties the program to
+// the site's code: read-only, and shown to administrators only.
+const notAdmin = ({ currentUser }: any) => !currentUser?.roles?.some((r: { name: string }) => r.name === 'administrator');
+
+// Programs whose price is never shown on the site (see NO_PRICE_LIST in src/data/site.ts): their
+// Cost tab shows only the What's included breakdown.
+const NO_PRICE = ['academy'];
+const noPrice = ({ document }: any) => NO_PRICE.includes(document?.key);
+
 // Programs priced and scheduled by their sessions (Recreation sessions, Futures sessions).
 const SESSION_PROGRAMS = ['rec', 'futures'];
 
@@ -85,7 +94,7 @@ const regionStatus = (name: string, title: string) =>
       str('season', 'Launching', { description: 'e.g. "Fall 2027".', hidden: ({ parent }: any) => parent?.status !== 'soon' }),
       str('ages', 'Ages in this region', { description: 'Optional, e.g. "U3 to U15". Shown at the top of the page on this region\'s tab; leave empty to use the program\'s ages.', hidden: ({ parent }: any) => parent?.status !== 'active' }),
       defineField({
-        name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent }: any) => parent?.status !== 'active',
+        name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent, document }: any) => parent?.status !== 'active' || NO_PRICE.includes(document?.key),
         description: 'This region\'s prices, shown on its tab. Add a row per age group (or one row for everyone). The overview shows "From" the lowest price across regions.',
         of: [defineArrayMember({
           type: 'object', name: 'fee',
@@ -97,7 +106,7 @@ const regionStatus = (name: string, title: string) =>
           preview: { select: { title: 'ages', cost: 'cost', note: 'note' }, prepare: ({ title, cost, note }: any) => ({ title, subtitle: [cost != null ? `$${cost}` : '', note].filter(Boolean).join(' · ') }) },
         })],
       }),
-      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Only used when Fees by age group is empty: added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || parent?.fees?.length || SESSION_PROGRAMS.includes(document?.key) }),
+      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Only used when Fees by age group is empty: added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || parent?.fees?.length || SESSION_PROGRAMS.includes(document?.key) || NO_PRICE.includes(document?.key) }),
       people('leaders', 'Leaders', {
         description: 'This program\'s leaders in this region, e.g. a managing director and a director of coaching. Pick people from Staff; add as many as you need and drag to reorder.',
         hidden: ({ parent }: any) => parent?.status === 'none',
@@ -121,20 +130,20 @@ export const program = defineType({
     { name: 'overview', title: 'Overview', default: true },
     { name: 'photos', title: 'Photos' },
     { name: 'join', title: 'Registration' },
-    { name: 'cost', title: 'Cost' },
+    { name: 'cost', title: 'Cost and what\'s included' },
     { name: 'season', title: 'Season and week' },
     { name: 'dev', title: 'Development and compare' },
     { name: 'staff', title: 'Staff' },
     { name: 'regions', title: 'Regions' },
     { name: 'map', title: 'Map pins' },
     { name: 'formats', title: 'How we play', hidden: ({ document }: any) => document?.key !== 'rec' },
-    { name: 'dev-only', title: 'Developer' },
+    { name: 'dev-only', title: 'Developer', hidden: notAdmin },
   ],
   fields: [
     // Overview
     str('name', 'Name', { required: true, group: 'overview' }),
     str('tier', 'Tier label', { required: true, group: 'overview', description: 'e.g. "Tier 02 · Competitive".' }),
-    str('ages', 'Ages', { required: true, group: 'overview', description: 'Write ranges as "U9 to U19".' }),
+    str('ages', 'Ages', { required: true, group: 'overview', description: 'Write ranges as "U9 to U19". Also sets the Age group choices on this program\'s forms (U9, U10 … U19).' }),
     str('kicker', 'Kicker', { required: true, group: 'overview', description: 'The small word above the name, e.g. "Competitive".' }),
     str('line', 'Leagues line', { required: true, group: 'overview', description: 'e.g. "USYS · State Cup".' }),
     txt('tagline', 'Tagline', { required: true, group: 'overview', rows: 2 }),
@@ -164,13 +173,14 @@ export const program = defineType({
         photo('who', 'Who it\'s for', { required: true }),
         photo('core', 'Core section', { required: true }),
         photo('cta', 'Join section', { required: true }),
-        defineField({ name: 'dev', title: 'Development (4 photos, Technical, Tactical, Physical, Mental)', type: 'array', of: [defineArrayMember({ type: 'image', options: { hotspot: true } })], validation: (r) => r.required().length(4) }),
+        // Retired: each pillar's photo now lives in its panel (Development model). Hidden, kept in the dataset.
+        defineField({ name: 'dev', title: 'Development (old)', type: 'array', hidden: true, of: [defineArrayMember({ type: 'image', options: { hotspot: true } })] }),
       ],
     }),
 
     // Registration
     {
-      ...link('registerUrl', 'Ollie registration link', { required: true, group: 'join', description: 'Every Register button for this program uses this link.' }),
+      ...link('registerUrl', 'Default Ollie link', { required: true, group: 'join', description: 'Used by any tryout or session that doesn\'t have its own Ollie link. Each tryout session (and Recreation session) can set its own.' }),
       // Futures registers on the site and pays with Stripe.
       hidden: ({ document }: any) => document?.key === 'futures',
     },
@@ -183,10 +193,11 @@ export const program = defineType({
     txt('joinCopy', 'Join section copy', { required: true, group: 'join', rows: 2 }),
     str('cta', 'Button label', { required: true, group: 'join', description: 'e.g. "Book a tryout".' }),
     str('sessionLabel', 'Session picker label', { required: true, group: 'join' }),
-    defineField({ name: 'years', title: 'Birth years accepted', type: 'array', group: 'join', of: [{ type: 'string' }], options: { layout: 'tags' } }),
+    // Retired: forms now offer U-age groups worked out from Ages (Overview tab). Hidden, kept in the dataset.
+    defineField({ name: 'years', title: 'Birth years accepted (old)', type: 'array', group: 'join', hidden: true, of: [{ type: 'string' }], options: { layout: 'tags' } }),
     defineField({
-      name: 'groups', title: 'Age groups (optional)', type: 'array', group: 'join',
-      description: 'Shown in the hero and home program list when a program prices age groups differently.',
+      // Retired: never shown on the site (it held a price per age group). Hidden, kept in the dataset.
+      name: 'groups', title: 'Age groups (old)', type: 'array', group: 'join', hidden: true,
       of: [defineArrayMember({
         type: 'object', name: 'group',
         fields: [str('label', 'Ages', { required: true }), str('line', 'Leagues', { required: true }), defineField({ name: 'cost', title: 'Cost ($)', type: 'number', validation: (r) => r.required().min(0) }), str('commit', 'Commitment', { required: true })],
@@ -197,17 +208,17 @@ export const program = defineType({
     // Cost
     defineField({
       name: 'cost', title: 'Cost ($)', type: 'number', group: 'cost', validation: (r) => r.required().min(0),
-      // Recreation and Futures prices come from their sessions.
-      hidden: ({ document }: any) => SESSION_PROGRAMS.includes(document?.key),
+      // Recreation and Futures prices come from their sessions; Academy's is never shown.
+      hidden: ({ document }: any) => SESSION_PROGRAMS.includes(document?.key) || NO_PRICE.includes(document?.key),
     }),
-    defineField({ name: 'unit', title: 'Billed', type: 'string', group: 'cost', options: { list: ['per year', 'per season'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
-    txt('costNote', 'Cost note', { required: true, group: 'cost', rows: 2 }),
-    defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', of: [{ type: 'string' }] }),
+    defineField({ name: 'unit', title: 'Billed', type: 'string', group: 'cost', hidden: noPrice, options: { list: ['per year', 'per season'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
+    txt('costNote', 'Cost note', { required: true, group: 'cost', rows: 2, hidden: noPrice }),
+    defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', hidden: noPrice, of: [{ type: 'string' }] }),
     txt('includedIntro', 'Fee breakdown intro', { group: 'cost', rows: 2, description: 'Optional. Shown above the breakdown below.' }),
     feeList('included', 'Included in the fee', 'When this has items, the program page shows this breakdown in place of the Compare programs table.'),
     feeList('notIncluded', 'Not included in the fee', 'e.g. kit package, tournament travel.'),
-    str('commit', 'Commitment', { required: true, group: 'cost', description: 'e.g. "3× / week".' }),
-    txt('commitNote', 'Commitment note', { required: true, group: 'cost', rows: 2 }),
+    str('commit', 'Commitment', { required: true, group: 'cost', description: 'e.g. "3× / week".', hidden: noPrice }),
+    txt('commitNote', 'Commitment note', { required: true, group: 'cost', rows: 2, hidden: noPrice }),
 
     // Season and week
     phasesField('season'),
@@ -216,10 +227,29 @@ export const program = defineType({
     defineField({ name: 'showWeek', title: 'Show "A typical week" on the program page', type: 'boolean', group: 'season', initialValue: true }),
 
     // Development and compare
+    // The "We develop the complete player" section and each pillar's pop-up, all in one place.
+    // Optional fields left empty use the shared text (Site settings, Development model tab).
     defineField({
-      name: 'development', title: 'Development model (this program\'s summary for each pillar)', type: 'object', group: 'dev',
-      fields: PILLARS.map(([k, t]) => txt(k, t, { required: true, rows: 2 })),
+      name: 'devPillars', title: 'Development model', type: 'object', group: 'dev',
+      description: 'The "We develop the complete player" section and the pop-up for each pillar. Optional fields left empty use the shared text in Site settings, Development model tab, so set them only where this program differs.',
+      fields: [
+        str('heading', 'Heading (optional)', { description: 'e.g. "We develop the". Empty uses the shared heading.' }),
+        str('headingAccent', 'Heading, teal part (optional)', { description: 'e.g. "complete player."' }),
+        txt('intro', 'Intro (optional)', { rows: 2, description: 'Empty uses the shared intro.' }),
+        ...PILLARS.map(([k, t]) => defineField({
+          name: k, title: t, type: 'object', options: { collapsible: true, collapsed: false },
+          fields: [
+            txt('summary', 'Summary', { required: true, rows: 2, description: 'Shown in the list and at the top of the pop-up.' }),
+            photo('photo', 'Photo', { required: true, description: 'Shown in the pop-up.' }),
+            str('tag', 'Label (optional)', { description: 'Small label next to the name, e.g. "The foundation". Empty uses the shared label.' }),
+            txt('deep', 'Detail (optional)', { rows: 4, description: 'The paragraph in the pop-up. Empty uses the shared detail.' }),
+            defineField({ name: 'focus', title: 'Focus areas (optional)', type: 'array', of: [{ type: 'string' }], description: 'The list in the pop-up. Empty uses the shared focus areas.' }),
+          ],
+        })),
+      ],
     }),
+    // Retired: replaced by Development model above. Hidden, kept in the dataset.
+    defineField({ name: 'development', title: 'Development summaries (old)', type: 'object', group: 'dev', hidden: true, fields: PILLARS.map(([k, t]) => txt(k, t, { rows: 2 })) }),
     defineField({
       name: 'compare', title: 'Compare programs table (this program\'s column)', type: 'object', group: 'dev',
       description: 'Leave a row empty to show it as not included.',
@@ -301,11 +331,11 @@ export const program = defineType({
     }),
 
     // Developer only: these change how pages behave, so they're locked.
-    defineField({ name: 'key', title: 'Program id', type: 'string', group: 'dev-only', readOnly: true }),
-    defineField({ name: 'order', title: 'Order', type: 'number', group: 'dev-only', readOnly: true }),
-    defineField({ name: 'num', title: 'Number label', type: 'string', group: 'dev-only', readOnly: true }),
-    defineField({ name: 'kind', title: 'Kind', type: 'string', group: 'dev-only', readOnly: true, description: 'tryout: teams picked at tryouts. season: everyone who signs up plays.' }),
-    defineField({ name: 'invite', title: 'Invitation only', type: 'boolean', group: 'dev-only', readOnly: true }),
+    defineField({ name: 'key', title: 'Program id', type: 'string', group: 'dev-only', readOnly: true, hidden: notAdmin }),
+    defineField({ name: 'order', title: 'Order', type: 'number', group: 'dev-only', readOnly: true, hidden: notAdmin }),
+    defineField({ name: 'num', title: 'Number label', type: 'string', group: 'dev-only', readOnly: true, hidden: notAdmin }),
+    defineField({ name: 'kind', title: 'Kind', type: 'string', group: 'dev-only', readOnly: true, hidden: notAdmin, description: 'tryout: teams picked at tryouts. season: everyone who signs up plays.' }),
+    defineField({ name: 'invite', title: 'Invitation only', type: 'boolean', group: 'dev-only', readOnly: true, hidden: notAdmin }),
   ],
   preview: { select: { title: 'name', subtitle: 'tier', media: 'img' } },
 });

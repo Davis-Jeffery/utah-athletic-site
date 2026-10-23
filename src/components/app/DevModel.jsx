@@ -5,7 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { SoccerBall, Strategy, Lightning, Brain, Check } from '@phosphor-icons/react';
 import { ACC, Kicker, ROW_RULE } from '../ui.jsx';
 
-// Icon per pillar. Copy for each pillar comes from Site settings in the Studio.
+// Icon per pillar. Copy and photos come from the program's Development model in the Studio, with the
+// shared text in Site settings for anything a program leaves empty.
 const ICONS = { Technical: SoccerBall, Tactical: Strategy, Physical: Lightning, Mental: Brain };
 const ANGLES = [-135, -45, 45, 135];
 
@@ -14,7 +15,7 @@ export default function DevModel({ program }) {
   const [hover, setHover] = useState(null);
   const [modal, setModal] = useState(null);
   const [shown, setShown] = useState(false);
-  const items = program.development.map((row, i) => ({ ...row, Icon: ICONS[row.t], n: '0' + (i + 1), photo: program.photos.dev[i] }));
+  const items = program.development.map((row, i) => ({ ...row, Icon: ICONS[row.t], n: '0' + (i + 1) }));
   const add = (i) => setBuilt((b) => (b.includes(i) ? b : [...b, i]));
   const open = (i) => { add(i); setHover(null); setModal(i); setShown(false); requestAnimationFrame(() => requestAnimationFrame(() => setShown(true))); };
   const close = () => { setShown(false); setTimeout(() => setModal(null), 240); };
@@ -39,9 +40,9 @@ export default function DevModel({ program }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '540px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Kicker>02 · Development model</Kicker>
-            <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>We develop the <span style={{ color: ACC }}>complete player.</span></h2>
+            <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>{program.devCopy.heading}{program.devCopy.headingAccent ? <> <span style={{ color: ACC }}>{program.devCopy.headingAccent}</span></> : null}</h2>
           </div>
-          <p style={{ margin: 0, fontSize: '17px', lineHeight: 1.65, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>Four principles, developed together. Every session, at every level and in every region, is planned around building a complete player, not just a good one.</p>
+          <p style={{ margin: 0, fontSize: '17px', lineHeight: 1.65, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{program.devCopy.intro}</p>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {items.map((it, i) => {
               const hv = hover === i, b = built.includes(i);
@@ -109,7 +110,7 @@ function DevModal({ it, prev, next, shown, onClose, onStep }) {
       <div role="dialog" aria-modal="true" aria-label={it.t} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', width: '100%', maxWidth: '980px', maxHeight: '100%', overflowY: 'auto', borderRadius: '16px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-lg),0 0 0 1px var(--color-accent-800)', transform: shown ? 'none' : 'scale(.9) translateY(20px)', transformOrigin: '50% 60%', transition: 'transform .45s cubic-bezier(.2,.8,.2,1)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,320px),1fr))' }}>
           <div style={{ position: 'relative', minHeight: '320px', background: 'var(--color-bg)' }}>
-            <img src={it.photo.src} alt={it.photo.alt || `${it.t} training`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: it.photo.pos, filter: 'saturate(.55) contrast(1.06) brightness(.9)' }} />
+            {it.photo ? <img src={it.photo.src} alt={it.photo.alt || `${it.t} training`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: it.photo.pos, filter: 'saturate(.55) contrast(1.06) brightness(.9)' }} /> : null}
             <span aria-hidden="true" style={{ position: 'absolute', left: '18px', top: '18px', width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', color: '#78b7b3', background: 'rgba(17,19,24,.85)', backdropFilter: 'blur(8px)', boxShadow: '0 0 0 1px #78b7b3', pointerEvents: 'none' }}><it.Icon /></span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: 'clamp(22px,3vw,34px)' }}>

@@ -223,7 +223,7 @@ function TrialRequest({ data, region: start }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
             <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
-            <Field label="Birth year"><select key={program} className="ua-input" name="birthYear">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
+            <Field label="Age group"><select key={program} className="ua-input" name="birthYear">{p.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
             <Field label="Parent name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
             <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
             <Field label="Parent phone"><input className="ua-input" name="phone" type="tel" placeholder="Optional" autoComplete="tel" /></Field>

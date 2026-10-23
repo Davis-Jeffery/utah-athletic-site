@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity';
 import { CalendarIcon } from '@sanity/icons/Calendar';
-import { AGE_OPTIONS, REGION_OPTIONS, TIME_OPTIONS, TRYOUT_PROGRAM_OPTIONS, fmtTime } from './helpers';
+import { AGE_OPTIONS, REGION_OPTIONS, TIME_OPTIONS, TRYOUT_PROGRAM_OPTIONS, fmtTime, link } from './helpers';
 
 const label = (opts: { title: string; value: unknown }[], v: unknown) => opts.find((o) => o.value === v)?.title ?? '';
 
@@ -33,6 +33,7 @@ export const tryoutSession = defineType({
       }),
     }),
     defineField({ name: 'gender', title: 'Players', type: 'string', options: { list: ['Boys', 'Girls', 'Coed'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
+    link('registerUrl', 'Ollie registration link', { description: 'Optional. This session\'s Register button goes here. Leave empty to use the program\'s Default Ollie link (Page content, Registration tab).' }),
   ],
   orderings: [{ title: 'Date', name: 'date', by: [{ field: 'date', direction: 'asc' }, { field: 'startTime', direction: 'asc' }] }],
   preview: {
