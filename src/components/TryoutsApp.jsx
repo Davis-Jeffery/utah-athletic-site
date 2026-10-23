@@ -133,7 +133,7 @@ export default function TryoutsApp({ data }) {
                       <span style={label10}>Location</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}><MapPin color={ACC} aria-hidden="true" />{r.venueName}</span>
                     </a>
-                    <a href={b.p.registerUrl} target="_blank" rel="noopener" aria-label={`Register for ${b.p.name} ${r.age} ${r.gender}, ${fmtDate(r.date)}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
+                    <a href={r.url} target="_blank" rel="noopener" aria-label={`Register for ${b.p.name} ${r.age} ${r.gender}, ${fmtDate(r.date)}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
                   </div>
                 ))}
               </div>
@@ -194,7 +194,7 @@ export default function TryoutsApp({ data }) {
             ) : (
               <form onSubmit={invite.onSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '10px', alignContent: 'start' }}>
                 <Field label="Player name"><input className="ua-input" name="player" required style={{ minHeight: '44px' }} /></Field>
-                <Field label="Birth year"><input className="ua-input" name="birthYear" required inputMode="numeric" pattern="20[0-9]{2}" placeholder="2013" style={{ minHeight: '44px' }} /></Field>
+                <Field label="Age group"><select className="ua-input" name="birthYear" required style={{ minHeight: '44px' }}>{P.academy.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
                 <Field label="Parent email"><input className="ua-input" name="email" required type="email" autoComplete="email" style={{ minHeight: '44px' }} /></Field>
                 <Field label="Current club"><input className="ua-input" name="club" placeholder="Optional" style={{ minHeight: '44px' }} /></Field>
                 <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}><FormGuard error={invite.error} /></div>

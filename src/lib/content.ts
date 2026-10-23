@@ -4,7 +4,7 @@
 import { buildAssets } from './assets';
 import { fetchContent, imageUrl, shareImageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
-import { ADULT, NO_COACH_LIST } from '../data/site';
+import { ADULT, NO_COACH_LIST, NO_PRICE_LIST } from '../data/site';
 import { CITIES } from '../data/locations';
 
 // Image widths, matching the sizes the design uses.
@@ -59,6 +59,13 @@ export const fmtTimeRange = (start: string, end: string) => {
   const a = clock(start), b = clock(end);
   return a.ap === b.ap ? `${a.h}–${b.h} ${b.ap}` : `${a.h} ${a.ap}–${b.h} ${b.ap}`;
 };
+/** "U10 to U19" -> ['U10', 'U11', ... 'U19'] (also "U12" alone). Age group choices on the forms. */
+export const ageGroupsFrom = (ages: string) => {
+  const m = ages.match(/U(\d+)(?:\s*to\s*U(\d+))?/i);
+  if (!m) return [];
+  const a = Number(m[1]), b = Number(m[2] ?? m[1]);
+  return Array.from({ length: Math.max(0, b - a) + 1 }, (_, i) => `U${a + i}`);
+};
 /** U15 to U18, or U12 for a single age group. */
 export const fmtAges = (min: number, max: number) => (min === max ? `U${min}` : `U${min} to U${max}`);
 
@@ -107,9 +114,10 @@ async function build() {
     // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
     // region's Fees by age group when set, else its sessions (Rec, Futures) or the program cost.
     // Null when no price is posted yet.
-    const price = fees.length ? priceOf(fees)
+    const hide = NO_PRICE_LIST.includes(p.key);
+    const price = hide ? null : fees.length ? priceOf(fees)
       : p.kind === 'season' ? sessionPrice(p.key, k) : { cost: p.cost + (feeDelta || 0), from: false };
-    return { ...r, ages: ages || p.ages, fees, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
+    return { ...r, ages: ages || p.ages, fees: hide ? [] : fees, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
   };
 
   // Recreation and Futures sessions, each in one region at its own venue and price. Status is the
@@ -151,8 +159,7 @@ async function build() {
     kind: p.kind, invite: p.invite, registerUrl: p.registerUrl, enrollment: p.enrollment,
     nextTryout: p.nextTryout, registrationOpens: p.registrationOpens,
     img: img(p.img, W.hero)!,
-    photos: { who: img(p.photos.who, W.section)!, cta: img(p.photos.cta, W.section)!, core: img(p.photos.core, W.section)!, dev: p.photos.dev.map((x) => img(x, W.section)!) },
-    groups: p.groups,
+    photos: { who: img(p.photos.who, W.section)!, cta: img(p.photos.cta, W.section)!, core: img(p.photos.core, W.section)! },
     tagline: p.tagline, forHead: p.forHead, intro: p.intro,
     leagues: p.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
     // Session programs: the lowest current session price, falling back to the program's own cost.
@@ -161,9 +168,11 @@ async function build() {
       const keys = (['north', 'south', 'west'] as const).filter((k) => p[k].status === 'active');
       const prices = keys.map((k) => regionFor(p, k).price).filter((x): x is { cost: number; from: boolean } => !!x);
       const low = prices.length ? Math.min(...prices.map((x) => x.cost)) : null;
+      if (NO_PRICE_LIST.includes(p.key)) return { cost: null, costFrom: false };
       return { cost: low ?? p.cost, costFrom: low != null && (prices.some((x) => x.from) || new Set(prices.map((x) => x.cost)).size > 1) };
     })(),
-    unit: p.unit, costNote: p.costNote, includes: p.includes, commit: p.commit, commitNote: p.commitNote,
+    ...(NO_PRICE_LIST.includes(p.key) ? { unit: null, costNote: '', includes: [] } : { unit: p.unit, costNote: p.costNote, includes: p.includes }),
+    commit: p.commit, commitNote: p.commitNote,
     // Fee breakdown: when `included` has items, it replaces the Compare programs table.
     fees: p.included.length ? { intro: p.includedIntro, included: p.included, notIncluded: p.notIncluded } : null,
     showSeason: p.showSeason, showWeek: p.showWeek,
@@ -171,7 +180,22 @@ async function build() {
     phases: p.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
     // This program's summary for each pillar, plus the shared detail from Site settings.
-    development: PILLARS.map(([k, t]) => ({ t, d: p.development[k], ...settings.development[k] })),
+    // Development model: each pillar's summary and photo, with its label, detail and focus areas
+    // from the program where set, else the shared text (Site settings). Falls back to the old fields.
+    development: PILLARS.map(([k, t], i) => {
+      const own = p.devPillars?.[k], shared = settings.development[k];
+      return {
+        t, d: own?.summary ?? p.development?.[k] ?? '',
+        tag: own?.tag?.trim() || shared.tag, deep: own?.deep?.trim() || shared.deep,
+        focus: own?.focus?.length ? own.focus : shared.focus,
+        photo: img(own?.photo ?? p.photos.dev?.[i], W.section),
+      };
+    }),
+    devCopy: {
+      heading: p.devPillars?.heading?.trim() || settings.development.heading || 'We develop the',
+      headingAccent: p.devPillars?.headingAccent?.trim() || settings.development.headingAccent || 'complete player.',
+      intro: p.devPillars?.intro?.trim() || settings.development.intro || 'Four principles, developed together. Every session, at every level and in every region, is planned around building a complete player, not just a good one.',
+    },
     compare: {
       training: p.compare.training, coaching: p.compare.coaching, competition: p.compare.competition,
       yearRound: p.compare.yearRound ?? null, evaluations: p.compare.evaluations ?? null, strength: p.compare.strength ?? null,
@@ -188,7 +212,9 @@ async function build() {
       description: p.tagline, image: shareImageUrl(p.img),
     }),
     leadership: staff(p.leadership), leadershipHeading: p.leadershipHeading || 'Program leadership', leadershipIntro: p.leadershipIntro,
-    joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel, years: p.years,
+    joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel,
+    // Age group choices on the forms, from the program's ages (US Soccer's Aug 1 age groups).
+    ageGroups: ageGroupsFrom(p.ages),
     regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
   }));
 
@@ -232,6 +258,8 @@ async function build() {
         id: idOf(t._id), program: t.program, region: t.region, venue: v.id, venueName: v.name, mapUrl: v.mapUrl,
         date: t.date, time: fmtTimeRange(t.startTime, t.endTime), startTime: t.startTime,
         age: fmtAges(t.minAge, t.maxAge), minAge: t.minAge, gender: t.gender,
+        // This session's Ollie link, else the program's default.
+        url: t.registerUrl ?? programDoc(t.program).registerUrl,
       };
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.startTime.localeCompare(b.startTime));

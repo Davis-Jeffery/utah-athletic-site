@@ -51,6 +51,8 @@ const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west'
 
 /** Search and sharing (studio/schemaTypes/helpers.ts seo()): all optional. */
 const seo = z.object({ title: z.string().optional(), description: z.string().optional(), image: image.optional() }).optional();
+/** One pillar on a program's Development model: its own summary and photo; label, detail and focus override the shared text. */
+const devPillar = z.object({ summary: z.string(), photo: image, tag: opt, deep: opt, focus: z.array(z.string()).optional() });
 const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
@@ -65,14 +67,15 @@ const program = z.object({
     divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), roster: opt, referees: opt })).default([]),
   }).optional(),
   img: image,
-  photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).length(4) }),
+  photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).optional() }),
   registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
-  joinCopy: z.string(), cta: z.string(), sessionLabel: z.string(), years: z.array(z.string()).default([]),
+  joinCopy: z.string(), cta: z.string(), sessionLabel: z.string(),
   groups: z.array(z.object({ label: z.string(), line: z.string(), cost: z.number(), commit: z.string() })).optional(),
   cost: z.number(), unit: z.enum(['per year', 'per season']), costNote: z.string(), includes: z.array(z.string()).default([]), commit: z.string(), commitNote: z.string(),
   phases: z.array(z.object({ label: z.string(), d: z.string(), startMonth: z.number().min(0).max(11), endMonth: z.number().min(0).max(11) })).default([]),
   week: z.object(Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, z.array(session).default([])]))),
-  development: z.object({ technical: z.string(), tactical: z.string(), physical: z.string(), mental: z.string() }),
+  development: z.object({ technical: opt, tactical: opt, physical: opt, mental: opt }).optional(),
+  devPillars: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: devPillar, tactical: devPillar, physical: devPillar, mental: devPillar }).optional(),
   compare: z.object({ training: z.string(), coaching: z.string(), competition: z.string(), yearRound: opt, evaluations: opt, strength: opt, film: opt, mental: opt, next: z.string() }),
   leadership: people,
   north: regionStatus, south: regionStatus, west: regionStatus,
@@ -81,6 +84,7 @@ const program = z.object({
 const tryout = z.object({
   _id: z.string(), program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']), venue: ref, date: isoDate,
   startTime: z.string().regex(/^\d{2}:\d{2}$/), endTime: z.string().regex(/^\d{2}:\d{2}$/), minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']),
+  registerUrl: z.string().url().optional(),
 });
 const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
 const sessionBase = {
@@ -145,7 +149,7 @@ const settings = z.object({
   tryoutBring: z.array(z.string()).default([]),
   futuresWaiver: z.string().optional(),
   eventReel: z.array(z.object({ photo: image, event: z.string(), caption: z.string() })).default([]),
-  development: z.object({ technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
+  development: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
   ...settingsHome,
 });
 

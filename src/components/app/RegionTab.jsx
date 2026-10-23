@@ -188,7 +188,7 @@ function Tryouts({ p, rm, data, today, n }) {
       const l = sessionLabel(s, today);
       return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: p.id === 'futures' ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
     })
-    : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, mapUrl: t.mapUrl, cta: 'Register', pick: `${fmtDate(t.date)}, ${t.age} ${t.gender}` }));
+    : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, mapUrl: t.mapUrl, cta: 'Register', href: t.url, pick: `${fmtDate(t.date)}, ${t.age} ${t.gender}` }));
   // Nothing posted yet: the register-interest form takes the place of sign-up.
   const notify = season && !rows.length;
   // Futures has no form beside its sessions: each session's button opens the registration page.
@@ -239,7 +239,7 @@ function TrialForm({ p, rm }) {
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--color-neutral-300)' }}><span style={{ width: '7px', height: '7px', flex: 'none', borderRadius: '50%', background: '#78b7b3', boxShadow: '0 0 8px #78b7b3' }} />Player trial application · reviewed by the {rm.label} {p.name} staff</span>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
         <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
-        <Field label="Birth year"><select className="ua-input" name="birthYear">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
+        <Field label="Age group"><select className="ua-input" name="birthYear">{p.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
         <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
         <Field label="Parent phone"><input className="ua-input" name="phone" type="tel" placeholder="(801) 555-0123" autoComplete="tel" /></Field>
         <Field label="Current club & team"><input className="ua-input" name="club" required placeholder="Club, team, league" /></Field>
@@ -271,7 +271,7 @@ function RegisterForm({ p, rm, choices }) {
       ) : null}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
         <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
-        <Field label="Age group"><select className="ua-input" name="age">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
+        <Field label="Age group"><select className="ua-input" name="age">{p.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
         <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
         <Field label="Current club"><input className="ua-input" name="club" placeholder="Optional" /></Field>
       </div>
@@ -294,7 +294,7 @@ function InterestForm({ p, rm, to, title }) {
             <Field label="Parent name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
             <Field label="Email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
           </div>
-          <Field label={p.kind === 'season' ? 'Player age group' : 'Player birth year'}><select className="ua-input" name="age">{p.years.map((y) => <option key={y}>{y}</option>)}</select></Field>
+          <Field label="Player age group"><select className="ua-input" name="age">{p.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
           <FormGuard error={f.error} />
           <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : `Register interest · ${title}`}</SubmitButton>
         </form>

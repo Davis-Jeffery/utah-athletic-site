@@ -8,6 +8,9 @@ export const ORDER: ProgramKey[] = ['academy', 'club', 'rec', 'futures'];
 export const REGION_ORDER: RegionKey[] = ['north', 'south', 'west'];
 // Programs coached by volunteers: no coaching staff section on their region tabs (leaders still show).
 export const NO_COACH_LIST: ProgramKey[] = ['rec'];
+// Programs whose price is never shown: their cost, billing, cost note and region fees are left out
+// of the built pages entirely (src/lib/content.ts), so they're not even in the page source.
+export const NO_PRICE_LIST: ProgramKey[] = ['academy'];
 
 // Adult leagues (Studio > Adult leagues), in home page order. `slug` is the page under /adult/;
 // `form` is the program value their form messages are saved with (Submissions).

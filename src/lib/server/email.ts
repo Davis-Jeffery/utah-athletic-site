@@ -133,7 +133,7 @@ export function autoReply(f: Submitted, contact: Person): Email {
           preheader: `${contact.name} will be in touch within 48 hours to schedule a trial.`,
           kicker: 'Trial application received', heading: 'Thanks for applying,', headingAccent: `${first(f.name)}.`,
           intro: `We've received ${player}'s application for a ${who} trial. ${contact.name}${contact.role ? `, ${contact.role},` : ''} will review it and contact you within 48 hours to schedule a trial.`,
-          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Birth year', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video], ['Program', who]] }],
+          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video], ['Program', who]] }],
           signoff: 'We look forward to seeing them play.\nUtah Athletic', footer: AUTO_FOOTER,
         }),
       };
@@ -144,7 +144,7 @@ export function autoReply(f: Submitted, contact: Person): Email {
           preheader: `${contact.name} will be in touch within 48 hours.`,
           kicker: 'Invitation request received', heading: 'Thanks for reaching out,', headingAccent: `${first(f.name)}.`,
           intro: `We've received your request for ${player} to be invited to an Academy trial${f.regionName ? ` in the ${f.regionName} region` : ''}. ${contact.name}${contact.role ? `, ${contact.role},` : ''} will review it and contact you within 48 hours.`,
-          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Birth year', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video]] }],
+          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video]] }],
           signoff: 'Utah Athletic', footer: AUTO_FOOTER,
         }),
       };
