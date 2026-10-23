@@ -19,8 +19,10 @@ import { SunIcon } from '@sanity/icons/Sun';
 import { FORM_OPTIONS } from './schemaTypes/submission';
 import { ADULT_LEAGUES } from './schemaTypes/adultLeague';
 import { PAGE_TYPES } from './schemaTypes/pages';
+import { COMPONENT_TYPES } from './schemaTypes/components';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
 
-export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', ...PAGE_TYPES]);
+export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', ...PAGE_TYPES, ...COMPONENT_TYPES]);
 
 // Created by the site's forms, never in the Studio.
 export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration', 'emailBroadcast']);
@@ -84,6 +86,10 @@ export const structure: StructureResolver = (S) => {
         .icon(EarthAmericasIcon)
         .child(S.document().schemaType('networkPage').documentId('networkPage').title('Network page')),
       S.listItem().title('Contact page').id('contact-page').icon(EnvelopeIcon).child(pageDoc('pageContact', 'Contact page')),
+
+      S.divider().title('Site-wide components'),
+      S.listItem().title('Development model').id('development-model').icon(BlockElementIcon)
+        .child(S.document().schemaType('componentDevelopment').documentId('componentDevelopment').title('Development model')),
 
       S.divider().title('People and places'),
       S.listItem()

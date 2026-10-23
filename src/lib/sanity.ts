@@ -142,7 +142,11 @@ const networkPage = z.object({
 });
 const settings = z.object({
   mainEmail: z.string().email(), tryoutsLabel: z.string(),
-  shareImage: image.optional(), homeSeo: seo, tryoutsSeo: seo, eventsSeo: seo, contactSeo: seo,
+  shareImage: image.optional(), logo: image.optional(), favicon: image.optional(),
+  marketing: z.object({
+    ga4: opt, metaPixel: opt, googleAds: opt, gtm: opt,
+    adsLabels: z.object({ futures: opt, trial: opt, interest: opt, contact: opt, ollie: opt }).optional(),
+  }).optional(), homeSeo: seo, tryoutsSeo: seo, eventsSeo: seo, contactSeo: seo,
   social: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
   collage: z.array(keyedImage).min(11),
   videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: z.string().url() })).default([]),
@@ -171,7 +175,7 @@ const adultLeague = z.object({
 });
 
 /** Page documents merged into Site settings (see fetchContent). Keep in step with PAGE_TYPES in studio/schemaTypes/pages.ts. */
-const PAGE_TYPES = ['pageHome', 'pageTryouts', 'pageEvents', 'pageContact', 'pageFutures'] as const;
+const PAGE_TYPES = ['pageHome', 'pageTryouts', 'pageEvents', 'pageContact', 'pageFutures', 'componentDevelopment'] as const;
 
 const SCHEMAS = { venue, staff, region, program, adultLeague, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
@@ -215,6 +219,18 @@ export async function fetchContent(): Promise<Docs> {
 
 let localAssets: Record<string, string> | undefined;
 export function useLocalAssets(map: Record<string, string>) { localAssets = map; }
+
+/** The logo at `height` px (for retina, pass twice the shown height). PNG when asked, e.g. for emails. */
+export function logoUrl(img: z.infer<typeof image> | undefined, height: number, png = false): string | undefined {
+  if (!img || img.asset._ref.startsWith('image-dryrun-')) return undefined;
+  const b = builder.image(img).height(height);
+  return (png ? b.format('png') : b.auto('format')).url();
+}
+/** A square PNG icon cut from the favicon upload around its hotspot (browser tab, home screen). */
+export function iconUrl(img: z.infer<typeof image> | undefined, size: number): string | undefined {
+  if (!img || img.asset._ref.startsWith('image-dryrun-')) return undefined;
+  return builder.image(img).width(size).height(size).fit('crop').format('png').url();
+}
 
 /** Link-preview image: 1200 x 630 JPEG, cropped around the editor's hotspot. */
 export function shareImageUrl(img: z.infer<typeof image> | undefined): string | undefined {

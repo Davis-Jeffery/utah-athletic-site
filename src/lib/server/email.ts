@@ -7,7 +7,10 @@
 // (Apple Mail, iOS); elsewhere it falls back to the system sans-serif.
 
 // The site logo as a PNG on Sanity's CDN: a fixed address that works before and after the domain moves.
-const LOGO = 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png';
+// brandEmails() (server/index.ts) swaps in the logo from Site settings when one is set.
+const DEFAULT_LOGO = 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png';
+let LOGO = DEFAULT_LOGO;
+export const setEmailLogo = (url?: string | null) => { LOGO = url || DEFAULT_LOGO; };
 const STUDIO = 'https://utah-athletic.sanity.studio';
 
 const C = {

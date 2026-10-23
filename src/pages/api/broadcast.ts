@@ -4,7 +4,7 @@
 // and the recipients are worked out here from the saved filter, never taken from the request, so
 // this can't be used to email arbitrary addresses. Each document sends once.
 import type { APIRoute } from 'astro';
-import { env, groupMessage, json, sanity } from '../../lib/server';
+import { brandEmails, env, groupMessage, json, sanity } from '../../lib/server';
 import { STUDIO_ORIGINS } from '../../lib/server/origins';
 import { PROGRAM_LABEL, SOURCES, matches, recipientsOf, type Audience } from '../../../studio/shared/registrants';
 
@@ -59,6 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
   const sender = b.sentBy?.match(/^(.*?)\s*<([^>]+)>$/);
   const main = await db.fetch<string>('*[_id == "siteSettings"][0].mainEmail');
   const replyTo = sender && /@utathletic\.com$/i.test(sender[2]) ? sender[2] : main;
+  await brandEmails();
   const emails = families.map((f) => {
     const m = groupMessage({ subject: b.subject.trim(), body: b.body.trim(), audienceLabel: b.audienceLabel, parentName: f.name, players: f.players, programName: PROGRAM_LABEL[source.program], sender: sender?.[1] });
     return { from, to: [f.email], reply_to: replyTo, subject: m.subject, html: m.html, text: m.text };

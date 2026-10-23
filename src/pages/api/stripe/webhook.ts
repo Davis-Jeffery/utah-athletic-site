@@ -6,7 +6,7 @@
 // checkout.session.expired, charge.refunded.
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { env, futuresConfirmation, futuresStaffNotice, json, recipients, sanity, sendEmail } from '../../../lib/server';
+import { brandEmails, env, futuresConfirmation, futuresStaffNotice, json, recipients, sanity, sendEmail } from '../../../lib/server';
 import { fmtDate, fmtRange } from '../../../lib/schedule';
 
 export const prerender = false;
@@ -81,6 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
       emergency: `${reg.emergencyName}, ${reg.emergencyPhone}`,
     };
 
+    await brandEmails();
     await sendEmail({ to: [reg.email], replyTo: leads[0]?.email, ...futuresConfirmation(r) });
     if (s) {
       await sendEmail({ to: leads.map((p) => p.email), replyTo: reg.email, ...futuresStaffNotice(r) });

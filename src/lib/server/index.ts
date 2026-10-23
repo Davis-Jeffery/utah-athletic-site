@@ -8,7 +8,7 @@
 //   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET  Futures registration payments.
 import { createClient } from '@sanity/client';
 import { randomUUID } from 'node:crypto';
-import type { Person } from './email';
+import { setEmailLogo, type Person } from './email';
 
 export * from './email';
 
@@ -96,6 +96,12 @@ export async function recipients(o: { program?: string; region?: string; leader?
   return out.length ? out : main();
 }
 const unique = (list: Leader[]) => list.filter((l, i) => list.findIndex((x) => x.email === l.email) === i);
+
+/** Use the logo from Site settings (Logo and icon) in emails, as a PNG; call before building them. */
+export async function brandEmails() {
+  const url = await sanity().fetch<string | null>('*[_id == "siteSettings"][0].logo.asset->url').catch(() => null);
+  setEmailLogo(url ? `${url}?h=72&fm=png` : null);
+}
 
 /** Sends an email through Resend when it's configured. Never throws: email is a bonus, the Studio is the record. */
 export async function sendEmail(m: { to: string[]; subject: string; text: string; html?: string; replyTo?: string }) {
