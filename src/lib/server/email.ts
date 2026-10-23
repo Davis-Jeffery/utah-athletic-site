@@ -272,3 +272,20 @@ export function futuresStaffNotice(r: FuturesPaid): Email {
     }),
   };
 }
+
+// ---------- group email from the Studio's Registrations page ----------
+
+/** A message staff send to a group of registered families (/api/broadcast/). One per family. */
+export function groupMessage(m: { subject: string; body: string; audienceLabel: string; parentName?: string; players: string[]; programName: string; sender?: string }): Email {
+  return {
+    subject: m.subject,
+    ...render({
+      preheader: m.body.slice(0, 120),
+      kicker: m.audienceLabel, heading: m.subject,
+      intro: `Hi ${first(m.parentName)},`,
+      blocks: [{ kind: 'text', body: m.body }],
+      signoff: `${m.sender ? `${m.sender}\n` : ''}Utah Athletic`,
+      footer: `You're getting this because you registered ${m.players.join(' and ')} for Utah Athletic ${m.programName}. Reply to this email to reach us.`,
+    }),
+  };
+}

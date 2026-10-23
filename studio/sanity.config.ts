@@ -3,7 +3,9 @@ import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemaTypes';
+import { UsersIcon } from '@sanity/icons/Users';
 import { structure, FIXED_TYPES, SITE_CREATED_TYPES } from './structure';
+import { Registrations } from './tools/Registrations';
 
 export default defineConfig({
   name: 'default',
@@ -16,6 +18,9 @@ export default defineConfig({
     // GROQ playground for developers. Hidden from editors by role in production use.
     visionTool(),
   ],
+
+  // Registrations: players by age group and gender, with group emails (tools/Registrations.tsx).
+  tools: (prev) => [...prev, { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }],
 
   schema: {
     types: schemaTypes,
@@ -31,7 +36,7 @@ export default defineConfig({
       FIXED_TYPES.has(schemaType)
         ? actions.filter((a) => ['publish', 'discardChanges', 'restore'].includes(a.action ?? ''))
         : schemaType === 'submission' ? actions.filter((a) => a.action === 'delete')
-          : schemaType === 'futuresRegistration' ? []
+          : schemaType === 'futuresRegistration' || schemaType === 'emailBroadcast' ? []
             : actions,
     newDocumentOptions: (items) => items.filter((i) => !FIXED_TYPES.has(i.templateId) && !SITE_CREATED_TYPES.has(i.templateId)),
   },

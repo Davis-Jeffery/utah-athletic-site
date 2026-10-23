@@ -9,6 +9,8 @@ export default defineConfig({
   integrations: [react()],
   // Pages stay static. Only the form and payment routes in src/pages/api/ run on the server.
   adapter: vercel(),
+  // Same check, done in src/middleware.ts so the Studio can call /api/broadcast/.
+  security: { checkOrigin: false },
   // Program pages moved from /programs/<key>/ to /<key>/.
   redirects: {
     '/programs/academy': '/academy/',

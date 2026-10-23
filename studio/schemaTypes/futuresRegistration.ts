@@ -37,6 +37,10 @@ export const futuresRegistration = defineType({
     ro('playerLast', 'Last name', 'string', { fieldset: 'player' }),
     ro('birthDate', 'Birth date', 'date', { fieldset: 'player' }),
     ro('gender', 'Gender', 'string', { fieldset: 'player' }),
+    ro('ageGroup', 'Age group', 'string', { fieldset: 'player', description: 'US Soccer age group for the season (Aug 1 to Jul 31), worked out from the birth date when they registered.' }),
+    ro('season', 'Season', 'string', { fieldset: 'player', description: 'e.g. 2026-27.' }),
+    ro('ageNumber', 'Age number', 'number', { hidden: true }),
+    ro('seasonEnd', 'Season end year', 'number', { hidden: true }),
     ro('medical', 'Allergies or medical notes', 'text', { fieldset: 'player' }),
     ro('parentName', 'Parent name', 'string', { fieldset: 'parent' }),
     ro('email', 'Email', 'string', { fieldset: 'parent' }),
@@ -55,10 +59,10 @@ export const futuresRegistration = defineType({
   ],
   orderings: [{ title: 'Newest first', name: 'received', by: [{ field: 'receivedAt', direction: 'desc' }] }],
   preview: {
-    select: { first: 'playerFirst', last: 'playerLast', session: 'sessionName', payment: 'payment' },
-    prepare: ({ first, last, session, payment }) => ({
+    select: { first: 'playerFirst', last: 'playerLast', session: 'sessionName', payment: 'payment', age: 'ageGroup', gender: 'gender' },
+    prepare: ({ first, last, session, payment, age, gender }) => ({
       title: `${first ?? ''} ${last ?? ''}`.trim() || 'Registration',
-      subtitle: [PAYMENT_OPTIONS.find((o) => o.value === payment)?.title.replace(/ \(.*\)/, ''), session].filter(Boolean).join(' · '),
+      subtitle: [PAYMENT_OPTIONS.find((o) => o.value === payment)?.title.replace(/ \(.*\)/, ''), age && gender ? `${age} ${gender === 'Girl' ? 'Girls' : 'Boys'}` : age, session].filter(Boolean).join(' · '),
     }),
   },
 });
