@@ -69,7 +69,7 @@ export const siteSettings = defineType({
     section('homeEvents', 'Tournaments', 'home', [
       str('kicker', 'Small heading', { required: true }),
       ...headingPair(),
-    ], 'The cards come from Tournaments and events.'),
+    ], 'The cards come from Tournaments and events. Write {Count} or {count} for the number of events as a word, e.g. "{Count} events." shows "Three events."'),
     section('homePathway', 'Where the pathway leads', 'home', [
       str('kicker', 'Small heading', { required: true }),
       str('heading', 'Heading', { required: true }),
@@ -149,7 +149,7 @@ export const siteSettings = defineType({
       }),
       str('reelKicker', 'Highlight reel small heading', { required: true, description: 'e.g. "Highlights".' }),
       str('reelHeading', 'Highlight reel heading', { required: true, description: 'e.g. "From the touchline".' }),
-    ]),
+    ], 'Write {count} or {Count} anywhere here for the number of events as a word, e.g. "across all {count} tournaments" shows "across all three tournaments".'),
 
     defineField({
       name: 'eventReel', title: 'Highlight reel', type: 'array', group: 'events',

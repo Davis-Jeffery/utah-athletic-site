@@ -223,11 +223,18 @@ async function build() {
 
   const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end) }));
 
+  // "{count}" / "{Count}" in tournament copy become the number of events as a word ("three" / "Three"),
+  // so headings like "Four events." can't go stale when an event is added or removed.
+  const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  const word = WORDS[events.length] ?? String(events.length);
+  const counted = <T,>(v: T): T => (typeof v === 'string' ? v.replaceAll('{count}', word).replaceAll('{Count}', word[0].toUpperCase() + word.slice(1))
+    : Array.isArray(v) ? v.map(counted) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, counted(x)])) : v) as T;
+
   // Home page and Professional tier copy (Site settings), and the Network page.
   const note = (s?: string) => s?.trim() || undefined;
   const { homeHero, homeAdult, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
   const home = {
-    hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: homeEvents, inside: homeInside, play: homePlay,
+    hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: counted(homeEvents), inside: homeInside, play: homePlay,
     pathway: {
       ...homePathway, placeholderNote: note(homePathway.placeholderNote),
       cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
@@ -245,7 +252,7 @@ async function build() {
   return {
     home, pro: proTier, network,
     // Page copy for /tryouts, /events, /contact and the Futures registration pages.
-    pages: { tryouts: settings.tryoutsPage, events: settings.eventsPage, contact: settings.contactPage, futures: settings.futuresPages },
+    pages: { tryouts: settings.tryoutsPage, events: counted(settings.eventsPage), contact: settings.contactPage, futures: settings.futuresPages },
     programs, adult, regions, venues, tryouts, sessions, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),
