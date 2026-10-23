@@ -4,7 +4,7 @@ import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemaTypes';
 import { UsersIcon } from '@sanity/icons/Users';
-import { structure, FIXED_TYPES, SITE_CREATED_TYPES } from './structure';
+import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES } from './structure';
 import { Registrations } from './tools/Registrations';
 
 export default defineConfig({
@@ -15,18 +15,23 @@ export default defineConfig({
 
   plugins: [
     structureTool({ structure }),
-    // GROQ playground for developers. Hidden from editors by role in production use.
+    // GROQ playground for developers; only administrators see it (tools below).
     visionTool(),
   ],
 
   // Registrations: players by age group and gender, with group emails (tools/Registrations.tsx).
-  tools: (prev) => [...prev, { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }],
+  // Vision is a developer tool, so editors don't see it.
+  tools: (prev, { currentUser }) => {
+    const admin = currentUser?.roles.some((r) => r.name === 'administrator');
+    return [...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }];
+  },
 
   schema: {
     types: schemaTypes,
     // Programs, regions and site settings are fixed documents: never offer "create new".
     // Submissions and Futures registrations are created only by the site's forms.
-    templates: (templates) => templates.filter((t) => !FIXED_TYPES.has(t.schemaType) && !SITE_CREATED_TYPES.has(t.schemaType)),
+    // Academy and Club tryout lists start new tryouts with their program filled in (structure.ts).
+    templates: (templates) => [...templates.filter((t) => !FIXED_TYPES.has(t.schemaType) && !SITE_CREATED_TYPES.has(t.schemaType)), ...TRYOUT_TEMPLATES],
   },
 
   document: {
