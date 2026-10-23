@@ -33,7 +33,7 @@ export const event = defineType({
     photo('logo', 'Logo', { group: 'look', description: 'Fills the top of the event card, edge to edge. Use a wide image (about 16 by 10); set the hotspot to keep the logo centered.' }),
     defineField({
       name: 'brand', title: 'Card colors', type: 'object', group: 'look', options: { columns: 2 },
-      fields: [hex('bg', 'Background'), hex('bg2', 'Background 2'), hex('ink', 'Text'), hex('accent', 'Accent'), defineField({ name: 'mono', title: 'Monogram (no longer shown)', type: 'string', hidden: true })],
+      fields: [hex('bg', 'Background'), hex('bg2', 'Background 2'), hex('ink', 'Text'), hex('accent', 'Accent')],
     }),
   ],
   orderings: [{ title: 'Start date', name: 'start', by: [{ field: 'start', direction: 'asc' }] }],
