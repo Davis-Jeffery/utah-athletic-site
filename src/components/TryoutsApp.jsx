@@ -66,7 +66,7 @@ export default function TryoutsApp({ data }) {
       const sessions = sessionsFor(data, id, region, today);
       return sessions.length
         ? { id, p, kicker, title: sessions.length === 1 ? '1 session' : `${sessions.length} sessions`, sessions }
-        : { id, p, kicker, title: 'No posted sessions', empty: true, head: 'Sessions to be announced', copy: `We'll post ${R.label} ${p.name} sessions here as soon as they're set.`, cta: 'Get notified', href: `/contact/?region=${region}&program=${id}` };
+        : { id, p, kicker, title: 'No posted sessions', empty: true, head: 'Sessions to be announced', copy: `We'll post ${R.label} ${p.name} sessions here as soon as they're set.`, cta: 'Get notified when registration opens', href: `/${id}/${region}/#notify` };
     }
     const rows = tryoutsFor(data, { program: id, region }, today);
     count += rows.length;
