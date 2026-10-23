@@ -1,0 +1,34 @@
+---
+// Page not found: sends people back into the site rather than leaving them on a bare error.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SiteHeader from '../components/SiteHeader.jsx';
+import SiteFooter from '../components/SiteFooter.jsx';
+import { loadSite } from '../lib/content';
+
+const data = await loadSite();
+const links = [
+  ...data.programs.map((p) => ({ href: `/${p.id}/`, label: p.name, sub: p.ages })),
+  { href: '/tryouts/', label: data.settings.tryoutsLabel, sub: 'Dates, times and fields' },
+  { href: '/events/', label: 'Tournaments & Events', sub: 'Every Utah Athletic event' },
+  { href: '/contact/', label: 'Contact us', sub: 'We reply within 48 hours' },
+];
+---
+<Base title="Page not found | Utah Athletic" description="This page doesn't exist. Find your program, tryouts or contact Utah Athletic." noindex>
+  <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+    <SiteHeader current="" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
+    <PageHero kicker="Page not found" maxWidth="1360px" bottom="40px">
+      <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">Off the <span style="color:#78b7b3">pitch.</span></h1>
+      <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">That page doesn't exist or has moved. Here's where to go next.</p>
+    </PageHero>
+    <main style="max-width:1360px;margin:0 auto;padding:8px clamp(16px,4vw,56px) 96px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+      {links.map((l) => (
+        <a href={l.href} class="hv-lift-sm" style="display:flex;flex-direction:column;gap:6px;padding:22px;border-radius:12px;background:var(--color-surface);box-shadow:var(--shadow-sm);color:var(--color-text);transition:box-shadow .25s,transform .25s">
+          <span style="font:500 22px/1.1 var(--font-heading);letter-spacing:-.02em">{l.label} →</span>
+          <span style="font-size:13px;color:var(--color-neutral-400)">{l.sub}</span>
+        </a>
+      ))}
+    </main>
+    <SiteFooter social={data.settings.social} />
+  </div>
+</Base>

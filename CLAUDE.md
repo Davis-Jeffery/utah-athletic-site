@@ -1,6 +1,6 @@
 # Utah Athletic website
 
-Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, static output, deployed on Vercel.
+Marketing site for Utah Athletic Soccer Club (utathletic.com). Astro, static output, deployed on Vercel.
 
 ## How this repo works
 
@@ -21,6 +21,12 @@ Marketing site for Utah Athletic Soccer Club (utathletic-club.com). Astro, stati
 - **Transition modes:** `expand` is the default. `zoom` and `curtain` also exist; pass `transition="zoom"` to `UAApp`, or `showModes` to show the picker dock while testing.
 - `docs/` is internal and never published. `docs/rec-program-plan.md` holds rec program decisions.
 - **Design updates:** follow `docs/DESIGN-SYNC.md`. Content changes from a handoff are made in the Studio, not in code. Run `npm run design:extract -- <handoff.zip, handoff folder or export.html>`, diff `docs/design-reference`, and port only what changed using the map in that doc.
+
+## Search and sharing
+
+- The live domain is `site` in `astro.config.mjs` (`SITE_URL`, default `https://utathletic.com`); canonical links, link previews, `/sitemap.xml` (`src/pages/sitemap.xml.ts`, built from the programs, regions and adult leagues; "not offered" regions left out) and structured data use it. `/robots.txt` points to the sitemap and keeps `/api/` out.
+- Every page passes `title`, `description` and `image` to `Base.astro`, which writes Open Graph and Twitter tags, the icons (`public/favicon-32.png`, `icon-192.png`, `apple-touch-icon.png`) and schema.org JSON-LD: the club as a SportsOrganization on every page, plus WebSite (home), SportsEvent per tournament (/events) and FAQPage (adult leagues). `noindex` keeps a page out of search (payment thank-you, 404).
+- Titles and descriptions default to search-friendly wording in `src/lib/content.ts` (`seoOf`), e.g. "Academy: Elite Youth Soccer in Utah"; region pages name the town. Editors can override any of them, and the share image, in each document's "Search and sharing" section (programs, adult leagues, Network page, and Site settings for home, Tryouts, Events and Contact; Site settings also has the default share image). Share images are 1200 x 630 JPEG crops around the hotspot (`shareImageUrl` in `src/lib/sanity.ts`).
 
 ## Forms and payments
 

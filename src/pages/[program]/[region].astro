@@ -18,7 +18,11 @@ const description = st.status === 'active'
   ? `${p.name} in the ${r.label} region (${r.area}): staff, tryouts and contacts.`
   : st.status === 'soon' ? `${p.name} launches in the ${r.label} region in ${st.season}. Register interest.`
     : `${p.name} isn't offered in the ${r.label} region. Find the nearest hub.`;
+// Titles name the town, e.g. "West Club: Youth Soccer in Saratoga Springs / Tooele, Utah".
+const title = st.status === 'active' && st.hub
+  ? `${r.label} ${p.name}: Youth Soccer in ${st.hub}, Utah | Utah Athletic`
+  : `${r.label} ${p.name} | Utah Athletic`;
 ---
-<Base title={`${r.label} ${p.name} | Utah Athletic`} description={description} preload={p.img.src}>
+<Base title={title} description={description} image={p.seo.image} preload={p.img.src}>
   <UAApp client:load data={data} initial={{ program: p.id, region: r.id }} />
 </Base>

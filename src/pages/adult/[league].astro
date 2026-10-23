@@ -16,8 +16,13 @@ const league = data.adult.find((a) => a.slug === Astro.params.league);
 if (!league) return Astro.redirect('/');
 const o = data.adult.find((a) => a !== league);
 const other = o ? { name: o.name, tagline: o.homeLine, href: o.href } : null;
+// "Good to know" questions as schema.org FAQPage.
+const faq = league.faqs.length ? [{
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: league.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+}] : [];
 ---
-<Base title={`${league.name} | Utah Athletic`} description={league.tagline} preload={league.img.src}>
+<Base title={league.seo.title} description={league.seo.description} image={league.seo.image} jsonLd={faq} preload={league.img.src}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="programs" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <AdultPage client:load league={league} other={other} />

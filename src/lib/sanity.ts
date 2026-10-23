@@ -49,6 +49,8 @@ const opt = z.string().optional();
 const venue = z.object({ _id: z.string(), name: z.string(), address: z.string() });
 const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string() });
 
+/** Search and sharing (studio/schemaTypes/helpers.ts seo()): all optional. */
+const seo = z.object({ title: z.string().optional(), description: z.string().optional(), image: image.optional() }).optional();
 const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
@@ -56,7 +58,7 @@ const program = z.object({
   leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
   includedIntro: opt, included: feeItems, notIncluded: feeItems,
   showSeason: z.boolean().default(true), showWeek: z.boolean().default(true),
-  leadershipHeading: opt, leadershipIntro: opt,
+  leadershipHeading: opt, leadershipIntro: opt, seo,
   mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: z.string(), shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
   formats: z.object({
     intro: opt, combining: opt, rules: z.array(z.string()).default([]),
@@ -119,7 +121,7 @@ const settingsHome = {
   proTier: z.object({ rowName: z.string(), rowLine: z.string(), rowLink: z.string(), pyramidKicker: z.string(), pyramidName: z.string(), pyramidSub: z.string(), hint: z.string() }),
 };
 const networkPage = z.object({
-  _id: z.string(),
+  _id: z.string(), seo,
   hero: z.object({ kicker: z.string(), ...heading, intro: z.string(), placeholderNote: opt }),
   network: z.object({
     kicker: z.string(), heading: z.string(),
@@ -136,6 +138,7 @@ const networkPage = z.object({
 });
 const settings = z.object({
   mainEmail: z.string().email(), tryoutsLabel: z.string(),
+  shareImage: image.optional(), homeSeo: seo, tryoutsSeo: seo, eventsSeo: seo, contactSeo: seo,
   social: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
   collage: z.array(keyedImage).min(11),
   videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: z.string().url() })).default([]),
@@ -147,7 +150,7 @@ const settings = z.object({
 });
 
 const adultLeague = z.object({
-  _id: z.string(), key: z.enum(['upsl', 'rec']), name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(),
+  _id: z.string(), key: z.enum(['upsl', 'rec']), name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(), seo,
   stats: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
   forHead: z.string(), intro: z.string(),
   expect: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
@@ -195,6 +198,12 @@ export async function fetchContent(): Promise<Docs> {
 
 let localAssets: Record<string, string> | undefined;
 export function useLocalAssets(map: Record<string, string>) { localAssets = map; }
+
+/** Link-preview image: 1200 x 630 JPEG, cropped around the editor's hotspot. */
+export function shareImageUrl(img: z.infer<typeof image> | undefined): string | undefined {
+  if (!img || img.asset._ref.startsWith('image-dryrun-')) return undefined;
+  return builder.image(img).width(1200).height(630).fit('crop').format('jpg').quality(80).url();
+}
 
 /** Optimized image URL at `width`. Keeps the editor's crop; serves WebP or AVIF to browsers that take it. */
 export function imageUrl(img: z.infer<typeof image> | undefined, width: number, quality = 72): string | undefined {

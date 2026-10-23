@@ -2,7 +2,7 @@
 // and the page layout stay in code; everything families read is here.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { EarthAmericasIcon } from '@sanity/icons/EarthAmericas';
-import { headingPair, photo, placeholderNote, section, str, txt } from './helpers';
+import { headingPair, photo, placeholderNote, section, str, txt, seo } from './helpers';
 
 export const networkPage = defineType({
   name: 'networkPage',
@@ -17,6 +17,7 @@ export const networkPage = defineType({
     { name: 'end', title: 'Bottom of page' },
   ],
   fields: [
+    seo('seo', 'top'),
     section('hero', 'Hero', 'top', [
       str('kicker', 'Small heading', { required: true }),
       ...headingPair(),

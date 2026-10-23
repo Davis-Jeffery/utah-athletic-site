@@ -20,6 +20,8 @@ const Head = ({ h }) => <>{h.heading}{h.headingAccent ? <>{' '}<span style={{ co
 // "RC Vichy crest" -> "RC Vichy" / "crest", so the text wraps neatly inside the circle.
 const twoLines = (s) => { const i = s.lastIndexOf(' '); return i > 0 ? <>{s.slice(0, i)}<br />{s.slice(i + 1)}</> : s; };
 
+const HeroHeading = ({ as: Tag, ...rest }) => <Tag {...rest} />;
+
 export default function Home({ data, hover, focus, intro, introDone, active, tilt: tiltOn, myRegion, today, onHover, onOpen, onNetwork }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const heroMove = (e) => {
@@ -48,7 +50,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           <div aria-hidden="true" style={{ position: 'absolute', right: '8%', top: '18%', width: '520px', height: '520px', maxWidth: '100%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(120,183,179,.16),transparent 65%)', pointerEvents: 'none', transform: `translate(${(tilt.x * 40).toFixed(1)}px,${(tilt.y * 40).toFixed(1)}px)`, transition: 'transform .5s ease' }} />
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '26px' }}>
             <Kicker line>{home.hero.kicker}</Kicker>
-            <h1 style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></h1>
+            {/* The page's one main heading, unless a program is open on top (it has its own). */}
+            <HeroHeading as={active ? 'p' : 'h1'} style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></HeroHeading>
             <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.hero.intro}</p>
             <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
               <LevelRow num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}

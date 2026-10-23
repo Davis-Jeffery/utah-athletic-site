@@ -3,7 +3,7 @@
 // but can't add or delete programs.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
-import { MONTH_OPTIONS, link, photo, str, txt } from './helpers';
+import { MONTH_OPTIONS, link, photo, seo, str, txt } from './helpers';
 import { TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
@@ -140,6 +140,7 @@ export const program = defineType({
     txt('tagline', 'Tagline', { required: true, group: 'overview', rows: 2 }),
     str('forHead', 'Who it\'s for (heading)', { required: true, group: 'overview' }),
     txt('intro', 'Intro', { required: true, group: 'overview' }),
+    seo('seo', 'overview'),
     defineField({
       name: 'leagues', title: 'Leagues and competitions', type: 'array', group: 'overview',
       of: [defineArrayMember({

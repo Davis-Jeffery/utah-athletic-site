@@ -1,20 +1,41 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
+import { loadSite } from '../lib/content';
 
 interface Props {
   title: string;
   description?: string;
+  /** Link-preview image (1200 x 630). Defaults to Site settings' share image. */
+  image?: string;
+  /** Keep this page out of search results (e.g. the payment thank-you page). */
+  noindex?: boolean;
+  /** Extra schema.org structured data for this page, besides the organization on every page. */
+  jsonLd?: Record<string, unknown>[];
   preload?: string;
   bodyClass?: string;
 }
+const data = await loadSite();
 const {
   title,
   description = 'Utah Athletic Soccer Club: Academy, Club, Recreation and Futures programs for Utah players.',
+  image = data.seo.shareDefault,
+  noindex = false,
+  jsonLd = [],
   preload,
   bodyClass,
 } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site);
+// The club itself, on every page: name, logo, contact and social profiles (schema.org).
+const organization = {
+  '@context': 'https://schema.org', '@type': 'SportsOrganization', '@id': new URL('/#organization', site).href,
+  name: 'Utah Athletic', alternateName: 'Utah Athletic Soccer Club', sport: 'Soccer', url: site.href,
+  logo: 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png',
+  email: data.settings.mainEmail, areaServed: { '@type': 'State', name: 'Utah' },
+  sameAs: data.settings.social.map((s) => s.href),
+};
+const structured = [organization, ...jsonLd];
 ---
 <!doctype html>
 <html lang="en">
@@ -26,13 +47,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <Analytics />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Utah Athletic" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <link rel="icon" href="/logo-ua.avif" />
+    {image && <meta property="og:image" content={image} />}
+    {image && <meta property="og:image:width" content="1200" />}
+    {image && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {image && <meta name="twitter:image" content={image} />}
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
     {preload && <link rel="preload" href={preload} as="image" />}
+    {structured.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d).replace(/</g, '\\u003c')} />)}
   </head>
   <body class={bodyClass}>
     <slot />

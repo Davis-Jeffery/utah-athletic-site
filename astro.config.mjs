@@ -4,7 +4,8 @@ import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  site: 'https://utathletic-club.com',
+  // The live domain: canonical links, link previews, the sitemap and structured data all use it.
+  site: process.env.SITE_URL || 'https://utathletic.com',
   trailingSlash: 'always',
   integrations: [react()],
   // Pages stay static. Only the form and payment routes in src/pages/api/ run on the server.

@@ -10,7 +10,7 @@ import { loadSite } from '../../lib/content';
 const data = await loadSite();
 const pg = data.pages.futures;
 ---
-<Base title="You're registered | Utah Athletic" description="Your Futures registration is complete.">
+<Base title="You're registered | Utah Athletic" description="Your Futures registration is complete." noindex>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="futures" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker="Futures registration" maxWidth="1360px" bottom="96px">

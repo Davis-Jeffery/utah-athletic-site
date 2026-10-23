@@ -5,6 +5,6 @@ import { loadSite } from '../lib/content';
 
 const data = await loadSite();
 ---
-<Base title="Utah Athletic Soccer Club">
+<Base title={data.seo.home.title} description={data.seo.home.description} image={data.seo.home.image} jsonLd={[{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Utah Athletic', url: Astro.site!.href, publisher: { '@id': new URL('/#organization', Astro.site).href } }]}>
   <UAApp client:load data={data} />
 </Base>
