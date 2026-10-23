@@ -14,12 +14,20 @@ const pg = data.pages.events;
 const names = data.events.map((e) => e.name);
 const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? 'tournaments and events';
 const ICONS = { flag: FlagBanner, handshake: Handshake };
+// Each tournament as schema.org SportsEvent, so Google can show it as an event.
+const org = { '@id': new URL('/#organization', Astro.site).href };
+const eventsLd = data.events.map((e) => ({
+  '@context': 'https://schema.org', '@type': 'SportsEvent', name: e.name, description: e.tagline, sport: 'Soccer',
+  startDate: e.start, endDate: e.end, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: { '@type': 'Place', name: e.location, address: e.location }, url: e.url, organizer: org,
+  ...(e.logo ? { image: e.logo.src } : {}),
+}));
 const A = await buildAssets();
 const card = 'display:flex;flex-direction:column;gap:12px;padding:clamp(20px,3vw,32px);border-radius:14px';
 const kicker = 'display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)';
 const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #78b7b3;color:#b5e1dd;font:500 14px/1 var(--font-body)';
 ---
-<Base title="Tournaments & Events | Utah Athletic" description={`Every Utah Athletic tournament in one place: ${list}.`} preload={A['collage-c18@lg']}>
+<Base title={data.seo.events.title} description={data.seo.events.description || `Every Utah Athletic tournament in one place: ${list}.`} image={data.seo.events.image} jsonLd={eventsLd} preload={A['collage-c18@lg']}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="events" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker={pg.kicker} photo={A['collage-c18@lg']} position="center 45%" bottom="clamp(36px,5vw,56px)">

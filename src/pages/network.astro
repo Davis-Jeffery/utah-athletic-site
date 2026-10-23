@@ -17,7 +17,7 @@ const h2 = 'margin:0;font:500 clamp(38px,4.4vw,64px)/1 var(--font-heading);lette
 const N = data.network;
 const pending = (v: string) => /to be supplied/i.test(v);
 ---
-<Base title="Athletic Global network | Utah Athletic" description="Utah Athletic is part of Athletic Global, a network of affiliate academies and professional clubs with a route to the professional game." bodyClass="page-zoom-in">
+<Base title={data.seo.network.title} description={data.seo.network.description} image={data.seo.network.image} bodyClass="page-zoom-in">
   <div style="position:relative;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="network" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
 

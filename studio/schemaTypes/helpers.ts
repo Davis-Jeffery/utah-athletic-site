@@ -85,3 +85,19 @@ export const TIME_OPTIONS = Array.from({ length: (22 - 6) * 4 + 1 }, (_, i) => {
 export const MONTH_OPTIONS = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'].map((title, value) => ({ title, value }));
 
 export const fmtTime = (v?: string) => TIME_OPTIONS.find((t) => t.value === v)?.title ?? v ?? '';
+
+/**
+ * How a page shows in Google and when it's shared (link previews in texts and social posts).
+ * Everything is optional: empty fields use the site's defaults, so editors only fill in what they
+ * want to tune.
+ */
+export const seo = (name = 'seo', group?: string, title = 'Search and sharing') =>
+  defineField({
+    name, title, type: 'object', group, options: { collapsible: true, collapsed: true },
+    description: 'Optional. How this page appears in Google and in link previews. Leave empty to use the defaults.',
+    fields: [
+      str('title', 'Page title', { description: 'About 50 to 60 characters, e.g. "Elite Youth Soccer Academy in Utah". " | Utah Athletic" is added for you.' }),
+      txt('description', 'Description', { rows: 2, description: 'The line under the title in Google, about 140 to 160 characters.' }),
+      photo('image', 'Share image', { description: 'Shown when the page is shared. Landscape works best; it\'s cropped to 1200 x 630 around the hotspot.' }),
+    ],
+  });

@@ -13,7 +13,7 @@ const programs = data.programs.map(({ id, name, regions }) => ({
   id, name, leads: Object.fromEntries(Object.entries(regions).map(([k, r]) => [k, r.status === 'none' ? [] : r.leaders])),
 }));
 ---
-<Base title="Contact | Utah Athletic" description="Contact Utah Athletic's main office, or reach a region's leaders directly.">
+<Base title={data.seo.contact.title} description={data.seo.contact.description} image={data.seo.contact.image}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="contact" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
     <PageHero kicker={pg.kicker} maxWidth="1360px" bottom="40px">

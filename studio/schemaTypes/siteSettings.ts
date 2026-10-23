@@ -1,7 +1,7 @@
 // Site-wide copy and lists that aren't tied to one program. One fixed document.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { CogIcon } from '@sanity/icons/Cog';
-import { headingPair, link, photo, placeholderNote, section, str, txt } from './helpers';
+import { headingPair, link, photo, placeholderNote, section, seo, str, txt } from './helpers';
 
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
 
@@ -39,6 +39,11 @@ export const siteSettings = defineType({
       group: 'futures', rows: 14,
       description: 'Families must accept this to register for Futures. Each registration keeps a copy of the text they accepted, so editing it later doesn\'t change past registrations.',
     }),
+    photo('shareImage', 'Default share image', { group: 'general', description: 'Shown when a page without its own share image is shared (texts, Facebook, iMessage). Landscape; cropped to 1200 x 630 around the hotspot. Until it\'s set, a club photo from the home collage is used.' }),
+    seo('homeSeo', 'home', 'Search and sharing: home page'),
+    seo('tryoutsSeo', 'tryouts', 'Search and sharing: Tryouts page'),
+    seo('eventsSeo', 'events', 'Search and sharing: Events page'),
+    seo('contactSeo', 'contact', 'Search and sharing: Contact page'),
     str('tryoutsLabel', 'Header Tryouts button', { required: true, group: 'general', description: 'e.g. "Tryouts 2027".' }),
     defineField({
       name: 'social', title: 'Social links', type: 'array', group: 'general',

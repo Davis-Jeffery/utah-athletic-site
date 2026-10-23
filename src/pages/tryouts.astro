@@ -17,7 +17,7 @@ const tryData = {
   bring: data.settings.tryoutBring,
 };
 ---
-<Base title={`${data.settings.tryoutsLabel} | Utah Athletic`} description={pg.intro} preload={A['collage-c14@lg']}>
+<Base title={data.seo.tryouts.title} description={data.seo.tryouts.description} image={data.seo.tryouts.image} preload={A['collage-c14@lg']}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
     <SiteHeader current="tryouts" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} sticky={false} />
     <PageHero kicker={data.settings.tryoutsLabel} photo={A['collage-c14@lg']}>

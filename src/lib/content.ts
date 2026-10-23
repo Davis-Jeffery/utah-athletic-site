@@ -2,7 +2,7 @@
 // Content is edited in the Studio (studio/); this file reshapes it into what components expect,
 // so components never deal with Sanity documents or image references directly.
 import { buildAssets } from './assets';
-import { fetchContent, imageUrl, useLocalAssets } from './sanity';
+import { fetchContent, imageUrl, shareImageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
 import { ADULT, NO_COACH_LIST } from '../data/site';
 import { CITIES } from '../data/locations';
@@ -74,6 +74,16 @@ async function build() {
   const c = await fetchContent();
   const settings = c.siteSettings[0];
   const img = pic;
+
+  // Search and sharing: an editor's title (with " | Utah Athletic" added), description and share
+  // image, each falling back to the page's default. Titles default to what families search for.
+  type Seo = { title?: string; description?: string; image?: Parameters<typeof shareImageUrl>[0] } | undefined;
+  const shareDefault = shareImageUrl(settings.shareImage) ?? shareImageUrl(settings.collage[0]);
+  const seoOf = (s: Seo, d: { title: string; description: string; image?: string }) => ({
+    title: s?.title?.trim() ? `${s.title.trim()} | Utah Athletic` : d.title,
+    description: s?.description?.trim() || d.description,
+    image: shareImageUrl(s?.image) ?? d.image ?? shareDefault,
+  });
 
   const venues = c.venue.map((v) => ({ id: idOf(v._id), name: v.name, address: v.address, mapUrl: mapUrl(v.name, v.address) }));
   const venue = (_ref: string) => {
@@ -173,6 +183,10 @@ async function build() {
       return town ? [{ id: h._key, label: h.label, city: h.shownAs || h.town, ll: [town[1], town[2]] as [number, number], side: h.side === 'left' ? -1 : 1 }] : [];
     }),
     formats: p.formats?.divisions.length ? p.formats : null,
+    seo: seoOf(p.seo, {
+      title: `${p.name}: ${p.kicker} Youth Soccer in Utah | Utah Athletic`,
+      description: p.tagline, image: shareImageUrl(p.img),
+    }),
     leadership: staff(p.leadership), leadershipHeading: p.leadershipHeading || 'Program leadership', leadershipIntro: p.leadershipIntro,
     joinCopy: p.joinCopy, cta: p.cta, sessionLabel: p.sessionLabel, years: p.years,
     regions: { north: regionFor(p, 'north'), south: regionFor(p, 'south'), west: regionFor(p, 'west') },
@@ -198,6 +212,7 @@ async function build() {
       venues: a.venues.map((v) => venue(v._ref)),
       faqs: a.faqs,
       img: img(a.img, W.hero) ?? img(settings.collage[(i * 3) % settings.collage.length], W.hero)!,
+      seo: seoOf(a.seo, { title: `${a.name}: Adult Soccer in Utah | Utah Athletic`, description: a.tagline, image: shareImageUrl(a.img) }),
       photos: { who: img(a.who, W.section) ?? stand(1), cta: img(a.cta, W.section) ?? stand(2) },
     }];
   });
@@ -251,6 +266,16 @@ async function build() {
 
   return {
     home, pro: proTier, network,
+    // Search and sharing for the main pages (programs, regions and adult leagues carry their own).
+    seo: {
+      shareDefault,
+      home: seoOf(settings.homeSeo, { title: 'Utah Athletic | Youth Soccer Academy, Club and Rec in Utah', description: `${homeHero.heading} ${homeHero.headingAccent} ${homeHero.intro}` }),
+      tryouts: seoOf(settings.tryoutsSeo, { title: `${settings.tryoutsLabel}: Youth Soccer Tryouts in Utah | Utah Athletic`, description: settings.tryoutsPage.intro }),
+      // Empty description: the Events page lists the current events instead.
+      events: seoOf(settings.eventsSeo, { title: 'Youth Soccer Tournaments in Utah | Utah Athletic', description: '' }),
+      contact: seoOf(settings.contactSeo, { title: 'Contact Utah Athletic Soccer Club', description: settings.contactPage.intro }),
+      network: seoOf(c.networkPage[0].seo, { title: 'Athletic Global Network | Utah Athletic', description: 'Utah Athletic is part of Athletic Global, a network of affiliate academies and professional clubs with a route to the professional game.' }),
+    },
     // Page copy for /tryouts, /events, /contact and the Futures registration pages.
     pages: { tryouts: settings.tryoutsPage, events: counted(settings.eventsPage), contact: settings.contactPage, futures: settings.futuresPages },
     programs, adult, regions, venues, tryouts, sessions, events,
@@ -258,6 +283,7 @@ async function build() {
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),
     settings: {
       mainEmail: settings.mainEmail,
+      siteName: 'Utah Athletic',
       tryoutsLabel: settings.tryoutsLabel,
       social: settings.social,
       tryoutBring: settings.tryoutBring,
