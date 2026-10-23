@@ -14,10 +14,13 @@ import { EarthAmericasIcon } from '@sanity/icons/EarthAmericas';
 import { UsersIcon } from '@sanity/icons/Users';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { CreditCardIcon } from '@sanity/icons/CreditCard';
+import { HomeIcon } from '@sanity/icons/Home';
+import { SunIcon } from '@sanity/icons/Sun';
 import { FORM_OPTIONS } from './schemaTypes/submission';
 import { ADULT_LEAGUES } from './schemaTypes/adultLeague';
+import { PAGE_TYPES } from './schemaTypes/pages';
 
-export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage']);
+export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', ...PAGE_TYPES]);
 
 // Created by the site's forms, never in the Studio.
 export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration', 'emailBroadcast']);
@@ -52,11 +55,14 @@ export const structure: StructureResolver = (S) => {
     );
   const program = (id: string, title: string) => S.document().schemaType('program').documentId(`program.${id}`).title(`${title} page`);
   const pageContent = (id: string, title: string) => S.listItem().title('Page content').id(`${id}-page`).icon(DocumentIcon).child(program(id, title));
+  // A page document (schemaTypes/pages.ts) opened by its id.
+  const pageDoc = (type: string, title: string) => S.document().schemaType(type).documentId(type).title(title);
 
   return S.list()
     .title('Content')
     .items([
       S.divider().title('Website pages'),
+      S.listItem().title('Home page').id('home').icon(HomeIcon).child(pageDoc('pageHome', 'Home page')),
       ...PROGRAMS.map(([id, title]) => S.listItem().title(title).id(id).icon(DocumentsIcon).child(
         S.list().title(title).items([
           pageContent(id, title),
@@ -65,18 +71,24 @@ export const structure: StructureResolver = (S) => {
       )),
       ...ADULT_LEAGUES.map(([id, title]) => S.listItem().title(`Adult: ${title}`).id(`adult-${id}`).icon(UsersIcon)
         .child(S.document().schemaType('adultLeague').documentId(`adultLeague.${id}`).title(title))),
+      S.listItem().title('Tryouts page').id('tryouts-page').icon(CalendarIcon).child(pageDoc('pageTryouts', 'Tryouts page')),
       S.listItem()
         .title('Tournaments & Events')
         .icon(StarIcon)
-        .child(S.documentTypeList('event').title('Tournaments & Events').defaultOrdering(BY_START)),
+        .child(S.list().title('Tournaments & Events').items([
+          S.listItem().title('Page content').id('events-page').icon(DocumentIcon).child(pageDoc('pageEvents', 'Tournaments & Events page')),
+          S.listItem().title('Events').id('events-list').icon(StarIcon).child(S.documentTypeList('event').title('Events').defaultOrdering(BY_START)),
+        ])),
       S.listItem()
         .title('Network page')
         .icon(EarthAmericasIcon)
         .child(S.document().schemaType('networkPage').documentId('networkPage').title('Network page')),
+      S.listItem().title('Contact page').id('contact-page').icon(EnvelopeIcon).child(pageDoc('pageContact', 'Contact page')),
 
       S.divider().title('People and places'),
       S.listItem()
         .title('Staff')
+        .id('staff')
         .icon(UsersIcon)
         .child(S.documentTypeList('staff').title('Staff').defaultOrdering([{ field: 'name', direction: 'asc' }])),
       S.documentTypeListItem('venue').title('Venues (fields)').icon(PinIcon),
@@ -84,6 +96,7 @@ export const structure: StructureResolver = (S) => {
       S.divider().title('Inbox'),
       S.listItem()
         .title('Form messages')
+        .id('messages')
         .icon(EnvelopeIcon)
         .child(
           S.list().title('Form messages').items([
@@ -133,7 +146,11 @@ function programExtras(S: StructureBuilder, id: string, title: string, list: Lis
   const type = id === 'rec' ? 'recSession' : 'futuresSession';
   return [
     S.listItem().title('Sessions').id(`${id}-sessions`).icon(ClockIcon).child(S.documentTypeList(type).title(`${title} sessions`).defaultOrdering(BY_START)),
-    ...(id === 'futures' ? [S.listItem().title('Registrations').id('futures-registrations').icon(CreditCardIcon).child(registrations(S, list))] : []),
+    ...(id === 'futures' ? [
+      S.listItem().title('Registration page and waiver').id('futures-register-page').icon(SunIcon)
+        .child(S.document().schemaType('pageFutures').documentId('pageFutures').title('Futures registration page and waiver')),
+      S.listItem().title('Registrations').id('futures-registrations').icon(CreditCardIcon).child(registrations(S, list)),
+    ] : []),
   ];
 }
 

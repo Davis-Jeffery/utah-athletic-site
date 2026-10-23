@@ -170,6 +170,9 @@ const adultLeague = z.object({
   img: image.optional(), who: image.optional(), cta: image.optional(),
 });
 
+/** Page documents merged into Site settings (see fetchContent). Keep in step with PAGE_TYPES in studio/schemaTypes/pages.ts. */
+const PAGE_TYPES = ['pageHome', 'pageTryouts', 'pageEvents', 'pageContact', 'pageFutures'] as const;
+
 const SCHEMAS = { venue, staff, region, program, adultLeague, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 
@@ -178,9 +181,19 @@ type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 export async function fetchContent(): Promise<Docs> {
   const types = Object.keys(SCHEMAS);
   const fixture = process.env.SANITY_FIXTURE;
-  const raw: { _id: string; _type: string }[] = fixture
+  const raw: ({ _id: string; _type: string } & Record<string, unknown>)[] = fixture
     ? JSON.parse(await readFile(fixture, 'utf8'))
-    : await sanity.fetch('*[_type in $types && !(_id in path("drafts.**"))]', { types });
+    : await sanity.fetch('*[_type in $types && !(_id in path("drafts.**"))]', { types: [...types, ...PAGE_TYPES] });
+
+  // Page documents (Home page, Tryouts page, ...; studio/schemaTypes/pages.ts) hold fields that used
+  // to live in Site settings, under the same names. Lay them over Site settings so the rest of the
+  // site reads one settings object.
+  const settingsDoc = raw.find((d) => d._type === 'siteSettings');
+  if (settingsDoc) {
+    for (const d of raw.filter((x) => (PAGE_TYPES as readonly string[]).includes(x._type))) {
+      for (const [k, v] of Object.entries(d)) if (!k.startsWith('_')) settingsDoc[k] = v;
+    }
+  }
 
   const out = Object.fromEntries(types.map((t) => [t, []])) as unknown as Docs;
   const problems: string[] = [];
