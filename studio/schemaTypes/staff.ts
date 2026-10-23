@@ -14,10 +14,10 @@ export const staff = defineType({
   fields: [
     str('name', 'Name', { required: true }),
     str('title', 'Title', { required: true, description: 'Their main title, e.g. "Managing Director, North" or "U12 Girls coach". A program can show a different title where it lists them.' }),
-    txt('bio', 'Description', { rows: 3, description: 'Optional. A sentence or two about them.' }),
+    txt('bio', 'Bio', { rows: 8, description: 'Optional. Cards show the first three lines with "Read more", which opens the full bio. Leave a blank line between paragraphs.' }),
     defineField({ name: 'email', title: 'Email', type: 'email', description: 'Optional. Shown as a link.' }),
     str('phone', 'Phone', { description: 'Optional. For staff use only: never shown on the website.' }),
-    photo('headshot', 'Headshot'),
+    photo('headshot', 'Headshot', { description: 'Portrait, at least 800 pixels wide, so it stays sharp in the profile pop-up. Set the hotspot on their face.' }),
     defineField({
       name: 'assignedTo', title: 'Assigned to', type: 'string', readOnly: true,
       description: 'Where this person shows on the site. Add or remove them in Programs: the Staff tab for program leadership, the Regions tab for regional leaders and coaches.',

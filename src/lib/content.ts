@@ -100,14 +100,15 @@ async function build() {
   };
 
   // Staff, by id. Program lists point at these; the person's details live only here.
-  const people = new Map(c.staff.map(({ _id, title, headshot, ...x }) => [idOf(_id), { id: idOf(_id), ...x, title, headshot: img(headshot, W.headshot) }]));
-  type Person = { id: string; name: string; role: string; bio?: string; email?: string; headshot?: Pic };
+  const people = new Map(c.staff.map(({ _id, title, headshot, ...x }) => [idOf(_id), { id: idOf(_id), ...x, title, headshot: img(headshot, W.headshot), headshotLg: img(headshot, W.section) }]));
+  type Person = { id: string; name: string; role: string; bio?: string; email?: string; headshot?: Pic; headshotLg?: Pic };
   /** A program list (leadership, a region's leaders or coaches) as people. `role` is the title for
    *  this spot, or the person's own title. A pick of someone whose Staff entry isn't published is skipped. */
   const staff = (list: { person: { _ref: string }; title?: string }[]): Person[] =>
     list.flatMap(({ person, title }) => {
       const s = people.get(idOf(person._ref));
-      return s ? [{ id: s.id, name: s.name, role: title || s.title, bio: s.bio, email: s.email, headshot: s.headshot }] : [];
+      // headshotLg: a sharper copy for the profile pop-up (StaffBio.jsx); only people with a bio need it.
+      return s ? [{ id: s.id, name: s.name, role: title || s.title, bio: s.bio, email: s.email, headshot: s.headshot, ...(s.bio ? { headshotLg: s.headshotLg } : {}) }] : [];
     });
   const regionFor = (p: (typeof c.program)[number], k: 'north' | 'south' | 'west') => {
     const { leaders, coaches, feeDelta, fees, ages, ...r } = p[k];
