@@ -10,7 +10,7 @@ import { ACC, Kicker, ROW_RULE } from '../ui.jsx';
 const ICONS = { Technical: SoccerBall, Tactical: Strategy, Physical: Lightning, Mental: Brain };
 const ANGLES = [-135, -45, 45, 135];
 
-export default function DevModel({ program }) {
+export default function DevModel({ program, num = '02' }) {
   const [built, setBuilt] = useState([]);
   const [hover, setHover] = useState(null);
   const [modal, setModal] = useState(null);
@@ -39,7 +39,7 @@ export default function DevModel({ program }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,340px),1fr))', gap: 'clamp(28px,4vw,64px)', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '540px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <Kicker>02 · Development model</Kicker>
+            <Kicker>{num} · Development model</Kicker>
             <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>{program.devCopy.heading}{program.devCopy.headingAccent ? <> <span style={{ color: ACC }}>{program.devCopy.headingAccent}</span></> : null}</h2>
           </div>
           <p style={{ margin: 0, fontSize: '17px', lineHeight: 1.65, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{program.devCopy.intro}</p>

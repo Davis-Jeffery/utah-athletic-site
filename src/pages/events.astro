@@ -10,6 +10,8 @@ import { FlagBanner, Handshake } from '@phosphor-icons/react';
 
 const data = await loadSite();
 const pg = data.pages.events;
+// Sections the editor hid (Tournaments & Events > Page content > Hide sections).
+const on = (k: string) => !pg.hide.includes(k);
 // "Copa Athletic, Summer Night Lights and Pioneer Cup", from the events in the Studio.
 const names = data.events.map((e) => e.name);
 const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? 'tournaments and events';
@@ -35,9 +37,9 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
       <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
     <main style="max-width:1280px;margin:0 auto;padding:8px clamp(16px,4vw,56px) 48px;display:flex;flex-direction:column;gap:56px">
-      <EventsApp client:load events={data.events} builtOn={data.builtOn} />
+      {on('list') && <EventsApp client:load events={data.events} builtOn={data.builtOn} />}
 
-      {pg.cards.length ? (
+      {on('cards') && pg.cards.length ? (
         <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px">
           {pg.cards.map((c, i) => {
             const Icon = ICONS[c.icon];
@@ -54,6 +56,7 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
         </section>
       ) : null}
 
+      {on('reel') && (
       <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="reel-title">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -75,6 +78,7 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
           ))}
         </div>
       </section>
+      )}
     </main>
     <SiteFooter note="Event schedules and registration are hosted on each event's own site." />
   </div>

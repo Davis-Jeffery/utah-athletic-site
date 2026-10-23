@@ -9,10 +9,11 @@ import { CalendarIcon } from '@sanity/icons/Calendar';
 import { StarIcon } from '@sanity/icons/Star';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { SunIcon } from '@sanity/icons/Sun';
-import { headingPair, link, photo, placeholderNote, section, seo, str, txt } from './helpers';
+import { headingPair, hideSections, link, photo, placeholderNote, section, seo, str, txt } from './helpers';
 
 // ---------- Home page, in the order sections appear on the page ----------
 export const HOME_FIELDS = [
+  hideSections('homeHide', 'home'),
   section('homeHero', 'Hero', undefined, [
     str('kicker', 'Small heading', { required: true, description: 'Above the big heading, e.g. "The Utah Athletic pathway".' }),
     str('heading', 'Heading, first line', { required: true }),
@@ -92,6 +93,7 @@ export const HOME_FIELDS = [
 
 // ---------- Tryouts page ----------
 export const TRYOUTS_FIELDS = [
+  hideSections('tryoutsHide', 'tryouts'),
   section('tryoutsPage', 'Page intro', undefined, [
     ...headingPair(),
     txt('intro', 'Intro', { required: true, rows: 2 }),
@@ -102,6 +104,7 @@ export const TRYOUTS_FIELDS = [
 
 // ---------- Tournaments & Events page ----------
 export const EVENTS_FIELDS = [
+  hideSections('eventsHide', 'events'),
   section('eventsPage', 'Page intro and cards', undefined, [
     str('kicker', 'Small heading', { required: true, description: 'e.g. "Tournaments & Events".' }),
     ...headingPair(),
@@ -137,6 +140,7 @@ export const EVENTS_FIELDS = [
 
 // ---------- Contact page ----------
 export const CONTACT_FIELDS = [
+  hideSections('contactHide', 'contact', { description: 'Tick to hide the contact form, e.g. while the inbox isn\'t watched. The top of the page (hero) always shows.' }),
   section('contactPage', 'Page intro and form', undefined, [
     str('kicker', 'Small heading', { required: true, description: 'e.g. "Contact us".' }),
     ...headingPair(),

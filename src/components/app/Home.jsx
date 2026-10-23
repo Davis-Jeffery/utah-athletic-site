@@ -36,6 +36,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   // No tryout dates posted anywhere (past dates drop off on the visitor's date).
   const noTryouts = !data.tryouts.some((t) => t.date >= today);
   const { home, pro } = data;
+  // Sections the editor hid (Home page > Hide sections).
+  const on = (k) => !home.hide.includes(k);
 
   return (
     <>
@@ -67,6 +69,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
         </section>
       </div>
 
+      {on('tryouts') ? (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '56px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -85,7 +88,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           ) : ORDER.map((id) => <PlayCard key={id} P={P} id={id} n={nextFor(data, id, region.id, today)} />)}
         </div>
       </section>
+      ) : null}
 
+      {on('events') ? (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '40px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -116,7 +121,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           })}
         </div>
       </section>
+      ) : null}
 
+      {on('pathway') ? (
       <section id="network" style={{ maxWidth: '1440px', margin: '0 auto', padding: '40px clamp(20px,4vw,56px) 72px', display: 'flex', flexDirection: 'column', gap: '36px' }}>
         <Rule />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: 'clamp(32px,5vw,72px)', alignItems: 'start' }}>
@@ -138,7 +145,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
         </div>
       </section>
+      ) : null}
 
+      {on('inside') ? (
       <section id="inside" style={{ maxWidth: '1440px', margin: '0 auto', padding: '48px clamp(20px,4vw,56px) 88px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
         <Rule />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '20px', flexWrap: 'wrap' }}>
@@ -157,7 +166,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           ))}
         </div>
       </section>
+      ) : null}
 
+      {on('play') ? (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px) 96px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: 'clamp(32px,5vw,64px)', borderRadius: '14px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.18),transparent 60%),var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
           <h2 style={{ margin: 0, font: '500 clamp(40px,6vw,88px)/.95 var(--font-heading)', letterSpacing: '-.045em' }}>{home.play.heading}</h2>
@@ -168,6 +179,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
         </div>
       </section>
+      ) : null}
       <SiteFooter social={data.settings.social} />
     </>
   );

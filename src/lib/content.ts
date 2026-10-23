@@ -176,7 +176,10 @@ async function build() {
     commit: p.commit, commitNote: p.commitNote,
     // Fee breakdown: when `included` has items, it replaces the Compare programs table.
     fees: p.included.length ? { intro: p.includedIntro, included: p.included, notIncluded: p.notIncluded } : null,
-    showSeason: p.showSeason, showWeek: p.showWeek,
+    // Sections the editor hid (program > Hide sections), on the overview and on every region tab.
+    hide: p.hide, hideRegion: p.hideRegion,
+    // Site-wide components > Development model > Show on these program pages (unset: all).
+    showDev: !settings.devShowOn || settings.devShowOn.includes(p.key),
     // The timeline axis runs Aug (0) to Jul (11); `to` is the end of the last month.
     phases: p.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
@@ -226,7 +229,7 @@ async function build() {
     if (!a) return [];
     const stand = (n: number) => img(settings.collage[(i * 3 + n) % settings.collage.length], W.section)!;
     return [{
-      id: key, slug, form, href: `/adult/${slug}/`,
+      id: key, slug, form, href: `/adult/${slug}/`, hide: a.hide,
       name: a.name, tier: a.tier, ages: a.ages, homeLine: a.homeLine, tagline: a.tagline, stats: a.stats,
       forHead: a.forHead, intro: a.intro, expect: a.expect, placeholderNote: a.placeholderNote?.trim() || undefined,
       leagues: a.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
@@ -278,7 +281,7 @@ async function build() {
   const note = (s?: string) => s?.trim() || undefined;
   const { homeHero, homeAdult, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
   const home = {
-    hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: counted(homeEvents), inside: homeInside, play: homePlay,
+    hide: settings.homeHide, hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: counted(homeEvents), inside: homeInside, play: homePlay,
     pathway: {
       ...homePathway, placeholderNote: note(homePathway.placeholderNote),
       cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
@@ -286,6 +289,7 @@ async function build() {
   };
   const n = c.networkPage[0];
   const network = {
+    hide: n.hide,
     hero: { ...n.hero, placeholderNote: note(n.hero.placeholderNote) },
     network: n.network,
     means: { ...n.means, placeholderNote: note(n.means.placeholderNote) },
@@ -306,7 +310,11 @@ async function build() {
       network: seoOf(c.networkPage[0].seo, { title: 'Athletic Global Network | Utah Athletic', description: 'Utah Athletic is part of Athletic Global, a network of affiliate academies and professional clubs with a route to the professional game.' }),
     },
     // Page copy for /tryouts, /events, /contact and the Futures registration pages.
-    pages: { tryouts: settings.tryoutsPage, events: counted(settings.eventsPage), contact: settings.contactPage, futures: settings.futuresPages },
+    // Each with the sections hidden on it (Hide sections, studio/shared/sections.ts).
+    pages: {
+      tryouts: { ...settings.tryoutsPage, hide: settings.tryoutsHide }, events: { ...counted(settings.eventsPage), hide: settings.eventsHide },
+      contact: { ...settings.contactPage, hide: settings.contactHide }, futures: settings.futuresPages,
+    },
     programs, adult, regions, venues, tryouts, sessions, events,
     collage: settings.collage.map((x) => img(x, W.section, 66)!),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),

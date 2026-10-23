@@ -4,6 +4,7 @@
 import { defineField, defineType } from 'sanity';
 import { BlockElementIcon } from '@sanity/icons/BlockElement';
 import { str, txt } from './helpers';
+import { DEV_PROGRAMS } from '../shared/sections';
 
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
 
@@ -29,7 +30,17 @@ export const componentDevelopment = defineType({
   title: 'Development model',
   type: 'document',
   icon: BlockElementIcon,
-  fields: [DEVELOPMENT_FIELD],
+  fields: [
+    // Its own name, since component fields are merged into Site settings for the site (src/lib/sanity.ts).
+    defineField({
+      name: 'devShowOn', title: 'Show on these program pages', type: 'array',
+      description: 'Untick a program to leave the development model off its page. Tick it to show it again.',
+      of: [{ type: 'string' }],
+      options: { list: DEV_PROGRAMS.map(([value, title]) => ({ value, title })), layout: 'grid' },
+      initialValue: DEV_PROGRAMS.map(([value]) => value),
+    }),
+    DEVELOPMENT_FIELD,
+  ],
   preview: { prepare: () => ({ title: 'Development model' }) },
 });
 

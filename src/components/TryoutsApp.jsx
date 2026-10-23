@@ -74,7 +74,9 @@ export default function TryoutsApp({ data }) {
       ? { id, p, kicker, title: `${rows.length} tryout sessions`, rows }
       : { id, p, kicker, title: 'No posted dates', empty: true, head: 'Dates to be announced', copy: `We'll post ${R.label} dates here as soon as they're set.`, cta: p.invite ? 'Request an invitation' : 'Get notified', href: p.invite ? '#invite' : `/contact/?region=${region}&program=${id}` };
   });
-  const showInvite = levels.includes('academy');
+  // Sections the editor hid (Tryouts page > Hide sections). The region and level filters always show.
+  const on = (k) => !data.hide.includes(k);
+  const showInvite = levels.includes('academy') && on('invite');
   const contactHref = `/contact/?region=${region}${level ? '&program=' + level : ''}`;
 
   return (
@@ -111,7 +113,7 @@ export default function TryoutsApp({ data }) {
       </div>
 
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '28px clamp(16px,4vw,56px) 40px', display: 'flex', flexDirection: 'column', gap: '44px', opacity: fade ? 0.25 : 1, transition: 'opacity .2s' }}>
-        {blocks.map((b) => (
+        {(on('sessions') ? blocks : []).map((b) => (
           <section key={b.id} aria-labelledby={`lv-${b.id}`} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -204,6 +206,7 @@ export default function TryoutsApp({ data }) {
           </section>
         ) : null}
 
+        {on('before') ? (
         <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>Before you come · {R.label} region</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '10px' }}>
@@ -226,6 +229,7 @@ export default function TryoutsApp({ data }) {
             </div>
           </div>
         </section>
+        ) : null}
       </main>
     </>
   );
