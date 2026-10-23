@@ -43,7 +43,7 @@ export const photo = (name: string, title: string, o: Opts = {}) =>
  * A page section: one top-level object field, so it can sit in a tab (only top-level fields can).
  * Fields inside it must not set a group.
  */
-export const section = (name: string, title: string, group: string, fields: ReturnType<typeof defineField>[], description?: string) =>
+export const section = (name: string, title: string, group: string | undefined, fields: ReturnType<typeof defineField>[], description?: string) =>
   defineField({ name, title, type: 'object', group, description, options: { collapsible: true, collapsed: false }, fields });
 
 /** A heading whose second part shows in teal, e.g. "Every level." + "One standard." */

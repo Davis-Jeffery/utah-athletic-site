@@ -11,5 +11,6 @@ import { submission } from './submission';
 import { futuresRegistration } from './futuresRegistration';
 import { adultLeague } from './adultLeague';
 import { emailBroadcast } from './emailBroadcast';
+import { pageContact, pageEvents, pageFutures, pageHome, pageTryouts } from './pages';
 
-export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, networkPage, submission, futuresRegistration, emailBroadcast];
+export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, pageHome, pageTryouts, pageEvents, pageContact, pageFutures, networkPage, submission, futuresRegistration, emailBroadcast];

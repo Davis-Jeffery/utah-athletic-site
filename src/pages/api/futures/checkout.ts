@@ -62,7 +62,8 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     if (taken >= session.capacity) return json({ error: 'Sorry, this session is full.' }, 409);
   }
 
-  const waiver = await db.fetch<string | null>(`*[_id == "siteSettings"][0].futuresWaiver`);
+  // The waiver lives on the Futures registration page document (older datasets: Site settings).
+  const waiver = await db.fetch<string | null>(`coalesce(*[_id == "pageFutures"][0].futuresWaiver, *[_id == "siteSettings"][0].futuresWaiver)`);
   const regId = privateId('futuresRegistration');
   const region = session.region[0].toUpperCase() + session.region.slice(1);
   await db.create({

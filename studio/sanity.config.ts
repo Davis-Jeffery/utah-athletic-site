@@ -6,6 +6,8 @@ import { schemaTypes } from './schemaTypes';
 import { UsersIcon } from '@sanity/icons/Users';
 import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES } from './structure';
 import { Registrations } from './tools/Registrations';
+import { StartHere } from './tools/StartHere';
+import { HomeIcon } from '@sanity/icons/Home';
 
 export default defineConfig({
   name: 'default',
@@ -23,7 +25,8 @@ export default defineConfig({
   // Vision is a developer tool, so editors don't see it.
   tools: (prev, { currentUser }) => {
     const admin = currentUser?.roles.some((r) => r.name === 'administrator');
-    return [...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }];
+    // "Start here" comes first, so the Studio opens on it (tools/StartHere.tsx).
+    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }];
   },
 
   schema: {
