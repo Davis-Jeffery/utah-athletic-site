@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { MONTHS } from '../../data/site';
 import { ACC, SectionHead, Headshot } from '../ui.jsx';
+import StaffBio from '../StaffBio.jsx';
 
 // 04 · The year: month axis with clickable phases and the selected phase's detail.
 export function Season({ p, kicker = '04 · The year' }) {
@@ -82,7 +83,7 @@ export function StaffGrid({ people }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '6px 6px 6px 0' }}>
             <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{d.role}</span>
             <span style={{ font: '500 26px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>{d.name}</span>
-            {d.bio ? <span style={{ fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{d.bio}</span> : null}
+            <StaffBio person={d} />
             {d.email ? <a href={'mailto:' + d.email} style={{ marginTop: 'auto', fontSize: '13px', overflowWrap: 'anywhere' }}>{d.email}</a> : null}
           </div>
         </div>

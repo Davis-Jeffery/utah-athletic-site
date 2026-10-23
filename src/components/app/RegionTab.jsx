@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER, NO_COACH_LIST } from '../../data/site';
+import StaffBio from '../StaffBio.jsx';
 import { fmtDate, tryoutsFor, money, sessionsFor, sessionLabel } from '../../lib/schedule';
 import { Kicker, SectionHead, Field, SubmitButton, Sent, Headshot, ClassList, FormGuard, useSubmit, ROW_RULE } from '../ui.jsx';
 
@@ -65,7 +66,7 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
                     <Headshot pic={c.headshot} name={c.name} label="Coach photo" style={{ aspectRatio: '1', borderRadius: '8px' }} slotStyle={{ padding: '10px', background: 'repeating-linear-gradient(135deg,#1a1d23 0 8px,#1f2229 8px 16px)' }} />
                     <span style={{ font: '500 17px/1.2 var(--font-heading)' }}>{c.name}</span>
                     <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{c.role}</span>
-                    {c.bio ? <span style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--color-neutral-500)' }}>{c.bio}</span> : null}
+                    <StaffBio person={c} size={13} color="var(--color-neutral-500)" />
                     {c.email ? <a href={'mailto:' + c.email} style={{ fontSize: '13px', overflowWrap: 'anywhere' }}>{c.email}</a> : null}
                   </div>
                 ))}
@@ -167,7 +168,7 @@ function LeadCard({ lead }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 4px 4px 0', minWidth: 0 }}>
         <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{lead.role}</span>
         <span style={{ font: '500 24px/1.05 var(--font-heading)', letterSpacing: '-.03em' }}>{lead.name}</span>
-        {lead.bio ? <span style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--color-neutral-400)' }}>{lead.bio}</span> : null}
+        <StaffBio person={lead} size={13} />
         {lead.email ? <a href={'mailto:' + lead.email} style={{ marginTop: 'auto', fontSize: '13px', overflowWrap: 'anywhere' }}>{lead.email}</a> : null}
       </div>
     </div>
