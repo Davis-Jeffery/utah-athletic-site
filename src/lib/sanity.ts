@@ -39,7 +39,7 @@ const keyedImage = image.extend({ _key: z.string() });
 const people = z.array(z.object({ person: ref, title: z.string().optional() })).default([]);
 const staff = z.object({ _id: z.string(), name: z.string(), title: z.string(), bio: z.string().optional(), email: z.string().email().optional(), headshot: image.optional() });
 const regionStatus = z.object({
-  status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(), feeDelta: z.number().optional(),
+  status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(),
   ages: z.string().optional(), fees: z.array(z.object({ ages: z.string(), cost: z.number(), note: z.string().optional() })).default([]),
   leaders: people, coaches: people,
 });
@@ -56,12 +56,17 @@ const seo = z.object({ title: z.string().optional(), description: z.string().opt
 /** One pillar on a program's Development model: its own summary and photo; label, detail and focus override the shared text. */
 const devPillar = z.object({ summary: z.string(), photo: image, tag: opt, deep: opt, focus: z.array(z.string()).optional() });
 const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
+/** Club's fees by age group: ages, a price per region (empty: to be announced) and what is and isn't included. */
+const ageTab = z.object({
+  _key: z.string(), minAge: z.number(), maxAge: z.number(), note: opt, included: feeItems, notIncluded: feeItems,
+  prices: z.object({ north: z.number().optional(), south: z.number().optional(), west: z.number().optional() }).default({}),
+});
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
   name: z.string(), tier: z.string(), ages: z.string(), kicker: z.string(), line: z.string(), tagline: z.string(), forHead: z.string(), intro: z.string(),
   leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
-  includedIntro: opt, included: feeItems, notIncluded: feeItems,
-  showSeason: z.boolean().default(true), showWeek: z.boolean().default(true), hide, hideRegion: hide,
+  includedIntro: opt, included: feeItems, notIncluded: feeItems, ageTabs: z.array(ageTab).default([]),
+  hide, hideRegion: hide,
   leadershipHeading: opt, leadershipIntro: opt, seo,
   mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: z.string(), shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
   formats: z.object({
@@ -69,15 +74,13 @@ const program = z.object({
     divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), roster: opt, referees: opt })).default([]),
   }).optional(),
   img: image,
-  photos: z.object({ who: image, cta: image, core: image, dev: z.array(keyedImage).optional() }),
+  photos: z.object({ who: image, cta: image, core: image }),
   registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
   joinCopy: z.string(), cta: z.string(), sessionLabel: z.string(),
-  groups: z.array(z.object({ label: z.string(), line: z.string(), cost: z.number(), commit: z.string() })).optional(),
-  cost: z.number(), unit: z.enum(['per year', 'per season']), costNote: z.string(), includes: z.array(z.string()).default([]), commit: z.string(), commitNote: z.string(),
+  cost: z.number().optional(), unit: z.enum(['per year', 'per season']), costNote: z.string(), includes: z.array(z.string()).default([]), commit: z.string(), commitNote: z.string(),
   phases: z.array(z.object({ label: z.string(), d: z.string(), startMonth: z.number().min(0).max(11), endMonth: z.number().min(0).max(11) })).default([]),
   week: z.object(Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, z.array(session).default([])]))),
-  development: z.object({ technical: opt, tactical: opt, physical: opt, mental: opt }).optional(),
-  devPillars: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: devPillar, tactical: devPillar, physical: devPillar, mental: devPillar }).optional(),
+  devPillars: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: devPillar, tactical: devPillar, physical: devPillar, mental: devPillar }),
   compare: z.object({ training: z.string(), coaching: z.string(), competition: z.string(), yearRound: opt, evaluations: opt, strength: opt, film: opt, mental: opt, next: z.string() }),
   leadership: people,
   north: regionStatus, south: regionStatus, west: regionStatus,

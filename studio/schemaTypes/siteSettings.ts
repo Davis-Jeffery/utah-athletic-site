@@ -5,13 +5,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { CogIcon } from '@sanity/icons/Cog';
 import { link, photo, str } from './helpers';
-import { CONTACT_FIELDS, EVENTS_FIELDS, FUTURES_FIELDS, HOME_FIELDS, TRYOUTS_FIELDS } from './pages';
-import { DEVELOPMENT_FIELD } from './components';
-
-// Moved to the page documents. Kept here, hidden and without validation, until the old values are
-// cleaned up, so the Studio doesn't flag them as unknown fields.
-const RETIRED = [...HOME_FIELDS, ...TRYOUTS_FIELDS, ...EVENTS_FIELDS, ...CONTACT_FIELDS, ...FUTURES_FIELDS]
-  .map((f) => ({ ...f, hidden: true, readOnly: true, validation: undefined }));
 
 // An ID field with a format check. A warning, not an error, so a new ID format never blocks publishing.
 const idField = (name: string, title: string, pattern: RegExp, example: string, where: string) =>
@@ -68,10 +61,6 @@ export const siteSettings = defineType({
       ],
     }),
     photo('shareImage', 'Default share image', { group: 'general', description: 'Shown when a page without its own share image is shared (texts, Facebook, iMessage). Landscape; cropped to 1200 x 630 around the hotspot. Until it\'s set, a club photo from the home collage is used.' }),
-
-    // Moved to Site-wide components > Development model. Hidden until the old values are cleaned up.
-    { ...DEVELOPMENT_FIELD, group: undefined, hidden: true, readOnly: true, validation: undefined },
-    ...RETIRED,
   ],
   preview: { prepare: () => ({ title: 'Site settings' }) },
 });

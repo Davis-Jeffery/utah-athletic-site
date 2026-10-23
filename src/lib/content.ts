@@ -111,14 +111,20 @@ async function build() {
       return s ? [{ id: s.id, name: s.name, role: title || s.title, bio: s.bio, email: s.email, headshot: s.headshot, ...(s.bio ? { headshotLg: s.headshotLg } : {}) }] : [];
     });
   const regionFor = (p: (typeof c.program)[number], k: 'north' | 'south' | 'west') => {
-    const { leaders, coaches, feeDelta, fees, ages, ...r } = p[k];
-    // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
-    // region's Fees by age group when set, else its sessions (Rec, Futures) or the program cost.
-    // Null when no price is posted yet.
+    const { leaders, coaches, fees, ages, ...r } = p[k];
     const hide = NO_PRICE_LIST.includes(p.key);
-    const price = hide ? null : fees.length ? priceOf(fees)
-      : p.kind === 'season' ? sessionPrice(p.key, k) : { cost: p.cost + (feeDelta || 0), from: false };
-    return { ...r, ages: ages || p.ages, fees: hide ? [] : fees, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
+    // Age tabs (Club): each age group with this region's price (null: to be announced) and what is
+    // and isn't included. They take the place of the region's Fees by age group.
+    const tabs = hide ? [] : p.ageTabs.map((t) => ({
+      key: t._key, label: fmtAges(t.minAge, t.maxAge), cost: t.prices[k] ?? null, note: t.note, included: t.included, notIncluded: t.notIncluded,
+    }));
+    const priced = tabs.flatMap((t) => (t.cost == null ? [] : [{ cost: t.cost }]));
+    // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
+    // age tabs, else the region's Fees by age group, else its sessions (Rec, Futures). Null when
+    // no price is posted yet.
+    const price = hide ? null : tabs.length ? (priced.length ? priceOf(priced) : null) : fees.length ? priceOf(fees)
+      : p.kind === 'season' ? sessionPrice(p.key, k) : null;
+    return { ...r, ages: ages || p.ages, fees: hide || tabs.length ? [] : fees, tabs, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
   };
 
   // Recreation and Futures sessions, each in one region at its own venue and price. Status is the
@@ -170,7 +176,7 @@ async function build() {
       const prices = keys.map((k) => regionFor(p, k).price).filter((x): x is { cost: number; from: boolean } => !!x);
       const low = prices.length ? Math.min(...prices.map((x) => x.cost)) : null;
       if (NO_PRICE_LIST.includes(p.key)) return { cost: null, costFrom: false };
-      return { cost: low ?? p.cost, costFrom: low != null && (prices.some((x) => x.from) || new Set(prices.map((x) => x.cost)).size > 1) };
+      return { cost: low ?? p.cost ?? null, costFrom: low != null && (prices.some((x) => x.from) || new Set(prices.map((x) => x.cost)).size > 1) };
     })(),
     ...(NO_PRICE_LIST.includes(p.key) ? { unit: null, costNote: '', includes: [] } : { unit: p.unit, costNote: p.costNote, includes: p.includes }),
     commit: p.commit, commitNote: p.commitNote,
@@ -183,16 +189,15 @@ async function build() {
     // The timeline axis runs Aug (0) to Jul (11); `to` is the end of the last month.
     phases: p.phases.map((ph) => ({ from: ph.startMonth, to: ph.endMonth + 1, label: ph.label, d: ph.d })),
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
-    // This program's summary for each pillar, plus the shared detail from Site settings.
     // Development model: each pillar's summary and photo, with its label, detail and focus areas
-    // from the program where set, else the shared text (Site-wide components > Development model). Falls back to the old fields.
-    development: PILLARS.map(([k, t], i) => {
-      const own = p.devPillars?.[k], shared = settings.development[k];
+    // from the program where set, else the shared text (Site-wide components > Development model).
+    development: PILLARS.map(([k, t]) => {
+      const own = p.devPillars[k], shared = settings.development[k];
       return {
-        t, d: own?.summary ?? p.development?.[k] ?? '',
-        tag: own?.tag?.trim() || shared.tag, deep: own?.deep?.trim() || shared.deep,
-        focus: own?.focus?.length ? own.focus : shared.focus,
-        photo: img(own?.photo ?? p.photos.dev?.[i], W.section),
+        t, d: own.summary,
+        tag: own.tag?.trim() || shared.tag, deep: own.deep?.trim() || shared.deep,
+        focus: own.focus?.length ? own.focus : shared.focus,
+        photo: img(own.photo, W.section),
       };
     }),
     devCopy: {

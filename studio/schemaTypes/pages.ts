@@ -1,8 +1,7 @@
 // One fixed document per website page that isn't a program: everything shown on that page, in
 // page order, so editors find it where they'd expect (Studio sidebar > Website pages).
 // The site merges these over Site settings when it builds (src/lib/sanity.ts), so field names
-// match the ones Site settings used before; Site settings keeps them hidden until the old values
-// are cleaned up.
+// must not clash with Site settings' own or with each other's.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { HomeIcon } from '@sanity/icons/Home';
 import { CalendarIcon } from '@sanity/icons/Calendar';

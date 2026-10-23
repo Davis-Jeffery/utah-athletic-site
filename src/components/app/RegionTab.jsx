@@ -82,7 +82,8 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
           </section>
           ) : null}
           {!signupFirst && on('try') ? <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} /> : null}
-          {on('fee') ? (
+          {on('fee') && rd.tabs.length ? <FeeTabs p={p} tabs={rd.tabs} n={num('fee')} /> : null}
+          {on('fee') && !rd.tabs.length ? (
             <section id="sec-rfee" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <Kicker>{num('fee')} · Fees</Kicker>
@@ -165,6 +166,67 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
         </section>
       ) : null}
     </div>
+  );
+}
+
+// Fees by age group (Club): a tab per age group with this region's price, what's included and what
+// isn't (Studio > program > Cost and what's included > Fees by age group). One age group shows no tabs.
+function FeeTabs({ p, tabs, n }) {
+  const [sel, setSel] = useState(0);
+  const t = tabs[sel] ?? tabs[0];
+  // Arrow keys move between tabs, as screen reader users expect.
+  const onKey = (e) => {
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const i = (sel + d + tabs.length) % tabs.length;
+    setSel(i);
+    document.getElementById(`fee-tab-${tabs[i].key}`)?.focus();
+  };
+  const list = (title, items, dot, color) => (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color, paddingBottom: '8px' }}>{title}</span>
+      {items.map((x) => (
+        <div key={x.item} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '14px 0', background: ROW_RULE }}>
+          <span style={{ display: 'flex', alignItems: 'baseline', gap: '14px', fontSize: '16px' }}>
+            <span aria-hidden="true" style={{ width: '7px', height: '7px', flex: 'none', transform: 'translateY(-2px) rotate(45deg)', background: dot }} />{x.item}
+          </span>
+          {x.detail ? <span style={{ paddingLeft: '21px', fontSize: '14px', lineHeight: 1.55, color: 'var(--color-neutral-400)' }}>{x.detail}</span> : null}
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <section id="sec-rfee" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <Kicker>{n} · Fees</Kicker>
+      {tabs.length > 1 ? (
+        <div role="tablist" aria-label="Age groups" onKeyDown={onKey} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {tabs.map((x, i) => {
+            const on = i === sel;
+            return (
+              <button key={x.key} id={`fee-tab-${x.key}`} type="button" role="tab" aria-selected={on} aria-controls="fee-panel" tabIndex={on ? 0 : -1} onClick={() => setSel(i)} className={on ? undefined : 'hv-outline'}
+                style={{ cursor: 'pointer', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: `1px solid ${on ? 'var(--color-accent)' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.14)' : 'transparent', color: on ? 'var(--color-accent)' : 'var(--color-neutral-300)', font: '500 15px/1 var(--font-body)', transition: 'all .2s' }}>
+                {x.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+      <div id="fee-panel" role={tabs.length > 1 ? 'tabpanel' : undefined} aria-labelledby={tabs.length > 1 ? `fee-tab-${t.key}` : undefined}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', flexWrap: 'wrap' }}>
+            <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{t.cost != null ? money(t.cost) : 'TBA'}</span>
+            <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{[t.label, t.cost != null ? p.unit : 'price to be announced', t.note].filter(Boolean).join(', ')}</span>
+          </div>
+          {p.costNote ? <p style={{ margin: 0, maxWidth: '460px', fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{p.costNote}</p> : null}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+          {t.included.length ? list('What\'s included', t.included, 'var(--color-accent)', 'var(--color-neutral-500)') : null}
+          {t.notIncluded.length ? list('Not included', t.notIncluded, 'var(--color-error)', 'var(--color-error)') : null}
+        </div>
+      </div>
+    </section>
   );
 }
 

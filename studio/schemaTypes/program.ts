@@ -3,7 +3,7 @@
 // but can't add or delete programs.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
-import { MONTH_OPTIONS, hideSections, link, photo, seo, str, txt } from './helpers';
+import { AGE_OPTIONS, MONTH_OPTIONS, hideSections, link, photo, seo, str, txt } from './helpers';
 import { TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
@@ -43,10 +43,10 @@ export const people = (name: string, title: string, o: { description?: string; g
     validation: (r) => r.unique(),
   });
 
-// A fee breakdown list: what the program fee covers, or what it doesn't.
-const feeList = (name: string, title: string, description: string) =>
+// A fee breakdown list: what the fee covers, or what it doesn't.
+const feeItems = (name: string, title: string, description: string, o: { group?: string; hidden?: any } = {}) =>
   defineField({
-    name, title, type: 'array', group: 'cost', description,
+    name, title, type: 'array', group: o.group, hidden: o.hidden, description,
     of: [defineArrayMember({
       type: 'object', name: 'feeItem',
       fields: [str('item', 'Item', { required: true, description: 'e.g. "Technical training sessions".' }), str('detail', 'Detail', { description: 'e.g. "3× per week (U14 and under), year-round".' })],
@@ -82,6 +82,43 @@ const noPrice = ({ document }: any) => NO_PRICE.includes(document?.key);
 // Programs priced and scheduled by their sessions (Recreation sessions, Futures sessions).
 const SESSION_PROGRAMS = ['rec', 'futures'];
 
+// Programs priced by age tabs (Club): age groups set once, each with a price per region and what's
+// included. They replace the region's Fees by age group, the program cost and What's included.
+const AGE_TAB_PROGRAMS = ['club'];
+const ageTabs = ({ document }: any) => AGE_TAB_PROGRAMS.includes(document?.key);
+const REGION_NAMES = [['north', 'North'], ['south', 'South'], ['west', 'West']] as const;
+const usLabel = (min?: number, max?: number) => (min == null ? 'New age group' : min === max || max == null ? `U${min}` : `U${min} to U${max}`);
+
+const ageTabsField = defineField({
+  name: 'ageTabs', title: 'Fees by age group', type: 'array', group: 'cost', hidden: (c: any) => !ageTabs(c),
+  description: 'One tab per age group in the Fees section of each region\'s page. Set the ages, the price in each region, and what is and isn\'t included. Drag to reorder.',
+  of: [defineArrayMember({
+    type: 'object', name: 'ageTab',
+    fields: [
+      defineField({ name: 'minAge', title: 'From', type: 'number', options: { list: AGE_OPTIONS }, validation: (r) => r.required() }),
+      defineField({ name: 'maxAge', title: 'Through', type: 'number', options: { list: AGE_OPTIONS }, validation: (r) => r.required().min(r.valueOfField('minAge')) }),
+      defineField({
+        name: 'prices', title: 'Price in each region ($)', type: 'object', options: { columns: 3 },
+        description: 'Leave a region empty to show "To be announced". Only regions where the program is running are shown.',
+        fields: REGION_NAMES.map(([k, t]) => defineField({
+          name: k, title: t, type: 'number', validation: (r) => r.min(0),
+          hidden: ({ document }: any) => document?.[k]?.status !== 'active',
+        })),
+      }),
+      str('note', 'Note (optional)', { description: 'Under the price, e.g. "Includes tournament entry".' }),
+      feeItems('included', 'Included', 'What this fee covers.'),
+      feeItems('notIncluded', 'Not included', 'e.g. kit package, tournament travel. Shown under Included.'),
+    ],
+    preview: {
+      select: { min: 'minAge', max: 'maxAge', n: 'prices.north', s: 'prices.south', w: 'prices.west' },
+      prepare: ({ min, max, n, s, w }: any) => ({
+        title: usLabel(min, max),
+        subtitle: [['North', n], ['South', s], ['West', w]].filter(([, v]) => v != null).map(([t, v]) => `${t} $${v}`).join(' · ') || 'No prices yet',
+      }),
+    },
+  })],
+});
+
 const regionStatus = (name: string, title: string) =>
   defineField({
     name, title, type: 'object', group: 'regions', options: { collapsible: true, collapsed: false },
@@ -94,7 +131,7 @@ const regionStatus = (name: string, title: string) =>
       str('season', 'Launching', { description: 'e.g. "Fall 2027".', hidden: ({ parent }: any) => parent?.status !== 'soon' }),
       str('ages', 'Ages in this region', { description: 'Optional, e.g. "U3 to U15". Shown at the top of the page on this region\'s tab; leave empty to use the program\'s ages.', hidden: ({ parent }: any) => parent?.status !== 'active' }),
       defineField({
-        name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent, document }: any) => parent?.status !== 'active' || NO_PRICE.includes(document?.key),
+        name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent, document }: any) => parent?.status !== 'active' || NO_PRICE.includes(document?.key) || AGE_TAB_PROGRAMS.includes(document?.key),
         description: 'This region\'s prices, shown on its tab. Add a row per age group (or one row for everyone). The overview shows "From" the lowest price across regions.',
         of: [defineArrayMember({
           type: 'object', name: 'fee',
@@ -106,7 +143,6 @@ const regionStatus = (name: string, title: string) =>
           preview: { select: { title: 'ages', cost: 'cost', note: 'note' }, prepare: ({ title, cost, note }: any) => ({ title, subtitle: [cost != null ? `$${cost}` : '', note].filter(Boolean).join(' · ') }) },
         })],
       }),
-      defineField({ name: 'feeDelta', title: 'Price difference in this region ($)', type: 'number', description: 'Only used when Fees by age group is empty: added to the program cost. Use a negative number for a discount, 0 for none.', hidden: ({ parent, document }: any) => parent?.status === 'none' || parent?.fees?.length || SESSION_PROGRAMS.includes(document?.key) || NO_PRICE.includes(document?.key) }),
       people('leaders', 'Leaders', {
         description: 'This program\'s leaders in this region, e.g. a managing director and a director of coaching. Pick people from Staff; add as many as you need and drag to reorder.',
         hidden: ({ parent }: any) => parent?.status === 'none',
@@ -177,8 +213,6 @@ export const program = defineType({
         photo('who', 'Who it\'s for', { required: true }),
         photo('core', 'Core section', { required: true }),
         photo('cta', 'Join section', { required: true }),
-        // Retired: each pillar's photo now lives in its panel (Development model). Hidden, kept in the dataset.
-        defineField({ name: 'dev', title: 'Development (old)', type: 'array', hidden: true, of: [defineArrayMember({ type: 'image', options: { hotspot: true } })] }),
       ],
     }),
 
@@ -197,39 +231,27 @@ export const program = defineType({
     txt('joinCopy', 'Join section copy', { required: true, group: 'join', rows: 2 }),
     str('cta', 'Button label', { required: true, group: 'join', description: 'e.g. "Book a tryout".' }),
     str('sessionLabel', 'Session picker label', { required: true, group: 'join' }),
-    // Retired: forms now offer U-age groups worked out from Ages (Overview tab). Hidden, kept in the dataset.
-    defineField({ name: 'years', title: 'Birth years accepted (old)', type: 'array', group: 'join', hidden: true, of: [{ type: 'string' }], options: { layout: 'tags' } }),
-    defineField({
-      // Retired: never shown on the site (it held a price per age group). Hidden, kept in the dataset.
-      name: 'groups', title: 'Age groups (old)', type: 'array', group: 'join', hidden: true,
-      of: [defineArrayMember({
-        type: 'object', name: 'group',
-        fields: [str('label', 'Ages', { required: true }), str('line', 'Leagues', { required: true }), defineField({ name: 'cost', title: 'Cost ($)', type: 'number', validation: (r) => r.required().min(0) }), str('commit', 'Commitment', { required: true })],
-        preview: { select: { title: 'label', subtitle: 'line' } },
-      })],
-    }),
 
     // Cost
     defineField({
-      name: 'cost', title: 'Cost ($)', type: 'number', group: 'cost', validation: (r) => r.required().min(0),
-      // Recreation and Futures prices come from their sessions; Academy's is never shown.
-      hidden: ({ document }: any) => SESSION_PROGRAMS.includes(document?.key) || NO_PRICE.includes(document?.key),
+      name: 'cost', title: 'Cost ($)', type: 'number', group: 'cost',
+      validation: (r) => r.min(0).custom((v, ctx: any) => v != null || ageTabs({ document: ctx.document }) || 'Required'),
+      // Recreation and Futures prices come from their sessions, Club's from its age tabs; Academy's is never shown.
+      hidden: ({ document }: any) => SESSION_PROGRAMS.includes(document?.key) || NO_PRICE.includes(document?.key) || ageTabs({ document }),
     }),
     defineField({ name: 'unit', title: 'Billed', type: 'string', group: 'cost', hidden: noPrice, options: { list: ['per year', 'per season'], layout: 'radio', direction: 'horizontal' }, validation: (r) => r.required() }),
     txt('costNote', 'Cost note', { required: true, group: 'cost', rows: 2, hidden: noPrice }),
-    defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', hidden: noPrice, of: [{ type: 'string' }] }),
-    txt('includedIntro', 'Fee breakdown intro', { group: 'cost', rows: 2, description: 'Optional. Shown above the breakdown below.' }),
-    feeList('included', 'Included in the fee', 'When this has items, the program page shows this breakdown in place of the Compare programs table.'),
-    feeList('notIncluded', 'Not included in the fee', 'e.g. kit package, tournament travel.'),
+    ageTabsField,
+    defineField({ name: 'includes', title: 'What\'s included', type: 'array', group: 'cost', hidden: (c: any) => noPrice(c) || ageTabs(c), of: [{ type: 'string' }] }),
+    txt('includedIntro', 'Fee breakdown intro', { group: 'cost', rows: 2, hidden: ageTabs, description: 'Optional. Shown above the breakdown below.' }),
+    feeItems('included', 'Included in the fee', 'When this has items, the program page shows this breakdown in place of the Compare programs table.', { group: 'cost', hidden: ageTabs }),
+    feeItems('notIncluded', 'Not included in the fee', 'e.g. kit package, tournament travel.', { group: 'cost', hidden: ageTabs }),
     str('commit', 'Commitment', { required: true, group: 'cost', description: 'e.g. "3× / week".', hidden: noPrice }),
     txt('commitNote', 'Commitment note', { required: true, group: 'cost', rows: 2, hidden: noPrice }),
 
     // Season and week
     phasesField('season'),
     defineField({ name: 'week', title: 'Typical week', type: 'object', group: 'season', fields: DAYS.map(([k, t]) => daySessions(k, t)) }),
-    // Replaced by Hide sections. Kept hidden until the old values are cleaned up.
-    defineField({ name: 'showSeason', title: 'Show "Season overview" on the program page (old)', type: 'boolean', group: 'season', hidden: true, readOnly: true }),
-    defineField({ name: 'showWeek', title: 'Show "A typical week" on the program page (old)', type: 'boolean', group: 'season', hidden: true, readOnly: true }),
 
     // Development and compare
     // The "We develop the complete player" section and each pillar's pop-up, all in one place.
@@ -253,8 +275,6 @@ export const program = defineType({
         })),
       ],
     }),
-    // Retired: replaced by Development model above. Hidden, kept in the dataset.
-    defineField({ name: 'development', title: 'Development summaries (old)', type: 'object', group: 'dev', hidden: true, fields: PILLARS.map(([k, t]) => txt(k, t, { rows: 2 })) }),
     defineField({
       name: 'compare', title: 'Compare programs table (this program\'s column)', type: 'object', group: 'dev',
       description: 'Leave a row empty to show it as not included.',
@@ -279,12 +299,6 @@ export const program = defineType({
       description: 'The "Program leadership" section on the program page: people who lead the whole program. Pick people from Staff; add as many as you need and drag to reorder. Regional leaders and coaches are on the Regions tab.',
       titleHint: 'e.g. "Academy Director".',
     }),
-    // Retired: replaced by Program leadership above (people from Staff). Hidden until the old
-    // values are cleared from the dataset, then this field can be deleted.
-    defineField({ name: 'directors', title: 'Directors (old)', type: 'array', group: 'staff', hidden: true, of: [{ type: 'object', name: 'director', fields: [str('name', 'Name'), str('role', 'Role'), txt('bio', 'Bio'), photo('headshot', 'Headshot')] }] }),
-    // Retired: coaches now live under each region (Regions tab). Hidden until the old values
-    // are cleared from the dataset, then this field can be deleted.
-    defineField({ name: 'coaches', title: 'Coaches (old)', type: 'array', group: 'staff', hidden: true, of: [{ type: 'object', name: 'coach', fields: [str('name', 'Name'), str('role', 'Team'), photo('headshot', 'Headshot')] }] }),
 
     // Regions
     regionStatus('north', 'North'),
