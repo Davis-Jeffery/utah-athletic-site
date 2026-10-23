@@ -2,7 +2,7 @@
 // Content is edited in the Studio (studio/); this file reshapes it into what components expect,
 // so components never deal with Sanity documents or image references directly.
 import { buildAssets } from './assets';
-import { fetchContent, imageUrl, shareImageUrl, useLocalAssets } from './sanity';
+import { fetchContent, iconUrl, imageUrl, logoUrl, shareImageUrl, useLocalAssets } from './sanity';
 import { fmtRange, mapUrl } from './schedule';
 import { ADULT, NO_COACH_LIST, NO_PRICE_LIST } from '../data/site';
 import { CITIES } from '../data/locations';
@@ -182,7 +182,7 @@ async function build() {
     week: DAYS.map(([k, day]) => ({ day, items: p.week[k] ?? [] })),
     // This program's summary for each pillar, plus the shared detail from Site settings.
     // Development model: each pillar's summary and photo, with its label, detail and focus areas
-    // from the program where set, else the shared text (Site settings). Falls back to the old fields.
+    // from the program where set, else the shared text (Site-wide components > Development model). Falls back to the old fields.
     development: PILLARS.map(([k, t], i) => {
       const own = p.devPillars?.[k], shared = settings.development[k];
       return {
@@ -320,7 +320,28 @@ async function build() {
     },
     // Only the Futures registration page uses this.
     futuresWaiver: settings.futuresWaiver?.trim() || '',
-    logo: A.logo,
+    // Tracking (Site settings > Marketing). Each ID must match its format exactly, since it goes into
+    // a script: anything else is ignored rather than risk breaking (or injecting into) the page.
+    marketing: (() => {
+      const m = settings.marketing ?? {};
+      const ok = (v: string | undefined, re: RegExp) => (v && re.test(v.trim()) ? v.trim() : null);
+      const label = (v?: string) => ok(v, /^[\w-]{4,40}$/);
+      const out = {
+        ga4: ok(m.ga4, /^G-[A-Z0-9]{4,20}$/), pixel: ok(m.metaPixel, /^\d{10,20}$/), ads: ok(m.googleAds, /^AW-\d{6,15}$/), gtm: ok(m.gtm, /^GTM-[A-Z0-9]{4,12}$/),
+        labels: { futures: label(m.adsLabels?.futures), trial: label(m.adsLabels?.trial), interest: label(m.adsLabels?.interest), contact: label(m.adsLabels?.contact), ollie: label(m.adsLabels?.ollie) },
+        // Sites a "Register" click leaves for (Ollie): every outside registration link in the content.
+        registerHosts: [...new Set([...c.program.map((p) => p.registerUrl), ...c.recSession.map((s) => s.registerUrl), ...c.tryoutSession.map((t) => t.registerUrl)]
+          .filter((u): u is string => !!u && /^https?:/.test(u)).map((u) => new URL(u).hostname))],
+      };
+      return out.ga4 || out.pixel || out.ads || out.gtm ? out : null;
+    })(),
+    // The header logo (Site settings > Logo and icon), else the logo file in public/.
+    logo: logoUrl(settings.logo, 80) ?? A.logo,
+    // A PNG logo for structured data, and the favicon sizes; null keeps public/ files (Base.astro).
+    brand: {
+      logoPng: logoUrl(settings.logo, 160, true) ?? 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png',
+      icons: settings.favicon ? { icon32: iconUrl(settings.favicon, 32)!, icon192: iconUrl(settings.favicon, 192)!, apple: iconUrl(settings.favicon, 180)! } : null,
+    },
     // Today at build time. Islands swap in the visitor's date after they load.
     builtOn,
   };

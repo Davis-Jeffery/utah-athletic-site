@@ -91,7 +91,8 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         },
       }],
       expires_at: Math.floor(Date.now() / 1000) + 31 * 60,
-      success_url: `${url.origin}/futures/registered/`,
+      // The thank-you page reports the purchase to marketing tools once (Stripe fills in the session id).
+      success_url: `${url.origin}/futures/registered/?cs={CHECKOUT_SESSION_ID}&value=${session.cost}`,
       cancel_url: `${url.origin}/futures/register/?session=${encodeURIComponent(id)}&cancelled=1`,
     });
     await db.patch(regId).set({ stripeCheckoutId: checkout.id }).commit();

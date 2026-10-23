@@ -31,11 +31,12 @@ const canonical = new URL(Astro.url.pathname, site);
 const organization = {
   '@context': 'https://schema.org', '@type': 'SportsOrganization', '@id': new URL('/#organization', site).href,
   name: 'Utah Athletic', alternateName: 'Utah Athletic Soccer Club', sport: 'Soccer', url: site.href,
-  logo: 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png',
+  logo: data.brand.logoPng,
   email: data.settings.mainEmail, areaServed: { '@type': 'State', name: 'Utah' },
   sameAs: data.settings.social.map((s) => s.href),
 };
 const structured = [organization, ...jsonLd];
+const mk = data.marketing;
 ---
 <!doctype html>
 <html lang="en">
@@ -60,12 +61,54 @@ const structured = [organization, ...jsonLd];
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {image && <meta name="twitter:image" content={image} />}
-    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
-    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {/* Icons: from Site settings > Logo and icon when set, else the files in public/. */}
+    <link rel="icon" href={data.brand.icons?.icon32 ?? '/favicon-32.png'} type="image/png" sizes="32x32" />
+    <link rel="icon" href={data.brand.icons?.icon192 ?? '/icon-192.png'} type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href={data.brand.icons?.apple ?? '/apple-touch-icon.png'} />
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
     {preload && <link rel="preload" href={preload} as="image" />}
     {structured.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d).replace(/</g, '\\u003c')} />)}
+    {/* Marketing tracking (Site settings > Marketing): each tool loads only once its ID is set. */}
+    {mk?.gtm && <script is:inline define:vars={{ id: mk.gtm }}>
+      (function (w, d, l) { w[l] = w[l] || []; w[l].push({ 'gtm.start': Date.now(), event: 'gtm.js' }); var s = d.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtm.js?id=' + id; d.head.appendChild(s); })(window, document, 'dataLayer');
+    </script>}
+    {(mk?.ga4 || mk?.ads) && <script async src={`https://www.googletagmanager.com/gtag/js?id=${mk.ga4 || mk.ads}`}></script>}
+    {(mk?.ga4 || mk?.ads) && <script is:inline define:vars={{ ga4: mk.ga4, ads: mk.ads }}>
+      window.dataLayer = window.dataLayer || []; window.gtag = function () { dataLayer.push(arguments); };
+      gtag('js', new Date()); if (ga4) gtag('config', ga4); if (ads) gtag('config', ads);
+    </script>}
+    {mk?.pixel && <script is:inline define:vars={{ id: mk.pixel }}>
+      !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s); }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', id); fbq('track', 'PageView');
+    </script>}
+    {mk && <script is:inline define:vars={{ cfg: { ads: mk.ads, labels: mk.labels, hosts: mk.registerHosts, gtm: !!mk.gtm } }}>
+      // window.uaTrack(kind, { value, id }): reports a site action to every tool that's on.
+      // Kinds: purchase (Futures paid), lead_trial, lead_interest, contact, ollie (Register click to Ollie).
+      (function () {
+        var GA = { purchase: 'purchase', lead_trial: 'generate_lead', lead_interest: 'generate_lead', contact: 'generate_lead', ollie: 'begin_checkout' };
+        var META = { purchase: 'Purchase', lead_trial: 'Lead', lead_interest: 'Lead', contact: 'Contact', ollie: 'InitiateCheckout' };
+        var ADS = { purchase: 'futures', lead_trial: 'trial', lead_interest: 'interest', contact: 'contact', ollie: 'ollie' };
+        window.uaTrack = function (kind, d) {
+          d = d || {};
+          var money = d.value != null ? { value: d.value, currency: 'USD' } : {};
+          try {
+            if (window.gtag) {
+              window.gtag('event', GA[kind], Object.assign({ event_category: kind }, money, d.id ? { transaction_id: d.id } : {}));
+              var label = cfg.ads && cfg.labels[ADS[kind]];
+              if (label) window.gtag('event', 'conversion', Object.assign({ send_to: cfg.ads + '/' + label }, money, d.id ? { transaction_id: d.id } : {}));
+            }
+            if (window.fbq) window.fbq('track', META[kind], money, d.id ? { eventID: d.id } : undefined);
+            if (cfg.gtm) (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'ua_' + kind }, money, d.id ? { transaction_id: d.id } : {}));
+          } catch (e) { /* tracking never breaks the page */ }
+        };
+        // Register clicks that leave for Ollie (or any outside registration link in the content).
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          try { if (cfg.hosts.indexOf(new URL(a.href).hostname) !== -1) window.uaTrack('ollie'); } catch (err) { /* not a URL */ }
+        }, true);
+      })();
+    </script>}
   </head>
   <body class={bodyClass}>
     <slot />

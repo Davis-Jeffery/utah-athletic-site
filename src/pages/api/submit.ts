@@ -3,7 +3,7 @@
 // sends the person who filled it in a confirmation naming who will get back to them
 // (src/lib/server/email.ts). The contact form always goes to the main contact email.
 import type { APIRoute } from 'astro';
-import { ADULT_PROGRAMS, FORMS, autoReply, isEmail, json, privateId, recipients, s, sanity, sendEmail, spamCheck, staffNotice } from '../../lib/server';
+import { ADULT_PROGRAMS, FORMS, autoReply, brandEmails, isEmail, json, privateId, recipients, s, sanity, sendEmail, spamCheck, staffNotice } from '../../lib/server';
 
 export const prerender = false;
 
@@ -55,6 +55,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     programName: program ? ADULT_PROGRAMS[program]?.name ?? NAMES[program] : undefined,
     regionName: region ? NAMES[region] : undefined,
   };
+  await brandEmails();
   const staff = staffNotice(sent, FORMS[form]);
   await sendEmail({ to: to.map((p) => p.email), replyTo: f.email, ...staff });
   // The confirmation goes out only when the message is saved; replies reach whoever will answer.

@@ -19,5 +19,14 @@ const pg = data.pages.futures;
       <p style="margin:8px 0 0"><a href="/futures/" style="color:var(--color-accent-300)">Back to Futures →</a></p>
     </PageHero>
     <SiteFooter social={data.settings.social} />
+    <script is:inline>
+      // Marketing: report this Futures payment once (uaTrack is set up in Base.astro when tracking is on).
+      (function () {
+        var q = new URLSearchParams(location.search), id = q.get('cs'), value = Number(q.get('value'));
+        if (!id || !window.uaTrack) return;
+        try { if (sessionStorage.getItem('ua_paid_' + id)) return; sessionStorage.setItem('ua_paid_' + id, '1'); } catch (e) { /* storage blocked: report anyway */ }
+        window.uaTrack('purchase', { value: value || undefined, id: id });
+      })();
+    </script>
   </div>
 </Base>

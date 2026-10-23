@@ -228,10 +228,10 @@ export const program = defineType({
 
     // Development and compare
     // The "We develop the complete player" section and each pillar's pop-up, all in one place.
-    // Optional fields left empty use the shared text (Site settings, Development model tab).
+    // Optional fields left empty use the shared text (Site-wide components > Development model).
     defineField({
       name: 'devPillars', title: 'Development model', type: 'object', group: 'dev',
-      description: 'The "We develop the complete player" section and the pop-up for each pillar. Optional fields left empty use the shared text in Site settings, Development model tab, so set them only where this program differs.',
+      description: 'The "We develop the complete player" section and the pop-up for each pillar. Optional fields left empty use the shared text in Site-wide components, Development model, so set them only where this program differs.',
       fields: [
         str('heading', 'Heading (optional)', { description: 'e.g. "We develop the". Empty uses the shared heading.' }),
         str('headingAccent', 'Heading, teal part (optional)', { description: 'e.g. "complete player."' }),

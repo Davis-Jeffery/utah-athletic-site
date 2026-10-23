@@ -125,6 +125,9 @@ export function ClassList({ classes }) {
 // ---------- Form sending ----------
 // Every form posts to an API route (/api/submit, or /api/futures/checkout). `extra` adds what the
 // form knows that isn't an input (form name, program, region). Returns the state to render.
+// Which marketing action each form counts as (see uaTrack in Base.astro).
+const TRACK_KIND = { trial: 'lead_trial', invite: 'lead_trial', interest: 'lead_interest', register: 'lead_interest', contact: 'contact', adult: 'contact' };
+
 export function useSubmit(extra, url = '/api/submit/') {
   const [state, setState] = useState({ busy: false, error: '', sent: false, result: null });
   const onSubmit = async (e) => {
@@ -132,12 +135,16 @@ export function useSubmit(extra, url = '/api/submit/') {
     const fields = Object.fromEntries(new FormData(e.currentTarget));
     setState({ busy: true, error: '', sent: false, result: null });
     try {
+      const payload = { ...fields, ...(typeof extra === 'function' ? extra(fields) : extra), page: location.pathname + location.search };
       const r = await fetch(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, ...(typeof extra === 'function' ? extra(fields) : extra), page: location.pathname + location.search }),
+        body: JSON.stringify(payload),
       });
       const out = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+      // Marketing: report the sent form (Base.astro's uaTrack; does nothing until a tracking ID is set).
+      const kind = TRACK_KIND[payload.form];
+      if (kind) try { window.uaTrack?.(kind); } catch { /* tracking never breaks a form */ }
       setState({ busy: false, error: '', sent: true, result: out });
       return out;
     } catch (err) {
