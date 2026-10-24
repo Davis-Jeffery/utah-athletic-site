@@ -113,18 +113,20 @@ async function build() {
   const regionFor = (p: (typeof c.program)[number], k: 'north' | 'south' | 'west') => {
     const { leaders, coaches, fees, ages, ...r } = p[k];
     const hide = NO_PRICE_LIST.includes(p.key);
-    // Age tabs (Club): each age group with this region's price (null: to be announced) and what is
-    // and isn't included. They take the place of the region's Fees by age group.
-    const tabs = hide ? [] : p.ageTabs.map((t) => ({
-      key: t._key, label: fmtAges(t.minAge, t.maxAge), cost: t.prices[k] ?? null, note: t.note, included: t.included, notIncluded: t.notIncluded,
-    }));
-    const priced = tabs.flatMap((t) => (t.cost == null ? [] : [{ cost: t.cost }]));
+    // Age tabs (Club): each age group offered in this region, with its price and what is and isn't
+    // included. An age group with no price for this region isn't offered here, so it's left out.
+    // They take the place of the region's Fees by age group.
+    const tabs = hide ? [] : p.ageTabs.flatMap((t) => (t.prices[k] == null ? [] : [{
+      key: t._key, label: fmtAges(t.minAge, t.maxAge), min: t.minAge, max: t.maxAge, cost: t.prices[k]!, note: t.note, included: t.included, notIncluded: t.notIncluded,
+    }]));
     // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
     // age tabs, else the region's Fees by age group, else its sessions (Rec, Futures). Null when
     // no price is posted yet.
-    const price = hide ? null : tabs.length ? (priced.length ? priceOf(priced) : null) : fees.length ? priceOf(fees)
+    const price = hide ? null : p.ageTabs.length ? (tabs.length ? priceOf(tabs) : null) : fees.length ? priceOf(fees)
       : p.kind === 'season' ? sessionPrice(p.key, k) : null;
-    return { ...r, ages: ages || p.ages, fees: hide || tabs.length ? [] : fees, tabs, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
+    // Ages shown on the region's page: the region's own, else the age groups offered here, else the program's.
+    const offered = tabs.length ? fmtAges(Math.min(...tabs.map((t) => t.min)), Math.max(...tabs.map((t) => t.max))) : null;
+    return { ...r, ages: ages || offered || p.ages, fees: hide || p.ageTabs.length ? [] : fees, tabs, price, leaders: staff(leaders), coaches: NO_COACH_LIST.includes(p.key) ? [] : staff(coaches) };
   };
 
   // Recreation and Futures sessions, each in one region at its own venue and price. Status is the

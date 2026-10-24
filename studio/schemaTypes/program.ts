@@ -99,7 +99,7 @@ const ageTabsField = defineField({
       defineField({ name: 'maxAge', title: 'Through', type: 'number', options: { list: AGE_OPTIONS }, validation: (r) => r.required().min(r.valueOfField('minAge')) }),
       defineField({
         name: 'prices', title: 'Price in each region ($)', type: 'object', options: { columns: 3 },
-        description: 'Leave a region empty to show "To be announced". Only regions where the program is running are shown.',
+        description: 'Leave a region empty if this age group isn\'t offered there: its tab won\'t show on that region\'s page. Only regions where the program is running are shown.',
         fields: REGION_NAMES.map(([k, t]) => defineField({
           name: k, title: t, type: 'number', validation: (r) => r.min(0),
           hidden: ({ document }: any) => document?.[k]?.status !== 'active',

@@ -7,6 +7,8 @@ import { UsersIcon } from '@sanity/icons/Users';
 import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES } from './structure';
 import { Registrations } from './tools/Registrations';
 import { StartHere } from './tools/StartHere';
+import { Pricing } from './tools/Pricing';
+import { TagIcon } from '@sanity/icons/Tag';
 import { HomeIcon } from '@sanity/icons/Home';
 
 export default defineConfig({
@@ -22,11 +24,12 @@ export default defineConfig({
   ],
 
   // Registrations: players by age group and gender, with group emails (tools/Registrations.tsx).
+  // Pricing: every price on the site in one place (tools/Pricing.tsx).
   // Vision is a developer tool, so editors don't see it.
   tools: (prev, { currentUser }) => {
     const admin = currentUser?.roles.some((r) => r.name === 'administrator');
     // "Start here" comes first, so the Studio opens on it (tools/StartHere.tsx).
-    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }];
+    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }, { name: 'pricing', title: 'Pricing', icon: TagIcon, component: Pricing }];
   },
 
   schema: {

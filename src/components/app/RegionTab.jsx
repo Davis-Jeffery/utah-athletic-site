@@ -104,13 +104,13 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', flexWrap: 'wrap' }}>
                     <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{rd.price ? money(rd.price.cost) : 'TBA'}</span>
-                    <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rd.fees.length ? [rd.fees[0].ages, p.unit, rd.fees[0].note].filter(Boolean).join(', ') : rd.price ? (rd.price.from ? 'and up, ' : '') + p.unit : 'Prices post with the first session'}</span>
+                    <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rd.fees.length ? [rd.fees[0].ages, p.unit, rd.fees[0].note].filter(Boolean).join(', ') : rd.price ? (rd.price.from ? 'and up, ' : '') + p.unit : p.kind === 'season' ? 'Prices post with the first session' : 'Prices to be announced'}</span>
                   </div>
                 )}
                 <p style={{ margin: 0, maxWidth: '460px', fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{p.costNote}</p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)', paddingBottom: '12px' }}>What's included</span>
+                {p.includes.length ? <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)', paddingBottom: '12px' }}>What's included</span> : null}
                 {p.includes.map((inc) => (
                   <div key={inc} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '15px 0', fontSize: '16px', background: ROW_RULE }}><span style={{ width: '7px', height: '7px', flex: 'none', transform: 'rotate(45deg)', background: 'var(--color-accent)' }} />{inc}</div>
                 ))}
@@ -216,8 +216,8 @@ function FeeTabs({ p, tabs, n }) {
         style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', flexWrap: 'wrap' }}>
-            <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{t.cost != null ? money(t.cost) : 'TBA'}</span>
-            <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{[t.label, t.cost != null ? p.unit : 'price to be announced', t.note].filter(Boolean).join(', ')}</span>
+            <span style={{ font: '500 clamp(80px,10vw,144px)/.9 var(--font-heading)', letterSpacing: '-.06em', color: 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{money(t.cost)}</span>
+            <span style={{ fontSize: '15px', color: 'var(--color-neutral-400)' }}>{[t.label, p.unit, t.note].filter(Boolean).join(', ')}</span>
           </div>
           {p.costNote ? <p style={{ margin: 0, maxWidth: '460px', fontSize: '15px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{p.costNote}</p> : null}
         </div>
