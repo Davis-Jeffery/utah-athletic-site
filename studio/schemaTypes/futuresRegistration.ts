@@ -26,7 +26,7 @@ export const futuresRegistration = defineType({
     { name: 'player', title: 'Player' },
     { name: 'parent', title: 'Parent and emergency contact' },
     { name: 'payment', title: 'Payment', options: { collapsible: true, collapsed: true } },
-    { name: 'waiver', title: 'Waiver', options: { collapsible: true, collapsed: true } },
+    { name: 'waiver', title: 'Waivers', options: { collapsible: true, collapsed: true } },
   ],
   fields: [
     ro('payment', 'Payment', 'string', { options: { list: PAYMENT_OPTIONS }, description: 'Updated by Stripe. Make refunds in the Stripe dashboard; this updates itself.' }),
@@ -54,8 +54,23 @@ export const futuresRegistration = defineType({
     ro('refundedAt', 'Refunded at', 'datetime', { fieldset: 'payment' }),
     ro('stripeCheckoutId', 'Stripe checkout id', 'string', { fieldset: 'payment' }),
     ro('stripePaymentIntent', 'Stripe payment id', 'string', { fieldset: 'payment', description: 'Search for this in the Stripe dashboard to find the payment.' }),
-    ro('waiverAcceptedAt', 'Accepted at', 'datetime', { fieldset: 'waiver' }),
-    ro('waiverText', 'Waiver text they accepted', 'text', { fieldset: 'waiver' }),
+    // Every waiver they accepted, as it read then (Settings > Waivers).
+    ro('waivers', 'Waivers they accepted', 'array', {
+      fieldset: 'waiver',
+      of: [{
+        type: 'object', name: 'acceptedWaiver',
+        fields: [
+          { name: 'title', title: 'Title', type: 'string' },
+          { name: 'acceptedAt', title: 'Accepted at', type: 'datetime' },
+          { name: 'text', title: 'Text they accepted', type: 'text', rows: 8 },
+          { name: 'waiver', title: 'Waiver (link)', type: 'reference', to: [{ type: 'waiver' }], weak: true },
+        ],
+        preview: { select: { title: 'title', subtitle: 'acceptedAt' } },
+      }],
+    }),
+    // Registrations from before Settings > Waivers: one waiver. Shown only when set.
+    ro('waiverAcceptedAt', 'Accepted at', 'datetime', { fieldset: 'waiver', hidden: ({ value }: { value?: unknown }) => !value }),
+    ro('waiverText', 'Waiver text they accepted', 'text', { fieldset: 'waiver', hidden: ({ value }: { value?: unknown }) => !value }),
   ],
   orderings: [{ title: 'Newest first', name: 'received', by: [{ field: 'receivedAt', direction: 'desc' }] }],
   preview: {

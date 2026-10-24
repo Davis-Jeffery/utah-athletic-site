@@ -40,7 +40,6 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
   if (missing.length) return json({ error: 'Please fill in every required field.', fields: missing }, 400);
   if (!isEmail(f.email)) return json({ error: 'Please enter a valid email address.' }, 400);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(f.birthDate)) return json({ error: 'Please enter the player\'s birth date.' }, 400);
-  if (body.waiver !== true) return json({ error: 'Please read and accept the waiver.' }, 400);
 
   const id = s(body.session, 120);
   const db = sanity();
@@ -62,8 +61,17 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     if (taken >= session.capacity) return json({ error: 'Sorry, this session is full.' }, 409);
   }
 
-  // The waiver lives on the Futures registration page document (older datasets: Site settings).
-  const waiver = await db.fetch<string | null>(`coalesce(*[_id == "pageFutures"][0].futuresWaiver, *[_id == "siteSettings"][0].futuresWaiver)`);
+  // Every waiver required for Futures right now (Studio > Settings > Waivers) must be ticked. The
+  // registration keeps a copy of each as accepted, so later edits never change it.
+  const waivers = await db.fetch<{ _id: string; title: string; text: string }[]>(
+    `*[_type == "waiver" && "futures" in requiredFor && !(_id in path("drafts.**"))] | order(title asc) { _id, title, text }`,
+  );
+  const ticked = Array.isArray(body.waivers) ? body.waivers.filter((x): x is string => typeof x === 'string') : [];
+  const unticked = waivers.filter((w) => !ticked.includes(w._id));
+  if (unticked.length) {
+    return json({ error: `Please read and accept the ${unticked.map((w) => w.title).join(' and ')}. If this page has been open a while, refresh it first.` }, 400);
+  }
+  const acceptedAt = new Date().toISOString();
   const regId = privateId('futuresRegistration');
   const region = session.region[0].toUpperCase() + session.region.slice(1);
   await db.create({
@@ -72,7 +80,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     // US Soccer age group for the session's season (Aug 1 to Jul 31), for filtering and group emails.
     ...(() => { const end = seasonEnd(session.start); const n = ageNumber(f.birthDate, end); return { season: seasonLabel(end), seasonEnd: end, ageNumber: n, ageGroup: ageLabel(n) }; })(),
     ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)),
-    waiverAcceptedAt: new Date().toISOString(), waiverText: waiver ?? '',
+    waivers: waivers.map((w, i) => ({ _key: `w${i}`, _type: 'acceptedWaiver', title: w.title, text: w.text, acceptedAt, waiver: { _type: 'reference', _ref: w._id, _weak: true } })),
   });
 
   try {

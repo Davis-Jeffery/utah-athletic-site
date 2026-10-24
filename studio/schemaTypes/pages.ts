@@ -149,7 +149,7 @@ export const CONTACT_FIELDS = [
   seo('contactSeo'),
 ];
 
-// ---------- Futures registration and thank-you pages, and the waiver ----------
+// ---------- Futures registration and thank-you pages (waivers: Settings > Waivers) ----------
 export const FUTURES_FIELDS = [
   section('futuresPages', 'Registration and thank-you pages', undefined, [
     ...headingPair(),
@@ -158,10 +158,6 @@ export const FUTURES_FIELDS = [
     str('thanksHeadingAccent', 'Thank-you heading, teal part', { description: 'e.g. "registered."' }),
     txt('thanksBody', 'Thank-you text', { required: true, rows: 3, description: 'The main email is added after it for questions.' }),
   ]),
-  txt('futuresWaiver', 'Waiver', {
-    rows: 14,
-    description: 'Families must accept this to register for Futures. Each registration keeps a copy of the text they accepted, so editing it later doesn\'t change past registrations.',
-  }),
 ];
 
 const page = (name: string, title: string, icon: typeof HomeIcon, fields: ReturnType<typeof defineField>[]) =>
@@ -171,7 +167,7 @@ export const pageHome = page('pageHome', 'Home page', HomeIcon, HOME_FIELDS);
 export const pageTryouts = page('pageTryouts', 'Tryouts page', CalendarIcon, TRYOUTS_FIELDS);
 export const pageEvents = page('pageEvents', 'Tournaments & Events page', StarIcon, EVENTS_FIELDS);
 export const pageContact = page('pageContact', 'Contact page', EnvelopeIcon, CONTACT_FIELDS);
-export const pageFutures = page('pageFutures', 'Futures registration page and waiver', SunIcon, FUTURES_FIELDS);
+export const pageFutures = page('pageFutures', 'Futures registration page', SunIcon, FUTURES_FIELDS);
 
 /** Page documents, by id (each one's id is its type). The site merges their fields over Site settings. */
 export const PAGE_TYPES = ['pageHome', 'pageTryouts', 'pageEvents', 'pageContact', 'pageFutures'] as const;

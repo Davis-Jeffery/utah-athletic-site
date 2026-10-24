@@ -333,8 +333,10 @@ async function build() {
       tryoutBring: settings.tryoutBring,
       eventReel: settings.eventReel.map((r) => ({ photo: img(r.photo, W.section, 66)!, event: r.event, caption: r.caption })),
     },
-    // Only the Futures registration page uses this.
-    futuresWaiver: settings.futuresWaiver?.trim() || '',
+    // Waivers (Settings > Waivers), by title; each registration form shows the ones required for it.
+    waivers: [...c.waiver].sort((a, b) => a.title.localeCompare(b.title)).map((w) => ({
+      id: w._id, title: w.title, text: w.text, requiredFor: w.requiredFor, checkboxLabel: w.checkboxLabel?.trim() || null,
+    })),
     // Tracking (Site settings > Marketing). Each ID must match its format exactly, since it goes into
     // a script: anything else is ignored rather than risk breaking (or injecting into) the page.
     marketing: (() => {

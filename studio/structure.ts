@@ -21,6 +21,7 @@ import { ADULT_LEAGUES } from './schemaTypes/adultLeague';
 import { PAGE_TYPES } from './schemaTypes/pages';
 import { COMPONENT_TYPES } from './schemaTypes/components';
 import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { DocumentTextIcon } from '@sanity/icons/DocumentText';
 
 export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', ...PAGE_TYPES, ...COMPONENT_TYPES]);
 
@@ -45,6 +46,9 @@ export const REGIONS = [
 export const TRYOUT_TEMPLATES = (['academy', 'club'] as const).map((p) => ({
   id: `tryout-${p}`, title: `${p === 'academy' ? 'Academy' : 'Club'} tryout session`, schemaType: 'tryoutSession', value: { program: p },
 }));
+
+// "+ New" in Futures' Waivers list starts a waiver already required for Futures registration.
+export const WAIVER_TEMPLATES = [{ id: 'waiver-futures', title: 'Futures waiver', schemaType: 'waiver', value: { requiredFor: ['futures'] } }];
 
 const NEWEST = [{ field: 'receivedAt', direction: 'desc' as const }];
 const BY_START = [{ field: 'start', direction: 'asc' as const }];
@@ -125,6 +129,7 @@ export const structure: StructureResolver = (S) => {
         .title('Site settings')
         .icon(CogIcon)
         .child(S.document().schemaType('siteSettings').documentId('siteSettings').title('Site settings')),
+      S.documentTypeListItem('waiver').title('Waivers').icon(DocumentTextIcon),
       S.listItem()
         .title('Region settings')
         .icon(EarthGlobeIcon)
@@ -153,8 +158,12 @@ function programExtras(S: StructureBuilder, id: string, title: string, list: Lis
   return [
     S.listItem().title('Sessions').id(`${id}-sessions`).icon(ClockIcon).child(S.documentTypeList(type).title(`${title} sessions`).defaultOrdering(BY_START)),
     ...(id === 'futures' ? [
-      S.listItem().title('Registration page and waiver').id('futures-register-page').icon(SunIcon)
-        .child(S.document().schemaType('pageFutures').documentId('pageFutures').title('Futures registration page and waiver')),
+      S.listItem().title('Registration page').id('futures-register-page').icon(SunIcon)
+        .child(S.document().schemaType('pageFutures').documentId('pageFutures').title('Futures registration page')),
+      S.listItem().title('Waivers').id('futures-waivers').icon(DocumentTextIcon).child(
+        S.documentList().title('Futures waivers').schemaType('waiver').filter('_type == "waiver" && "futures" in requiredFor')
+          .initialValueTemplates([S.initialValueTemplateItem('waiver-futures')]),
+      ),
       S.listItem().title('Registrations').id('futures-registrations').icon(CreditCardIcon).child(registrations(S, list)),
     ] : []),
   ];
