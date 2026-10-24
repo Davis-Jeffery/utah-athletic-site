@@ -13,5 +13,6 @@ import { adultLeague } from './adultLeague';
 import { emailBroadcast } from './emailBroadcast';
 import { pageContact, pageEvents, pageFutures, pageHome, pageTryouts } from './pages';
 import { componentDevelopment } from './components';
+import { waiver } from './waiver';
 
-export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, pageHome, pageTryouts, pageEvents, pageContact, pageFutures, componentDevelopment, networkPage, submission, futuresRegistration, emailBroadcast];
+export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, pageHome, pageTryouts, pageEvents, pageContact, pageFutures, componentDevelopment, networkPage, submission, futuresRegistration, emailBroadcast, waiver];

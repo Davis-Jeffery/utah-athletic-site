@@ -1,16 +1,16 @@
 // /futures/register/: pick a Futures session, add the player, parent, medical and emergency details,
-// accept the waiver, then pay with Stripe Checkout. The server checks the session is open and has
+// accept each waiver required for Futures (Studio > Settings > Waivers), then pay with Stripe Checkout. The server checks the session is open and has
 // room and sets the price (src/pages/api/futures/checkout.ts); this page only collects details.
 import React, { useEffect, useState } from 'react';
 import { CalendarBlank, MapPin, Clock, CurrencyDollar } from '@phosphor-icons/react';
 import { money, sessionLabel } from '../lib/schedule';
-import { ACC, Field, FormGuard, ClassList, Placeholder, useSubmit, useToday } from './ui.jsx';
+import { ACC, Field, FormGuard, ClassList, useSubmit, useToday } from './ui.jsx';
 
 const box = { borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)' };
 const legend = { padding: 0, marginBottom: '12px', font: '500 20px/1.1 var(--font-heading)', letterSpacing: '-.02em', color: 'var(--color-text)' };
 const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' };
 
-export default function FuturesRegister({ sessions, waiver, builtOn }) {
+export default function FuturesRegister({ sessions, waivers, builtOn }) {
   const today = useToday(builtOn);
   const [id, setId] = useState(null);
   const [cancelled, setCancelled] = useState(false);
@@ -34,7 +34,8 @@ export default function FuturesRegister({ sessions, waiver, builtOn }) {
   };
 
   const f = useSubmit(
-    (fields) => ({ session: s?.id, waiver: fields.waiver === 'on' }),
+    // The waivers ticked, by id; the server checks every required one is there.
+    (fields) => ({ session: s?.id, waivers: waivers.filter((w) => fields[`waiver-${w.id}`] === 'on').map((w) => w.id) }),
     '/api/futures/checkout/',
   );
   const submit = async (e) => {
@@ -106,16 +107,23 @@ export default function FuturesRegister({ sessions, waiver, builtOn }) {
                 </div>
               </div>
             </fieldset>
-            <fieldset style={{ border: 0, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <legend style={legend}>Waiver</legend>
-              <div tabIndex={0} aria-label="Waiver text" style={{ maxHeight: '220px', overflowY: 'auto', padding: '14px 16px', borderRadius: '8px', background: 'var(--color-bg)', boxShadow: 'inset 0 0 0 1px var(--color-divider)', fontSize: '13px', lineHeight: 1.6, color: 'var(--color-neutral-300)', whiteSpace: 'pre-wrap' }}>
-                {waiver || <Placeholder>Placeholder · waiver text to be added in Site settings</Placeholder>}
-              </div>
-              <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '14px', lineHeight: 1.5, color: 'var(--color-neutral-300)' }}>
-                <input type="checkbox" name="waiver" required style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: ACC }} />
-                I'm the player's parent or guardian, and I've read and accept the waiver.
-              </label>
-            </fieldset>
+            {waivers.length ? (
+              <fieldset style={{ border: 0, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                <legend style={legend}>{waivers.length > 1 ? 'Waivers' : 'Waiver'}</legend>
+                {waivers.map((w) => (
+                  <div key={w.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {waivers.length > 1 || w.title ? <span style={{ font: '500 16px/1.2 var(--font-heading)' }}>{w.title}</span> : null}
+                    <div tabIndex={0} aria-label={`${w.title} text`} style={{ maxHeight: '220px', overflowY: 'auto', padding: '14px 16px', borderRadius: '8px', background: 'var(--color-bg)', boxShadow: 'inset 0 0 0 1px var(--color-divider)', fontSize: '13px', lineHeight: 1.6, color: 'var(--color-neutral-300)', whiteSpace: 'pre-wrap' }}>
+                      {w.text}
+                    </div>
+                    <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '14px', lineHeight: 1.5, color: 'var(--color-neutral-300)' }}>
+                      <input type="checkbox" name={`waiver-${w.id}`} required style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: ACC }} />
+                      {w.checkboxLabel || `I'm the player's parent or guardian, and I've read and accept the ${w.title}.`}
+                    </label>
+                  </div>
+                ))}
+              </fieldset>
+            ) : null}
             <FormGuard error={f.error} />
             <button type="submit" disabled={f.busy} className="hv-t16" style={{ opacity: f.busy ? 0.6 : 1, cursor: 'pointer', minHeight: '52px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 16px/1 var(--font-body)', borderRadius: '8px' }}>
               {f.busy ? 'Opening secure payment…' : `Continue to payment · ${money(s.cost)} →`}

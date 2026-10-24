@@ -156,7 +156,6 @@ const settings = z.object({
   collage: z.array(keyedImage).min(11),
   videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: z.string().url() })).default([]),
   tryoutBring: z.array(z.string()).default([]),
-  futuresWaiver: z.string().optional(),
   eventReel: z.array(z.object({ photo: image, event: z.string(), caption: z.string() })).default([]),
   development: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
   // Program pages showing the development model (Site-wide components); missing means all.
@@ -164,6 +163,9 @@ const settings = z.object({
   homeHide: hide, tryoutsHide: hide, eventsHide: hide, contactHide: hide,
   ...settingsHome,
 });
+
+/** A waiver families accept on the registration forms listed in requiredFor (studio/shared/registrationForms.ts). */
+const waiver = z.object({ _id: z.string(), title: z.string(), text: z.string(), requiredFor: z.array(z.string()).default([]), checkboxLabel: opt });
 
 const adultLeague = z.object({
   _id: z.string(), key: z.enum(['upsl', 'rec']), hide, name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(), seo,
@@ -185,7 +187,7 @@ const adultLeague = z.object({
 /** Page documents merged into Site settings (see fetchContent). Keep in step with PAGE_TYPES in studio/schemaTypes/pages.ts. */
 const PAGE_TYPES = ['pageHome', 'pageTryouts', 'pageEvents', 'pageContact', 'pageFutures', 'componentDevelopment'] as const;
 
-const SCHEMAS = { venue, staff, region, program, adultLeague, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage } as const;
+const SCHEMAS = { venue, staff, region, program, adultLeague, tryoutSession: tryout, recSession, futuresSession, event, siteSettings: settings, networkPage, waiver } as const;
 type Docs = { [K in keyof typeof SCHEMAS]: z.infer<(typeof SCHEMAS)[K]>[] };
 
 // ---------- fetch ----------

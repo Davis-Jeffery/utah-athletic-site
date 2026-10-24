@@ -20,7 +20,7 @@ const sessions = data.sessions.filter((s) => s.program === 'futures').map((s) =>
       <h1 style="margin:0;max-width:900px;font:500 clamp(44px,6vw,88px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">{pg.heading}{pg.headingAccent ? <> <span style="color:#78b7b3">{pg.headingAccent}</span></> : null}</h1>
       <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
-    <FuturesRegister client:load sessions={sessions} waiver={data.futuresWaiver} builtOn={data.builtOn} />
+    <FuturesRegister client:load sessions={sessions} waivers={data.waivers.filter((w) => w.requiredFor.includes('futures'))} builtOn={data.builtOn} />
     <SiteFooter social={data.settings.social} note="Payments are handled securely by Stripe." />
   </div>
 </Base>

@@ -4,7 +4,7 @@ import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemaTypes';
 import { UsersIcon } from '@sanity/icons/Users';
-import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES } from './structure';
+import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES, WAIVER_TEMPLATES } from './structure';
 import { Registrations } from './tools/Registrations';
 import { StartHere } from './tools/StartHere';
 import { Pricing } from './tools/Pricing';
@@ -37,7 +37,7 @@ export default defineConfig({
     // Programs, regions and site settings are fixed documents: never offer "create new".
     // Submissions and Futures registrations are created only by the site's forms.
     // Academy and Club tryout lists start new tryouts with their program filled in (structure.ts).
-    templates: (templates) => [...templates.filter((t) => !FIXED_TYPES.has(t.schemaType) && !SITE_CREATED_TYPES.has(t.schemaType)), ...TRYOUT_TEMPLATES],
+    templates: (templates) => [...templates.filter((t) => !FIXED_TYPES.has(t.schemaType) && !SITE_CREATED_TYPES.has(t.schemaType)), ...TRYOUT_TEMPLATES, ...WAIVER_TEMPLATES],
   },
 
   document: {
