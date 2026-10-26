@@ -6,7 +6,8 @@
 // (teal on near-black, src/styles/global.css). Inter loads where the client allows web fonts
 // (Apple Mail, iOS); elsewhere it falls back to the system sans-serif.
 
-import { safeHref, toPlain, type RichBlock, type Run } from '../../../studio/shared/richText';
+import { isEmpty, readBlocks, safeHref, toPlain, type RichBlock, type Run } from '../../../studio/shared/richText';
+import { EMAIL_TEMPLATES, fillTemplate, type TemplateKey, type TemplateText } from '../../../studio/shared/emailTemplates';
 
 // The site logo as a PNG on Sanity's CDN: a fixed address that works before and after the domain moves.
 // brandEmails() (server/index.ts) swaps in the logo from Site settings when one is set.
@@ -14,6 +15,20 @@ const DEFAULT_LOGO = 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a6
 let LOGO = DEFAULT_LOGO;
 export const setEmailLogo = (url?: string | null) => { LOGO = url || DEFAULT_LOGO; };
 const STUDIO = 'https://utah-athletic.sanity.studio';
+
+// Wording for the automatic emails from Settings > Automatic emails (studio/shared/emailTemplates.ts).
+// brandEmails() (server/index.ts) loads it before sending; any field left empty uses the default.
+let TEMPLATES: Partial<Record<TemplateKey, Partial<TemplateText>>> = {};
+export const setEmailTemplates = (t: typeof TEMPLATES) => { TEMPLATES = t; };
+// The message is formatted text (bold, italic, links, lists; saved as JSON blocks, or older plain text).
+const wording = (key: TemplateKey, values: Record<string, string | undefined | null>): Omit<TemplateText, 'message'> & { message: RichBlock[] } => {
+  const d: TemplateText = EMAIL_TEMPLATES[key].defaults, own = TEMPLATES[key] ?? {};
+  const text = Object.fromEntries((Object.keys(d) as (keyof TemplateText)[]).map((k) => [k, fillTemplate(own[k]?.trim() || d[k], values)])) as TemplateText;
+  const ownMessage = readBlocks(own.message);
+  const blocks = isEmpty(ownMessage) ? readBlocks(d.message) : ownMessage;
+  const fill = (rs: Run[]) => rs.map((r) => ({ ...r, t: fillTemplate(r.t, values, { keepEdges: true }) }));
+  return { ...text, message: blocks.map((b) => (b.k === 'p' ? { k: 'p', c: fill(b.c) } : { k: b.k, items: b.items.map(fill) })) };
+};
 
 const C = {
   page: '#0c0d11', bg: '#111318', card: '#1b1d24', line: '#2c2f38',
@@ -56,7 +71,8 @@ type Block =
 
 type Layout = {
   preheader: string; kicker: string; heading: string; headingAccent?: string;
-  intro: string; blocks?: Block[]; signoff?: string; footer: string;
+  /** Plain text, or formatted text (the automatic emails' editable message). */
+  intro: string | RichBlock[]; blocks?: Block[]; signoff?: string; footer: string;
 };
 
 function render(l: Layout): { html: string; text: string } {
@@ -98,7 +114,7 @@ function render(l: Layout): { html: string; text: string } {
   <tr><td style="padding:34px 32px 8px">
     ${label(l.kicker)}
     <h1 style="margin:0 0 14px;font:500 30px/1.12 ${FONT};letter-spacing:-.03em;color:${C.text}">${esc(l.heading)}${l.headingAccent ? ` <span style="color:${C.accent}">${esc(l.headingAccent)}</span>` : ''}</h1>
-    <p style="margin:0 0 24px;font:400 16px/1.65 ${FONT};color:${C.soft}">${nl(l.intro)}</p>
+    ${typeof l.intro === 'string' ? `<p style="margin:0 0 24px;font:400 16px/1.65 ${FONT};color:${C.soft}">${nl(l.intro)}</p>` : `<div style="margin:0 0 24px">${richHtml(l.intro)}</div>`}
   </td></tr>
   <tr><td style="padding:0 32px 8px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${blocks}</table></td></tr>
   ${l.signoff ? `<tr><td style="padding:4px 32px 30px;font:400 15px/1.6 ${FONT};color:${C.soft}">${nl(l.signoff)}</td></tr>` : ''}
@@ -121,12 +137,10 @@ function render(l: Layout): { html: string; text: string } {
       case 'button': return `${b.label}: ${b.href}`;
     }
   };
-  const text = [`${l.heading}${l.headingAccent ? ' ' + l.headingAccent : ''}`, l.intro, ...(l.blocks ?? []).map(t).filter(Boolean), l.signoff, `--\nUtah Athletic\n${l.footer}`]
+  const text = [`${l.heading}${l.headingAccent ? ' ' + l.headingAccent : ''}`, typeof l.intro === 'string' ? l.intro : toPlain(l.intro), ...(l.blocks ?? []).map(t).filter(Boolean), l.signoff, `--\nUtah Athletic\n${l.footer}`]
     .filter(Boolean).join('\n\n');
   return { html: page, text };
 }
-
-const AUTO_FOOTER = 'You\'re getting this because you sent a form on the Utah Athletic website. Reply to this email to reach us.';
 
 // ---------- auto-replies to whoever filled in a form ----------
 
@@ -145,88 +159,31 @@ export type Submitted = {
  */
 export function autoReply(f: Submitted, contact: Person): Email {
   const who = f.programName && f.regionName ? `${f.regionName} ${f.programName}` : f.programName || f.regionName || 'Utah Athletic';
-  const player = f.player || 'your player';
+  const key: TemplateKey = f.form in EMAIL_TEMPLATES ? f.form : 'contact';
+  const t = wording(key, {
+    '{Parent first name}': first(f.name), '{Parent full name}': f.name?.trim() || 'there', '{Player}': f.player || 'your player',
+    '{Program}': f.form === 'adult' ? f.programName ?? 'our adult leagues' : f.programName, '{Region}': f.regionName, '{Program and region}': who,
+    '{Contact name}': contact.name, '{Contact role}': contact.role, '{Session}': f.session,
+  });
   const director: Block = { kind: 'person', title: 'Who will contact you', person: contact, note: 'Questions before then? Reply to this email or write to them directly.' };
-
-  switch (f.form) {
-    case 'trial':
-      return {
-        subject: `We got your ${f.programName ? f.programName + ' ' : ''}trial application for ${player}`,
-        ...render({
-          preheader: `${contact.name} will be in touch within 48 hours to schedule a trial.`,
-          kicker: 'Trial application received', heading: 'Thanks for applying,', headingAccent: `${first(f.name)}.`,
-          intro: `We've received ${player}'s application for a ${who} trial. ${contact.name}${contact.role ? `, ${contact.role},` : ''} will review it and contact you within 48 hours to schedule a trial.`,
-          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video], ['Program', who]] }],
-          signoff: 'We look forward to seeing them play.\nUtah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-    case 'invite':
-      return {
-        subject: `We got your Academy invitation request for ${player}`,
-        ...render({
-          preheader: `${contact.name} will be in touch within 48 hours.`,
-          kicker: 'Invitation request received', heading: 'Thanks for reaching out,', headingAccent: `${first(f.name)}.`,
-          intro: `We've received your request for ${player} to be invited to an Academy trial${f.regionName ? ` in the ${f.regionName} region` : ''}. ${contact.name}${contact.role ? `, ${contact.role},` : ''} will review it and contact you within 48 hours.`,
-          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video]] }],
-          signoff: 'Utah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-    case 'register':
-      return {
-        subject: `We got your ${who} registration request`,
-        ...render({
-          preheader: `${contact.name} will email you within 48 hours with next steps.`,
-          kicker: 'Registration request received', heading: 'Thanks,', headingAccent: `${first(f.name)}.`,
-          intro: `We've received your request to register ${player} for ${who}${f.session ? `, ${f.session}` : ''}. ${contact.name} will email you within 48 hours with next steps.`,
-          blocks: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Session', f.session], ['Age group', f.birthYear], ['Current club', f.club]] }],
-          signoff: 'Utah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-    case 'interest':
-      return {
-        subject: `You're on the list for ${who}`,
-        ...render({
-          preheader: `We'll email you as soon as there's news about ${who}.`,
-          kicker: 'You\'re on the list', heading: 'Thanks for your interest,', headingAccent: `${first(f.name)}.`,
-          intro: `We've added you to our ${who} contact list. We'll email you with updates on the program in your area, including when sessions are posted and registration opens.`,
-          blocks: [
-            { kind: 'details', title: 'What you signed up for', rows: [['Program', f.programName], ['Region', f.regionName], ['Age group', f.birthYear]] },
-            { kind: 'text', body: `Questions in the meantime? Reply to this email and it goes to ${contact.name}.` },
-          ],
-          signoff: 'Utah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-    case 'adult':
-      return {
-        subject: `We got your question about ${f.programName ?? 'our adult leagues'}`,
-        ...render({
-          preheader: 'Someone from our staff will reply within 48 hours.',
-          kicker: 'Message received', heading: 'Thanks,', headingAccent: `${first(f.name)}.`,
-          intro: `We've received your question about ${f.programName ?? 'our adult leagues'}. Someone from our staff will reply within 48 hours.`,
-          blocks: [
-            ...(contact.name !== 'Utah Athletic' ? [director] : []),
-            { kind: 'details', title: 'What you sent', rows: [['League', f.programName], ['Position', f.position], ['Joining as', f.topic], ['Played for', f.club]] },
-            ...(f.message ? [{ kind: 'quote' as const, title: 'Your message', body: f.message }] : []),
-          ],
-          signoff: 'Utah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-    case 'contact':
-    default:
-      return {
-        subject: 'We got your message',
-        ...render({
-          preheader: 'Someone from our team will reply within 48 hours.',
-          kicker: 'Message received', heading: 'Thanks for reaching out,', headingAccent: `${first(f.name)}.`,
-          intro: 'We\'ve received your message and someone from our team will get back to you within 48 hours.',
-          blocks: [
-            { kind: 'details', title: 'What you sent', rows: [['Topic', f.topic], ['Program', f.programName], ['Region', f.regionName]] },
-            ...(f.message ? [{ kind: 'quote' as const, title: 'Your message', body: f.message }] : []),
-          ],
-          signoff: 'Utah Athletic', footer: AUTO_FOOTER,
-        }),
-      };
-  }
+  const quote: Block[] = f.message ? [{ kind: 'quote', title: 'Your message', body: f.message }] : [];
+  // What's shown under the message (automatic, not part of the editable wording).
+  const blocks: Record<TemplateKey, Block[]> = {
+    trial: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video], ['Program', who]] }],
+    invite: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Age group', f.birthYear], ['Current club', f.club], ['Position', f.position], ['Highlight video', f.video]] }],
+    register: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Session', f.session], ['Age group', f.birthYear], ['Current club', f.club]] }],
+    interest: [{ kind: 'details', title: 'What you signed up for', rows: [['Program', f.programName], ['Region', f.regionName], ['Age group', f.birthYear]] }],
+    adult: [...(contact.name !== 'Utah Athletic' ? [director] : []), { kind: 'details', title: 'What you sent', rows: [['League', f.programName], ['Position', f.position], ['Joining as', f.topic], ['Played for', f.club]] }, ...quote],
+    contact: [{ kind: 'details', title: 'What you sent', rows: [['Topic', f.topic], ['Program', f.programName], ['Region', f.regionName]] }, ...quote],
+    futuresPaid: [],
+  };
+  return {
+    subject: t.subject,
+    ...render({
+      preheader: t.preview, kicker: t.kicker, heading: t.heading, headingAccent: t.headingAccent,
+      intro: t.message, blocks: blocks[key], signoff: t.signoff, footer: t.footer,
+    }),
+  };
 }
 
 // ---------- notification to staff ----------
@@ -261,19 +218,20 @@ export type FuturesPaid = {
 
 /** The family's confirmation after paying for Futures. */
 export function futuresConfirmation(r: FuturesPaid): Email {
+  const t = wording('futuresPaid', {
+    '{Parent first name}': first(r.parentName), '{Parent full name}': r.parentName?.trim() || 'there', '{Player}': r.player, '{Player first name}': first(r.player),
+    '{Session}': r.session, '{Dates}': r.dates, '{Where}': r.where, '{Paid}': r.paid,
+  });
   return {
-    subject: `${r.player} is registered for Futures · ${r.session}`,
+    subject: t.subject,
     ...render({
-      preheader: `Your spot in ${r.session} is confirmed. Stripe sends your receipt separately.`,
-      kicker: 'Registration confirmed', heading: `${first(r.player)} is`, headingAccent: 'registered.',
-      intro: `Hi ${first(r.parentName)},\nThanks for joining Futures. Your spot is confirmed, and Stripe is emailing your payment receipt separately.`,
+      preheader: t.preview, kicker: t.kicker, heading: t.heading, headingAccent: t.headingAccent, intro: t.message,
       blocks: [
         { kind: 'details', title: 'Your session', rows: [['Session', r.session], ['Dates', r.dates], ['Where', r.where], ['Paid', r.paid]] },
         ...(r.classes.length ? [{ kind: 'list' as const, title: 'Class dates', items: r.classes }] : []),
         ...(r.contact ? [{ kind: 'person' as const, title: 'Your Futures contact', person: r.contact, note: 'Questions? Reply to this email or write to them directly.' }] : []),
       ],
-      signoff: 'See you on the field.\nUtah Athletic',
-      footer: 'You\'re getting this because you registered a player for Utah Athletic Futures.',
+      signoff: t.signoff, footer: t.footer,
     }),
   };
 }

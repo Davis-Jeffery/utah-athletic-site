@@ -1,14 +1,15 @@
-// A small formatted-text editor for group emails: bold, italic, links and lists, with the usual
+// A small formatted-text editor for emails (group emails, and the automatic emails' message):
+// bold, italic, links and lists, with the usual
 // shortcuts (⌘B, ⌘I, ⌘K). It edits like a normal text box and reports what's written as blocks
 // (studio/shared/richText.ts), never as HTML. Pasted text comes in plain, so formatting from other
 // apps can't sneak in.
 import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Card, Flex, Text } from '@sanity/ui';
 import { NAME_FIELDS, toHref, type RichBlock } from '../shared/richText';
-import { serialize } from './richTextDom';
+import { serialize, toEditorHtml } from './richTextDom';
 
 const CSS = `
-.ua-rte{min-height:220px;max-height:50vh;overflow-y:auto;padding:12px 14px;border-radius:0 0 4px 4px;border:1px solid var(--card-border-color);border-top:0;background:var(--card-bg-color);color:var(--card-fg-color);font:400 15px/1.6 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;outline:none}
+.ua-rte{min-height:var(--ua-rte-min,220px);max-height:50vh;overflow-y:auto;padding:12px 14px;border-radius:0 0 4px 4px;border:1px solid var(--card-border-color);border-top:0;background:var(--card-bg-color);color:var(--card-fg-color);font:400 15px/1.6 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;outline:none}
 .ua-rte:focus{box-shadow:inset 0 0 0 1px var(--card-focus-ring-color, #2276fc)}
 .ua-rte:empty::before{content:attr(data-placeholder);color:var(--card-muted-fg-color);pointer-events:none}
 .ua-rte p,.ua-rte div{margin:0 0 12px}
@@ -18,8 +19,24 @@ const CSS = `
 .ua-rte i,.ua-rte em{font-style:italic}
 `;
 
-export function RichTextEditor({ onChange, placeholder, disabled }: { onChange: (blocks: RichBlock[]) => void; placeholder?: string; disabled?: boolean }) {
+type Field = { token: string; label: string; hint?: string };
+
+export function RichTextEditor({ value, onChange, placeholder, disabled, fields = NAME_FIELDS, minHeight = 220, label = 'Message' }: {
+  /** What to show; when it changes from outside (e.g. Discard changes), the editor follows. */
+  value?: RichBlock[]; onChange: (blocks: RichBlock[]) => void; placeholder?: string; disabled?: boolean;
+  /** The names the Insert name menu offers. */
+  fields?: readonly Field[]; minHeight?: number; label?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+  // The last blocks this editor reported, so its own changes don't reset the cursor.
+  const mine = useRef<string | null>(null);
+  useEffect(() => {
+    if (!ref.current || value === undefined) return;
+    const json = JSON.stringify(value);
+    if (json === mine.current) return;
+    ref.current.innerHTML = toEditorHtml(value);
+    mine.current = json;
+  }, [value]);
   const [active, setActive] = useState({ bold: false, italic: false, link: false, ul: false, ol: false });
 
   // Shows which buttons apply where the cursor is.
@@ -45,7 +62,12 @@ export function RichTextEditor({ onChange, placeholder, disabled }: { onChange: 
     return () => document.removeEventListener('selectionchange', update);
   }, []);
 
-  const report = () => { if (ref.current) onChange(serialize(ref.current)); };
+  const report = () => {
+    if (!ref.current) return;
+    const blocks = serialize(ref.current);
+    mine.current = JSON.stringify(blocks);
+    onChange(blocks);
+  };
   const run = (cmd: string, value?: string) => {
     ref.current?.focus();
     document.execCommand(cmd, false, value);
@@ -113,16 +135,16 @@ export function RichTextEditor({ onChange, placeholder, disabled }: { onChange: 
           {tool('• List', 'Bulleted list', active.ul, () => run('insertUnorderedList'))}
           {tool('1. List', 'Numbered list', active.ol, () => run('insertOrderedList'))}
           <Box style={{ width: 1, alignSelf: 'stretch', background: 'var(--card-border-color)', margin: '0 4px' }} />
-          <select aria-label="Insert a name" disabled={disabled} value="" onChange={(e) => { const v = e.currentTarget.value; if (v) insertField(v); }}
+          {fields.length ? <select aria-label="Insert a name" disabled={disabled} value="" onChange={(e) => { const v = e.currentTarget.value; if (v) insertField(v); }}
             style={{ font: 'inherit', fontSize: 13, padding: '5px 8px', borderRadius: 4, border: '1px solid var(--card-border-color)', background: 'var(--card-bg-color)', color: 'var(--card-fg-color)', cursor: 'pointer' }}>
             <option value="">Insert name…</option>
-            {NAME_FIELDS.map((f) => <option key={f.token} value={f.token}>{f.label}{'hint' in f ? ` (${f.hint})` : ''}</option>)}
-          </select>
+            {fields.map((f) => <option key={f.token} value={f.token}>{f.label}{f.hint ? ` (${f.hint})` : ''}</option>)}
+          </select> : null}
           <Box flex={1} />
           <Text size={0} muted>Pasted text comes in plain</Text>
         </Flex>
       </Card>
-      <div ref={ref} className="ua-rte" contentEditable={!disabled} suppressContentEditableWarning role="textbox" aria-multiline="true" aria-label="Message"
+      <div ref={ref} className="ua-rte" style={{ ['--ua-rte-min' as string]: `${minHeight}px` }} contentEditable={!disabled} suppressContentEditableWarning role="textbox" aria-multiline="true" aria-label={label}
         data-placeholder={placeholder} onInput={report} onKeyDown={onKeyDown} onPaste={onPaste}
         onFocus={() => document.execCommand('defaultParagraphSeparator', false, 'p')} />
     </Box>

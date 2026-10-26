@@ -14,5 +14,6 @@ import { emailBroadcast } from './emailBroadcast';
 import { pageContact, pageEvents, pageFutures, pageHome, pageTryouts } from './pages';
 import { componentDevelopment } from './components';
 import { waiver } from './waiver';
+import { emailTemplate } from './emailTemplate';
 
-export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, pageHome, pageTryouts, pageEvents, pageContact, pageFutures, componentDevelopment, networkPage, submission, futuresRegistration, emailBroadcast, waiver];
+export const schemaTypes = [tryoutSession, recSession, futuresSession, event, venue, staff, program, adultLeague, region, siteSettings, pageHome, pageTryouts, pageEvents, pageContact, pageFutures, componentDevelopment, networkPage, submission, futuresRegistration, emailBroadcast, waiver, emailTemplate];

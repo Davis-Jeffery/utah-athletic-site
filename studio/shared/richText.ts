@@ -63,6 +63,13 @@ const plainRuns = (rs: Run[]) => rs.map((r) => (r.href && r.href !== r.t && !r.h
 export const toPlain = (blocks: RichBlock[]) =>
   blocks.map((b) => (b.k === 'p' ? plainRuns(b.c) : b.items.map((it, n) => `${b.k === 'ol' ? `${n + 1}.` : '•'} ${plainRuns(it)}`).join('\n'))).join('\n\n').trim();
 
+/** Plain text as blocks: blank lines start paragraphs, single line breaks stay. */
+export const plainToBlocks = (text: string): RichBlock[] =>
+  text.replace(/\r/g, '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean).map((t) => ({ k: 'p' as const, c: [{ t }] }));
+
+/** Saved text that's either formatted (JSON blocks) or older plain text, as blocks. */
+export const readBlocks = (v: unknown): RichBlock[] => (typeof v !== 'string' || !v.trim() ? [] : parseRich(v) ?? plainToBlocks(v));
+
 /** True when there's no text at all. */
 export const isEmpty = (blocks: RichBlock[]) => !toPlain(blocks).replace(/\s/g, '');
 

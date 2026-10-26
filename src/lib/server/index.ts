@@ -8,7 +8,8 @@
 //   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET  Futures registration payments.
 import { createClient } from '@sanity/client';
 import { randomUUID } from 'node:crypto';
-import { setEmailLogo, type Person } from './email';
+import { setEmailLogo, setEmailTemplates, type Person } from './email';
+import type { TemplateKey, TemplateText } from '../../../studio/shared/emailTemplates';
 
 export * from './email';
 
@@ -99,8 +100,13 @@ const unique = (list: Leader[]) => list.filter((l, i) => list.findIndex((x) => x
 
 /** Use the logo from Site settings (Logo and icon) in emails, as a PNG; call before building them. */
 export async function brandEmails() {
-  const url = await sanity().fetch<string | null>('*[_id == "siteSettings"][0].logo.asset->url').catch(() => null);
-  setEmailLogo(url ? `${url}?h=72&fm=png` : null);
+  // The logo (Site settings) and the automatic emails' wording (Settings > Automatic emails), published only.
+  const r = await sanity().fetch<{ logo: string | null; templates: ({ key: TemplateKey } & Partial<TemplateText>)[] }>(`{
+    "logo": *[_id == "siteSettings"][0].logo.asset->url,
+    "templates": *[_type == "emailTemplate" && !(_id in path("drafts.**"))]{ key, subject, preview, kicker, heading, headingAccent, message, signoff, footer }
+  }`).catch(() => null);
+  setEmailLogo(r?.logo ? `${r.logo}?h=72&fm=png` : null);
+  setEmailTemplates(Object.fromEntries((r?.templates ?? []).map(({ key, ...t }) => [key, t])));
 }
 
 /** Sends an email through Resend when it's configured. Never throws: email is a bonus, the Studio is the record. */
