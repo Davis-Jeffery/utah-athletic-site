@@ -6,6 +6,8 @@
 // (teal on near-black, src/styles/global.css). Inter loads where the client allows web fonts
 // (Apple Mail, iOS); elsewhere it falls back to the system sans-serif.
 
+import { safeHref, toPlain, type RichBlock, type Run } from '../../../studio/shared/richText';
+
 // The site logo as a PNG on Sanity's CDN: a fixed address that works before and after the domain moves.
 // brandEmails() (server/index.ts) swaps in the logo from Site settings when one is set.
 const DEFAULT_LOGO = 'https://cdn.sanity.io/images/03wnsd9x/production/7136068a606a4a8c18b238e508f4eda1a27b6a96-166x77.png';
@@ -25,11 +27,27 @@ type Email = { subject: string; html: string; text: string };
 
 const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const nl = (v: string) => esc(v).replace(/\n/g, '<br>');
+// Formatted text from the Studio's editor (studio/shared/richText.ts, already checked by parseRich).
+// Every piece of text is escaped here and links are limited to web, email and phone addresses.
+const runHtml = (r: Run) => {
+  let h = nl(r.t);
+  if (r.b) h = `<strong style="font-weight:600;color:${C.text}">${h}</strong>`;
+  if (r.i) h = `<em>${h}</em>`;
+  const href = safeHref(r.href);
+  return href ? `<a href="${esc(href)}" style="color:${C.accent};text-decoration:underline">${h}</a>` : h;
+};
+const richHtml = (blocks: RichBlock[]) => blocks.map((b, n) => {
+  const gap = n < blocks.length - 1 ? '0 0 14px' : '0';
+  if (b.k === 'p') return `<p style="margin:${gap};font:400 16px/1.65 ${FONT};color:${C.soft}">${b.c.map(runHtml).join('')}</p>`;
+  const tag = b.k === 'ol' ? 'ol' : 'ul';
+  return `<${tag} style="margin:${gap};padding-left:22px;font:400 16px/1.65 ${FONT};color:${C.soft}">${b.items.map((it) => `<li style="margin:0 0 6px">${it.map(runHtml).join('')}</li>`).join('')}</${tag}>`;
+}).join('');
 const first = (name?: string) => (name ?? '').trim().split(/\s+/)[0] || 'there';
 const filled = (rows: Row[]) => rows.filter((r): r is [string, string] => !!r[1]);
 
 type Block =
   | { kind: 'text'; body: string }
+  | { kind: 'rich'; blocks: RichBlock[] }
   | { kind: 'details'; title?: string; rows: Row[] }
   | { kind: 'person'; title: string; person: Person; note?: string }
   | { kind: 'quote'; title: string; body: string }
@@ -47,6 +65,7 @@ function render(l: Layout): { html: string; text: string } {
   const html = (b: Block) => {
     switch (b.kind) {
       case 'text': return `<p style="margin:0;font:400 16px/1.65 ${FONT};color:${C.soft}">${nl(b.body)}</p>`;
+      case 'rich': return richHtml(b.blocks);
       case 'details': {
         const rows = filled(b.rows);
         if (!rows.length) return '';
@@ -94,6 +113,7 @@ function render(l: Layout): { html: string; text: string } {
   const t = (b: Block) => {
     switch (b.kind) {
       case 'text': return b.body;
+      case 'rich': return toPlain(b.blocks);
       case 'details': { const rows = filled(b.rows); return rows.length ? `${b.title ? b.title.toUpperCase() + '\n' : ''}${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}` : ''; }
       case 'person': return `${b.title.toUpperCase()}\n${b.person.name}${b.person.role ? `, ${b.person.role}` : ''}\n${b.person.email}${b.note ? `\n${b.note}` : ''}`;
       case 'quote': return `${b.title.toUpperCase()}\n${b.body}`;
@@ -279,14 +299,14 @@ export function futuresStaffNotice(r: FuturesPaid): Email {
 // ---------- group email from the Studio's Registrations page ----------
 
 /** A message staff send to a group of registered families (/api/broadcast/). One per family. */
-export function groupMessage(m: { subject: string; body: string; audienceLabel: string; parentName?: string; players: string[]; programName: string; sender?: string }): Email {
+export function groupMessage(m: { subject: string; body: string; rich?: RichBlock[] | null; audienceLabel: string; parentName?: string; players: string[]; programName: string; sender?: string }): Email {
   return {
     subject: m.subject,
     ...render({
       preheader: m.body.slice(0, 120),
       kicker: m.audienceLabel, heading: m.subject,
       intro: `Hi ${first(m.parentName)},`,
-      blocks: [{ kind: 'text', body: m.body }],
+      blocks: [m.rich?.length ? { kind: 'rich', blocks: m.rich } : { kind: 'text', body: m.body }],
       signoff: `${m.sender ? `${m.sender}\n` : ''}Utah Athletic`,
       footer: `You're getting this because you registered ${m.players.join(' and ')} for Utah Athletic ${m.programName}. Reply to this email to reach us.`,
     }),

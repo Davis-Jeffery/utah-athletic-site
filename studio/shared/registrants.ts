@@ -87,12 +87,13 @@ export function describe(a: Audience) {
 
 /** One entry per parent email (siblings share one email), keeping the first parent name. */
 export function recipientsOf(list: Registrant[]) {
-  const seen = new Map<string, { email: string; name?: string; players: string[] }>();
+  const seen = new Map<string, { email: string; name?: string; players: string[]; playerFirsts: string[] }>();
   for (const r of list) {
     if (!r.email) continue;
     const k = r.email.trim().toLowerCase();
-    const cur = seen.get(k) ?? { email: r.email.trim(), name: r.parentName, players: [] };
+    const cur = seen.get(k) ?? { email: r.email.trim(), name: r.parentName, players: [], playerFirsts: [] };
     cur.players.push(`${r.first} ${r.last}`.trim());
+    cur.playerFirsts.push(r.first.trim());
     seen.set(k, cur);
   }
   return [...seen.values()];

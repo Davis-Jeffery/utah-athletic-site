@@ -4,7 +4,9 @@
 // /api/broadcast/ to send it, which works out the same recipients from the same filter.
 import { useEffect, useMemo, useState } from 'react';
 import { useClient, useCurrentUser } from 'sanity';
-import { Badge, Box, Button, Card, Checkbox, Dialog, Flex, Heading, Select, Stack, Text, TextArea, TextInput } from '@sanity/ui';
+import { Badge, Box, Button, Card, Checkbox, Dialog, Flex, Heading, Select, Stack, Text, TextInput } from '@sanity/ui';
+import { RichTextEditor } from '../components/RichTextEditor';
+import { isEmpty, toPlain, type RichBlock } from '../shared/richText';
 import { useToast } from '@sanity/ui/toast';
 import {
   AGE_MAX, AGE_MIN, GENDERS, SOURCES, ageChart, ageLabel, describe, matches, recipientsOf, seasonEnd, seasonLabel,
@@ -200,11 +202,12 @@ export function Registrations() {
       {compose ? (
         <Compose audience={a} families={families.length} players={rows.length} user={user} onClose={() => setCompose(false)}
           onSent={(n) => { setCompose(false); toast.push({ status: 'success', title: `Sent to ${n} families`, description: 'See it under Sent emails.' }); }}
-          send={async (subject, body) => {
+          send={async (subject, blocks) => {
             const id = `emailBroadcast.${crypto.randomUUID()}`;
             await client.create({
               _id: id, _type: 'emailBroadcast', status: 'queued', createdAt: new Date().toISOString(),
-              subject, body, audience: a, audienceLabel: describe(a), sentBy: user ? `${user.name} <${user.email}>` : undefined,
+              // The formatted message (bodyRich), and the same as plain text for the record.
+              subject, body: toPlain(blocks), bodyRich: JSON.stringify(blocks), audience: a, audienceLabel: describe(a), sentBy: user ? `${user.name} <${user.email}>` : undefined,
             });
             const r = await fetch(`${SITE_URL}/api/broadcast/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
             const out = await r.json().catch(() => ({}));
@@ -237,30 +240,30 @@ function AgeChart({ season }: { season?: string }) {
 
 function Compose({ audience, families, players, user, onClose, onSent, send }: {
   audience: Audience; families: number; players: number; user: ReturnType<typeof useCurrentUser>;
-  onClose: () => void; onSent: (n: number) => void; send: (subject: string, body: string) => Promise<number>;
+  onClose: () => void; onSent: (n: number) => void; send: (subject: string, blocks: RichBlock[]) => Promise<number>;
 }) {
   const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [blocks, setBlocks] = useState<RichBlock[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const go = async () => {
     if (!window.confirm(`Send "${subject}" to ${families} families?`)) return;
     setBusy(true); setError('');
-    try { onSent(await send(subject.trim(), body.trim())); } catch (e) { setError((e as Error).message); setBusy(false); }
+    try { onSent(await send(subject.trim(), blocks)); } catch (e) { setError((e as Error).message); setBusy(false); }
   };
   return (
     <Dialog id="compose" header={`Email ${describe(audience)}`} onClose={busy ? undefined : onClose} width={2}
       footer={
         <Flex gap={2} justify="flex-end" padding={3}>
           <Button text="Cancel" mode="ghost" disabled={busy} onClick={onClose} />
-          <Button text={busy ? 'Sending…' : `Send to ${families} families`} tone="primary" disabled={busy || !subject.trim() || !body.trim()} onClick={go} />
+          <Button text={busy ? 'Sending…' : `Send to ${families} families`} tone="primary" disabled={busy || !subject.trim() || isEmpty(blocks)} onClick={go} />
         </Flex>
       }>
       <Box padding={4}>
         <Stack gap={4}>
-          <Text size={1} muted>{players} players, {families} families. Each family gets its own copy in the site's email design, starting "Hi [parent's first name],". Replies come to {user?.email ?? 'you'}.</Text>
+          <Text size={1} muted>{players} players, {families} families. Each family gets its own copy in the site's email design, starting "Hi [parent's first name],". Replies come to {user?.email ?? 'you'}. Use Insert name for each family's names; the same fields, e.g. {'{Player first name}'}, work in the subject.</Text>
           <Stack gap={2}><Text size={1} weight="medium">Subject</Text><TextInput value={subject} onChange={(e) => setSubject(e.currentTarget.value)} placeholder="e.g. Saturday's session moves to 10 AM" /></Stack>
-          <Stack gap={2}><Text size={1} weight="medium">Message</Text><TextArea rows={10} value={body} onChange={(e) => setBody(e.currentTarget.value)} placeholder="Write it like a normal email. Blank lines start new paragraphs." /></Stack>
+          <Stack gap={2}><Text size={1} weight="medium">Message</Text><RichTextEditor onChange={setBlocks} disabled={busy} placeholder="Write it like a normal email. Select text to make it bold, italic or a link." /></Stack>
           {error ? <Card padding={3} radius={2} tone="critical"><Text size={1}>{error}</Text></Card> : null}
         </Stack>
       </Box>
