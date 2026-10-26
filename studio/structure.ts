@@ -22,8 +22,9 @@ import { PAGE_TYPES } from './schemaTypes/pages';
 import { COMPONENT_TYPES } from './schemaTypes/components';
 import { BlockElementIcon } from '@sanity/icons/BlockElement';
 import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { EMAIL_TEMPLATES, TEMPLATE_KEYS } from './shared/emailTemplates';
 
-export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', ...PAGE_TYPES, ...COMPONENT_TYPES]);
+export const FIXED_TYPES = new Set(['program', 'adultLeague', 'region', 'siteSettings', 'networkPage', 'emailTemplate', ...PAGE_TYPES, ...COMPONENT_TYPES]);
 
 // Created by the site's forms, never in the Studio.
 export const SITE_CREATED_TYPES = new Set(['submission', 'futuresRegistration', 'emailBroadcast']);
@@ -130,6 +131,11 @@ export const structure: StructureResolver = (S) => {
         .icon(CogIcon)
         .child(S.document().schemaType('siteSettings').documentId('siteSettings').title('Site settings')),
       S.documentTypeListItem('waiver').title('Waivers').icon(DocumentTextIcon),
+      // One fixed document per automatic email (studio/shared/emailTemplates.ts).
+      S.listItem().title('Automatic emails').id('automatic-emails').icon(EnvelopeIcon).child(
+        S.list().title('Automatic emails').items(TEMPLATE_KEYS.map((k) => S.listItem().title(EMAIL_TEMPLATES[k].title).id(`email-${k}`).icon(EnvelopeIcon)
+          .child(S.document().schemaType('emailTemplate').documentId(`emailTemplate.${k}`).title(EMAIL_TEMPLATES[k].title)))),
+      ),
       S.listItem()
         .title('Region settings')
         .icon(EarthGlobeIcon)

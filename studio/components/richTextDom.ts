@@ -70,3 +70,16 @@ export function serialize(root: HTMLElement): RichBlock[] {
   flush();
   return blocks;
 }
+
+const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const runHtml = (r: Run) => {
+  let h = esc(r.t).replace(/\n/g, '<br>');
+  if (r.b) h = `<b>${h}</b>`;
+  if (r.i) h = `<i>${h}</i>`;
+  const href = safeHref(r.href);
+  return href ? `<a href="${esc(href)}">${h}</a>` : h;
+};
+/** Blocks as HTML for the editor to start from (all text escaped). */
+export const toEditorHtml = (blocks: RichBlock[]) => blocks.map((b) => (b.k === 'p'
+  ? `<p>${b.c.map(runHtml).join('')}</p>`
+  : `<${b.k}>${b.items.map((it) => `<li>${it.map(runHtml).join('')}</li>`).join('')}</${b.k}>`)).join('');
