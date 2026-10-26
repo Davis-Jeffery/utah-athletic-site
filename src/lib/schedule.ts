@@ -59,10 +59,17 @@ export function eventsWithStatus<E extends { start: string; regOpen: string; reg
     .sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status] || a.start.localeCompare(b.start));
 }
 
-// Tryout sessions for a program and/or region, upcoming only, in date order.
+// Tryouts for a program and/or region that still have a day to come, in the order of their next
+// day. Each comes with `left` (its days from today on), `next` (the first of those) and `more`
+// (how many after it), so lists can show the next day and "+ 2 more days".
 export function tryoutsFor(data: SiteData, f: { program?: string; region?: string }, today: string) {
-  return data.tryouts.filter((t) => (!f.program || t.program === f.program) && (!f.region || t.region === f.region) && t.date >= today);
+  return data.tryouts
+    .filter((t) => (!f.program || t.program === f.program) && (!f.region || t.region === f.region) && t.end >= today)
+    .map((t) => { const left = t.days.filter((d) => d.date >= today); return { ...t, left, next: left[0], more: left.length - 1 }; })
+    .sort((a, b) => a.next.date.localeCompare(b.next.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.next.startTime.localeCompare(b.next.startTime));
 }
+/** "+ 2 more days" after a tryout's next day, or nothing. */
+export const moreDays = (n: number) => (n > 0 ? ` + ${n} more day${n === 1 ? '' : 's'}` : '');
 
 // The next thing a family in `region` can sign up for at `program` (home "Tryouts near you").
 export function nextFor(data: SiteData, program: string, region: string, today: string) {
@@ -89,7 +96,7 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
     kind: 'none', title: 'No posted dates', when: p.invite ? 'Request an invitation to trial' : 'Dates to be announced', where: `${r.label} region`,
     href: tryoutsPage, cta: p.invite ? 'Request invitation' : 'See tryouts', external: false,
   };
-  return { kind: 'tryout', title: `${t.age} ${t.gender}`, when: `${fmtDate(t.date)} · ${t.time}`, where: t.venueName, href: tryoutsPage, cta: 'See tryouts', external: false };
+  return { kind: 'tryout', title: `${t.age} ${t.gender}`, when: `${fmtDate(t.next.date)} · ${t.next.time}${moreDays(t.more)}`, where: t.next.venueName, href: tryoutsPage, cta: 'See tryouts', external: false };
 }
 
 // Region choice: ?region= wins, then the ua_region cookie.

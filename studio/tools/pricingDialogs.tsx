@@ -7,7 +7,7 @@ import { useClient } from 'sanity';
 import { Box, Button, Card, Dialog, Flex, Select, Stack, Text, TextInput } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
 import { AGE_OPTIONS, TIME_OPTIONS } from '../schemaTypes/helpers';
-import { IntentLink } from 'sanity/router';
+import { Cols, DAYS, Field, Footer, FullPage, Label, Problems, addDays, agesLabel, errText, ids, key, longDate, weekday } from './formParts';
 
 export const REGIONS = ['north', 'south', 'west'] as const;
 export type RegionKey = (typeof REGIONS)[number];
@@ -19,12 +19,6 @@ export type Session = {
 };
 type Opt = { value: string; label: string };
 
-const key = () => Math.random().toString(36).slice(2, 12);
-const agesLabel = (min: number, max: number) => (min === max ? `U${min}` : `U${min} to U${max}`);
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-// Day of the week for a YYYY-MM-DD date, without time zone surprises.
-const weekday = (iso: string) => new Date(`${iso}T12:00:00Z`).getUTCDay();
-const addDays = (iso: string, n: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
 /** Every `day` (0 Sunday to 6 Saturday) from `start` through `end`, as Futures classes. */
 export function weeklyClasses(start: string, end: string, day: number, startTime: string, endTime: string) {
@@ -33,33 +27,6 @@ export function weeklyClasses(start: string, end: string, day: number, startTime
   return out;
 }
 
-// Fields side by side, wrapping to one per row on narrow screens (@sanity/ui's Grid has no columns prop here).
-const Cols = ({ children, min = 150 }: { children: React.ReactNode; min?: number }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit,minmax(${min}px,1fr))`, gap: 12 }}>{children}</div>
-);
-const Label = ({ children }: { children: React.ReactNode }) => <Text size={1} weight="medium">{children}</Text>;
-const Field = ({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) => (
-  <Stack gap={2}><Label>{label}</Label>{children}{hint ? <Text muted size={0}>{hint}</Text> : null}</Stack>
-);
-const Problems = ({ list }: { list: string[] }) => (list.length ? (
-  <Card tone="critical" padding={3} radius={2}><Stack gap={2}>{list.map((p) => <Text key={p} size={1}>{p}</Text>)}</Stack></Card>
-) : null);
-const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
-// The published document, plus its draft when it has unpublished changes.
-const ids = (id: string, drafted?: boolean) => [id, ...(drafted ? [`drafts.${id}`] : [])];
-
-/** Goes to the whole document in the Studio, for anything these forms don't cover. */
-const FullPage = ({ id, type, path }: { id: string; type: string; path?: string }) => (
-  <Button as={IntentLink} intent="edit" params={{ id, type, ...(path ? { path } : {}) }} mode="bleed" text="Open full page" />
-);
-const Footer = ({ busy, ok, label, onClose, onSave, full }: { busy: boolean; ok: boolean; label: string; onClose: () => void; onSave: () => void; full?: React.ReactNode }) => (
-  <Box padding={3}>
-    <Flex gap={2} justify="space-between" align="center" wrap="wrap">
-      <Box>{full}</Box>
-      <Flex gap={2}><Button mode="ghost" text="Cancel" disabled={busy} onClick={onClose} /><Button tone="positive" text={busy ? 'Saving…' : label} disabled={busy || !ok} onClick={onSave} /></Flex>
-    </Flex>
-  </Box>
-);
 
 // Included / Not included: a list of items, each with an optional detail.
 type ItemRow = { _key: string; item: string; detail: string };
@@ -236,8 +203,6 @@ export function FeeForm({ program, region, regionLabel, fee, drafted, unit, onCl
 const KIND_LABEL = { recSession: 'Recreation', futuresSession: 'Futures' } as const;
 
 type ClassRow = { _key: string; date: string; startTime: string; endTime: string; note: string };
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const longDate = (iso: string) => { const [y, m, d] = iso.split('-').map(Number); return `${DAYS[weekday(iso)].slice(0, 3)}, ${MONTHS[m - 1]} ${d}, ${y}`; };
 
 const STATUSES = {
   recSession: [['auto', 'Automatic (from the dates)'], ['open', 'Open'], ['closed', 'Closed'], ['full', 'Full']],

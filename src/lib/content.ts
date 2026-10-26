@@ -266,18 +266,23 @@ async function build() {
     return { id: r.key, label: r.label, area: r.area, leaders: [...leaders.values()] };
   });
 
+  // Tryouts: one registration (Ollie link) over one or more days, each with its own field and times.
+  // `date` is the first day and `end` the last; which days are still to come is worked out on the
+  // visitor's date (tryoutsFor in schedule.ts).
   const tryouts = c.tryoutSession
     .map((t) => {
-      const v = venue(t.venue._ref);
+      const days = [...t.days].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)).map((d) => {
+        const v = venue(d.venue._ref);
+        return { date: d.date, time: fmtTimeRange(d.startTime, d.endTime), startTime: d.startTime, venue: v.id, venueName: v.name, mapUrl: v.mapUrl };
+      });
       return {
-        id: idOf(t._id), program: t.program, region: t.region, venue: v.id, venueName: v.name, mapUrl: v.mapUrl,
-        date: t.date, time: fmtTimeRange(t.startTime, t.endTime), startTime: t.startTime,
+        id: idOf(t._id), program: t.program, region: t.region, days, date: days[0].date, end: days.at(-1)!.date,
         age: fmtAges(t.minAge, t.maxAge), minAge: t.minAge, gender: t.gender,
-        // This session's Ollie link, else the program's default.
+        // This tryout's Ollie link, else the program's default.
         url: t.registerUrl ?? programDoc(t.program).registerUrl,
       };
     })
-    .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.startTime.localeCompare(b.startTime));
+    .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.days[0].startTime.localeCompare(b.days[0].startTime));
 
   const events = c.event.map(({ _id, logo, place, ...e }) => ({
     id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end),

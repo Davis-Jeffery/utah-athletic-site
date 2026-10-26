@@ -89,8 +89,10 @@ const program = z.object({
 });
 
 const tryout = z.object({
-  _id: z.string(), program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']), venue: ref, date: isoDate,
-  startTime: z.string().regex(/^\d{2}:\d{2}$/), endTime: z.string().regex(/^\d{2}:\d{2}$/), minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']),
+  _id: z.string(), program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']),
+  // One or more days, each with its own field and times; one registration for all of them.
+  days: z.array(z.object({ date: isoDate, venue: ref, startTime: z.string().regex(/^\d{2}:\d{2}$/), endTime: z.string().regex(/^\d{2}:\d{2}$/) })).min(1),
+  minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']),
   registerUrl: z.string().url().optional(),
 });
 const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
