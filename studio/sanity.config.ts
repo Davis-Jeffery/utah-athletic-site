@@ -11,6 +11,8 @@ import { Pricing } from './tools/Pricing';
 import { TagIcon } from '@sanity/icons/Tag';
 import { HomeIcon } from '@sanity/icons/Home';
 
+const ADMIN_TOOLS = ['vision', 'releases'];
+
 export default defineConfig({
   name: 'default',
   title: 'Utah Athletic',
@@ -25,11 +27,11 @@ export default defineConfig({
 
   // Registrations: players by age group and gender, with group emails (tools/Registrations.tsx).
   // Pricing: every price on the site in one place (tools/Pricing.tsx).
-  // Vision is a developer tool, so editors don't see it.
+  // Vision (developer queries) and Releases (scheduled content releases) are for administrators only.
   tools: (prev, { currentUser }) => {
     const admin = currentUser?.roles.some((r) => r.name === 'administrator');
     // "Start here" comes first, so the Studio opens on it (tools/StartHere.tsx).
-    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || t.name !== 'vision'), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }, { name: 'pricing', title: 'Pricing', icon: TagIcon, component: Pricing }];
+    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || !ADMIN_TOOLS.includes(t.name)), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }, { name: 'pricing', title: 'Pricing', icon: TagIcon, component: Pricing }];
   },
 
   schema: {
