@@ -39,9 +39,6 @@ export function sessionsFor(data: SiteData, program: string, region: string, tod
   return data.sessions.filter((s) => s.program === program && s.region === region && s.end >= today);
 }
 
-export const mapUrl = (name: string, address: string) =>
-  'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ', ' + address);
-
 // Today as YYYY-MM-DD in the visitor's time zone.
 export const todayIso = (now = new Date()) =>
   `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;

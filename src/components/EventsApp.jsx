@@ -55,7 +55,7 @@ export default function EventsApp({ events, builtOn }) {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'center', fontSize: '13px' }}>
                   <CalendarBlank size={16} color={e.brand.accent} aria-label="Dates" /><span>{e.dates}</span>
-                  <MapPin size={16} color={e.brand.accent} aria-label="Location" /><span>{e.location}</span>
+                  <MapPin size={16} color={e.brand.accent} aria-label="Location" /><a href={e.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${e.location}`} style={{ color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{e.location}</a>
                   <SoccerBall size={16} color={e.brand.accent} aria-label="Format" /><span>{e.format}</span>
                   <UsersThree size={16} color={e.brand.accent} aria-label="Ages" /><span>{e.ages}</span>
                 </div>

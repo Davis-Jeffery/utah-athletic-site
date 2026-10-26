@@ -313,11 +313,15 @@ export const program = defineType({
         type: 'object', name: 'mapHub',
         fields: [
           str('label', 'Label', { required: true, description: 'Small heading on the pin, e.g. "West Club".' }),
-          defineField({ name: 'town', title: 'Town', type: 'string', description: 'Places the pin. Missing a town? Ask for it to be added to the map.', options: { list: TOWN_OPTIONS }, validation: (r) => r.required() }),
+          defineField({
+            name: 'town', title: 'Town', type: 'string', options: { list: TOWN_OPTIONS }, description: 'Places the pin. Town not listed? Find the place below instead.',
+            validation: (r) => r.custom((v, ctx: any) => !!v || !!ctx.parent?.place?.location || 'Pick a town, or find the place below.'),
+          }),
+          defineField({ name: 'place', title: 'Or find the place', type: 'place', description: 'Optional. Puts the pin at a place you search for (any town or field) instead of the town above.' }),
           str('shownAs', 'Shown as', { description: 'Optional. The place name on the pin if it isn\'t just the town, e.g. "Saratoga Springs / Lehi".' }),
           defineField({ name: 'side', title: 'Label side', type: 'string', initialValue: 'right', options: { list: [{ title: 'Right of the pin', value: 'right' }, { title: 'Left of the pin', value: 'left' }], layout: 'radio', direction: 'horizontal' } }),
         ],
-        preview: { select: { title: 'label', town: 'town', shownAs: 'shownAs' }, prepare: ({ title, town, shownAs }: any) => ({ title, subtitle: shownAs || town }) },
+        preview: { select: { title: 'label', town: 'town', shownAs: 'shownAs', place: 'place.name' }, prepare: ({ title, town, shownAs, place }: any) => ({ title, subtitle: shownAs || place || town }) },
       })],
     }),
 
