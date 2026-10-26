@@ -34,7 +34,7 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   const region = data.regions.find((r) => r.id === (myRegion || 'north'));
   const tryoutsHref = `/tryouts/?region=${region.id}`;
   // No tryout dates posted anywhere (past dates drop off on the visitor's date).
-  const noTryouts = !data.tryouts.some((t) => t.date >= today);
+  const noTryouts = !data.tryouts.some((t) => t.end >= today);
   const { home, pro } = data;
   // Sections the editor hid (Home page > Hide sections).
   const on = (k) => !home.hide.includes(k);

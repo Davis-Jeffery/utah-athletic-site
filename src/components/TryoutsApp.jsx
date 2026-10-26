@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER } from '../data/site';
-import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
+import { fmtDate, tryoutsFor, moreDays, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
 import { ACC, Field, ClassList, FormGuard, useSubmit, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
@@ -129,13 +129,20 @@ export default function TryoutsApp({ data }) {
                   <div key={r.id} className="hv-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', padding: '14px 16px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s' }}>
                     <Cell label="Age group" flex="1 1 120px"><span style={{ font: '500 18px/1 var(--font-heading)', letterSpacing: '-.02em' }}>{r.age}</span></Cell>
                     <Cell label="Gender" flex="0 1 70px">{r.gender}</Cell>
-                    <Cell label="Date" flex="1 1 120px">{fmtDate(r.date)}</Cell>
-                    <Cell label="Time" flex="1 1 120px"><span style={{ whiteSpace: 'nowrap' }}>{r.time}</span></Cell>
-                    <a href={r.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ flex: '2 1 220px', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--color-text)' }}>
-                      <span style={label10}>Location</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}><MapPin color={ACC} aria-hidden="true" />{r.venueName}</span>
-                    </a>
-                    <a href={r.url} target="_blank" rel="noopener" aria-label={`Register for ${b.p.name} ${r.age} ${r.gender}, ${fmtDate(r.date)}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
+                    {/* Each day still to come: a tryout can run over several days, each with its own field and times. */}
+                    <div style={{ flex: '4 1 420px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {r.left.map((d, i) => (
+                        <div key={d.date + d.startTime} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px' }}>
+                          <Cell label={r.left.length > 1 ? `Day ${i + 1}` : 'Date'} flex="1 1 120px">{fmtDate(d.date)}</Cell>
+                          <Cell label="Time" flex="1 1 120px"><span style={{ whiteSpace: 'nowrap' }}>{d.time}</span></Cell>
+                          <a href={d.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ flex: '2 1 200px', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--color-text)' }}>
+                            <span style={label10}>Location</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}><MapPin color={ACC} aria-hidden="true" />{d.venueName}</span>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                    <a href={r.url} target="_blank" rel="noopener" aria-label={`Register for ${b.p.name} ${r.age} ${r.gender}, ${fmtDate(r.next.date)}${moreDays(r.more)}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
                   </div>
                 ))}
               </div>

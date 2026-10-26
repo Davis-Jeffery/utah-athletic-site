@@ -8,6 +8,8 @@ import { structure, FIXED_TYPES, SITE_CREATED_TYPES, TRYOUT_TEMPLATES, WAIVER_TE
 import { Registrations } from './tools/Registrations';
 import { StartHere } from './tools/StartHere';
 import { Pricing } from './tools/Pricing';
+import { Tryouts } from './tools/Tryouts';
+import { CalendarIcon } from '@sanity/icons/Calendar';
 import { TagIcon } from '@sanity/icons/Tag';
 import { HomeIcon } from '@sanity/icons/Home';
 
@@ -26,12 +28,12 @@ export default defineConfig({
   ],
 
   // Registrations: players by age group and gender, with group emails (tools/Registrations.tsx).
-  // Pricing: every price on the site in one place (tools/Pricing.tsx).
+  // Pricing: every price on the site in one place (tools/Pricing.tsx). Tryouts: every tryout by program and region (tools/Tryouts.tsx).
   // Vision (developer queries) and Releases (scheduled content releases) are for administrators only.
   tools: (prev, { currentUser }) => {
     const admin = currentUser?.roles.some((r) => r.name === 'administrator');
     // "Start here" comes first, so the Studio opens on it (tools/StartHere.tsx).
-    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || !ADMIN_TOOLS.includes(t.name)), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }, { name: 'pricing', title: 'Pricing', icon: TagIcon, component: Pricing }];
+    return [{ name: 'start', title: 'Start here', icon: HomeIcon, component: StartHere }, ...prev.filter((t) => admin || !ADMIN_TOOLS.includes(t.name)), { name: 'registrations', title: 'Registrations', icon: UsersIcon, component: Registrations }, { name: 'tryouts', title: 'Tryouts', icon: CalendarIcon, component: Tryouts }, { name: 'pricing', title: 'Pricing', icon: TagIcon, component: Pricing }];
   },
 
   schema: {

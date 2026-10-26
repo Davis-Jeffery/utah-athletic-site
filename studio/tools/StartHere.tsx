@@ -34,8 +34,8 @@ export function StartHere() {
         </Section>
 
         <Section title="Post dates">
-          <Tile intent={{ intent: 'create', params: { type: 'tryoutSession', template: 'tryout-academy' } }} title="Add an Academy tryout" note="Date, time, field and age groups" />
-          <Tile intent={{ intent: 'create', params: { type: 'tryoutSession', template: 'tryout-club' } }} title="Add a Club tryout" note="Date, time, field and age groups" />
+          <Tile href={at('tryouts')} title="Tryouts" note="Add or change Academy and Club tryouts, by region" />
+          <Tile href={at('pricing')} title="Pricing" note="Every price, plus Rec and Futures sessions" />
           <Tile intent={{ intent: 'create', params: { type: 'recSession' } }} title="Add a Recreation session" note="Season dates, registration and price" />
           <Tile intent={{ intent: 'create', params: { type: 'futuresSession' } }} title="Add a Futures session" note="Classes, spots and price" />
           <Tile intent={{ intent: 'create', params: { type: 'event' } }} title="Add a tournament or event" note="Dates, link, logo and colors" />
