@@ -88,13 +88,15 @@ const program = z.object({
   north: regionStatus, south: regionStatus, west: regionStatus,
 });
 
+const hhmmTime = z.string().regex(/^\d{2}:\d{2}$/);
+const tryoutDay = z.object({ date: isoDate, venue: ref, startTime: hhmmTime, endTime: hhmmTime });
+const tryoutGroup = z.object({ minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']), days: z.array(tryoutDay).min(1), registerUrl: z.string().url().optional() });
+/** A tryout and its age groups. Older documents were one age group each (minAge … days at the top). */
 const tryout = z.object({
-  _id: z.string(), program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']),
-  // One or more days, each with its own field and times; one registration for all of them.
-  days: z.array(z.object({ date: isoDate, venue: ref, startTime: z.string().regex(/^\d{2}:\d{2}$/), endTime: z.string().regex(/^\d{2}:\d{2}$/) })).min(1),
-  minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']),
-  registerUrl: z.string().url().optional(),
-});
+  _id: z.string(), name: opt, program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']),
+  registerUrl: z.string().url().optional(), groups: z.array(tryoutGroup).optional(),
+  minAge: z.number().optional(), maxAge: z.number().optional(), gender: z.enum(['Boys', 'Girls', 'Coed']).optional(), days: z.array(tryoutDay).optional(),
+}).refine((t) => t.groups?.length || t.days?.length, 'Add at least one age group with a day.');
 const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
 const sessionBase = {
   _id: z.string(), name: z.string(), region: z.enum(['north', 'south', 'west']), venue: ref, minAge: z.number().optional(), maxAge: z.number().optional(),

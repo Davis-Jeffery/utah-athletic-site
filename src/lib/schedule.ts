@@ -59,17 +59,28 @@ export function eventsWithStatus<E extends { start: string; regOpen: string; reg
     .sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status] || a.start.localeCompare(b.start));
 }
 
-// Tryouts for a program and/or region that still have a day to come, in the order of their next
-// day. Each comes with `left` (its days from today on), `next` (the first of those) and `more`
-// (how many after it), so lists can show the next day and "+ 2 more days".
+// Tryouts for a program and/or region that still have a day to come, soonest first. Each comes
+// with only its age groups that still have days (`groups`, each with `left`: its days from today
+// on), `next` (the first day still to come) and a summary for short lists: `when` (the remaining
+// dates, e.g. "May 26 – 29"), `ages` ("U10 to U13") and `players` ("Boys and Girls").
 export function tryoutsFor(data: SiteData, f: { program?: string; region?: string }, today: string) {
   return data.tryouts
     .filter((t) => (!f.program || t.program === f.program) && (!f.region || t.region === f.region) && t.end >= today)
-    .map((t) => { const left = t.days.filter((d) => d.date >= today); return { ...t, left, next: left[0], more: left.length - 1 }; })
-    .sort((a, b) => a.next.date.localeCompare(b.next.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.next.startTime.localeCompare(b.next.startTime));
+    .map((t) => {
+      const groups = t.groups.map((g) => ({ ...g, left: g.days.filter((d) => d.date >= today) })).filter((g) => g.left.length);
+      const days = groups.flatMap((g) => g.left).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+      const first = days[0].date, last = days.at(-1)!.date;
+      const genders = new Set(groups.map((g) => g.gender));
+      return {
+        ...t, groups, next: days[0],
+        when: first === last ? fmtDate(first) : fmtRange(first, last),
+        ages: fmtAgeRange(Math.min(...groups.map((g) => g.minAge)), Math.max(...groups.map((g) => g.maxAge))),
+        players: genders.has('Coed') || (genders.has('Boys') && genders.has('Girls')) ? 'Boys and Girls' : [...genders][0],
+      };
+    })
+    .sort((a, b) => a.next.date.localeCompare(b.next.date) || a.name.localeCompare(b.name));
 }
-/** "+ 2 more days" after a tryout's next day, or nothing. */
-export const moreDays = (n: number) => (n > 0 ? ` + ${n} more day${n === 1 ? '' : 's'}` : '');
+const fmtAgeRange = (min: number, max: number) => (min === max ? `U${min}` : `U${min} to U${max}`);
 
 // The next thing a family in `region` can sign up for at `program` (home "Tryouts near you").
 export function nextFor(data: SiteData, program: string, region: string, today: string) {
@@ -96,7 +107,7 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
     kind: 'none', title: 'No posted dates', when: p.invite ? 'Request an invitation to trial' : 'Dates to be announced', where: `${r.label} region`,
     href: tryoutsPage, cta: p.invite ? 'Request invitation' : 'See tryouts', external: false,
   };
-  return { kind: 'tryout', title: `${t.age} ${t.gender}`, when: `${fmtDate(t.next.date)} · ${t.next.time}${moreDays(t.more)}`, where: t.next.venueName, href: tryoutsPage, cta: 'See tryouts', external: false };
+  return { kind: 'tryout', title: t.name, when: `${t.when} · ${t.ages}`, where: t.players, href: tryoutsPage, cta: 'See tryouts', external: false };
 }
 
 // Region choice: ?region= wins, then the ua_region cookie.

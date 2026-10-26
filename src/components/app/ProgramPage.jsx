@@ -3,7 +3,7 @@
 // leadership and regions. Region tabs render RegionTab.
 import React from 'react';
 import { ORDER, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
-import { fmtDate, tryoutsFor, moreDays, money, sessionLabel } from '../../lib/schedule';
+import { tryoutsFor, money, sessionLabel } from '../../lib/schedule';
 import { ACC, Kicker, SectionHead, Rule } from '../ui.jsx';
 import { RegionMenu } from '../SiteHeader.jsx';
 import DevModel from './DevModel.jsx';
@@ -34,7 +34,7 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
   const investment = price ? (price.from ? 'From ' : '') + money(price.cost) + (p.unit === 'per year' ? ' / year' : ' / season') : 'To be announced';
   const status = en ? {
     label: en.label,
-    next: p.enrollment === 'trial' ? p.nextTryout : firstTryout ? `${fmtDate(firstTryout.next.date)} · ${firstTryout.next.time}${moreDays(firstTryout.more)}` : 'To be announced',
+    next: p.enrollment === 'trial' ? p.nextTryout : firstTryout ? firstTryout.when : 'To be announced',
     reg: p.enrollment === 'trial' ? `Opens ${p.registrationOpens}` : 'Open now',
   } : null;
   // Rec and Futures list every region's open sessions in the hero; with none open it shows the program facts.
