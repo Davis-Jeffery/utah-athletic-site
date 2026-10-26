@@ -3,7 +3,8 @@
 // so components never deal with Sanity documents or image references directly.
 import { buildAssets } from './assets';
 import { fetchContent, iconUrl, imageUrl, logoUrl, shareImageUrl, useLocalAssets } from './sanity';
-import { fmtRange, mapUrl } from './schedule';
+import { fmtRange } from './schedule';
+import { directions } from '../../studio/shared/places';
 import { ADULT, NO_COACH_LIST, NO_PRICE_LIST } from '../data/site';
 import { CITIES } from '../data/locations';
 
@@ -92,7 +93,8 @@ async function build() {
     image: shareImageUrl(s?.image) ?? d.image ?? shareDefault,
   });
 
-  const venues = c.venue.map((v) => ({ id: idOf(v._id), name: v.name, address: v.address, mapUrl: mapUrl(v.name, v.address) }));
+  // Directions to each venue: to its exact spot when one was found in the Studio, else a search for name and address.
+  const venues = c.venue.map((v) => ({ id: idOf(v._id), name: v.name, address: v.address, mapUrl: directions({ ...v.place, name: v.name, address: v.address }).href }));
   const venue = (_ref: string) => {
     const v = venues.find((x) => x.id === idOf(_ref));
     if (!v) throw new Error(`A document points to venue "${_ref}", which isn't published.`);
@@ -212,10 +214,12 @@ async function build() {
       yearRound: p.compare.yearRound ?? null, evaluations: p.compare.evaluations ?? null, strength: p.compare.strength ?? null,
       film: p.compare.film ?? null, mental: p.compare.mental ?? null, next: p.compare.next,
     },
-    // Map pins: each town picked in the Studio placed at its coordinates (src/data/locations.ts).
+    // Map pins: each placed at its found place, or at its town's coordinates (src/data/locations.ts).
     mapHubs: p.mapHubs.flatMap((h) => {
+      // A place found in the Studio, else the town picked from the list.
       const town = CITIES.find(([name]) => name === h.town);
-      return town ? [{ id: h._key, label: h.label, city: h.shownAs || h.town, ll: [town[1], town[2]] as [number, number], side: h.side === 'left' ? -1 : 1 }] : [];
+      const ll: [number, number] | null = h.place?.location ? [h.place.location.lng, h.place.location.lat] : town ? [town[1], town[2]] : null;
+      return ll ? [{ id: h._key, label: h.label, city: h.shownAs || h.place?.name || h.town || '', ll, side: h.side === 'left' ? -1 : 1 }] : [];
     }),
     formats: p.formats?.divisions.length ? p.formats : null,
     seo: seoOf(p.seo, {
@@ -275,7 +279,11 @@ async function build() {
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.startTime.localeCompare(b.startTime));
 
-  const events = c.event.map(({ _id, logo, ...e }) => ({ id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end) }));
+  const events = c.event.map(({ _id, logo, place, ...e }) => ({
+    id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end),
+    // Directions: to the place found in the Studio, else a search for the Location text.
+    mapUrl: directions(place?.location ? place : { address: e.location }).href, geo: place?.location ?? null,
+  }));
 
   // "{count}" / "{Count}" in tournament copy become the number of events as a word ("three" / "Three"),
   // so headings like "Four events." can't go stale when an event is added or removed.

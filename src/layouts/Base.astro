@@ -122,6 +122,20 @@ const mk = data.marketing;
           if (!a.closest('astro-island') && a.getAttribute('href') === '/tryouts/') a.setAttribute('href', '/tryouts/?region=' + r);
         });
       })();
+      // Directions links (studio/shared/places.ts) point at Google Maps; on iPhones, iPads and Macs a
+      // click opens Apple Maps instead, with the same destination.
+      (function () {
+        var apple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+        if (!apple) return;
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href^="https://www.google.com/maps/dir/"]');
+          if (!a) return;
+          var u = new URL(a.href), to = u.searchParams.get('destination') || '';
+          var q = new URLSearchParams({ daddr: to });
+          if (/^-?[\d.]+,-?[\d.]+$/.test(to)) q.set('q', (a.textContent || '').trim());
+          a.href = 'https://maps.apple.com/?' + q.toString();
+        }, true);
+      })();
       // Hamburger menu (SiteHeader): close it on a link click, Escape or a tap outside.
       (function () {
         var shut = function () { document.querySelectorAll('details.site-menu[open]').forEach(function (d) { d.open = false; }); };

@@ -48,7 +48,9 @@ const opt = z.string().optional();
 /** Hide sections (studio/shared/sections.ts): the keys of the sections an editor ticked. */
 const hide = z.array(z.string()).default([]);
 
-const venue = z.object({ _id: z.string(), name: z.string(), address: z.string() });
+/** A place picked with the Studio's place search (studio/shared/places.ts). */
+const place = z.object({ name: opt, address: opt, location: z.object({ lat: z.number(), lng: z.number() }).optional(), placeId: opt }).optional();
+const venue = z.object({ _id: z.string(), name: z.string(), address: z.string(), place });
 const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west']), order: z.number(), label: z.string(), area: z.string() });
 
 /** Search and sharing (studio/schemaTypes/helpers.ts seo()): all optional. */
@@ -68,7 +70,7 @@ const program = z.object({
   includedIntro: opt, included: feeItems, notIncluded: feeItems, ageTabs: z.array(ageTab).default([]),
   hide, hideRegion: hide,
   leadershipHeading: opt, leadershipIntro: opt, seo,
-  mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: z.string(), shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
+  mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: opt, place, shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
   formats: z.object({
     intro: opt, combining: opt, rules: z.array(z.string()).default([]),
     divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), roster: opt, referees: opt })).default([]),
@@ -104,7 +106,7 @@ const futuresSession = z.object({
 const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
 const event = z.object({
   _id: z.string(), name: z.string(), tagline: z.string(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate,
-  location: z.string(), format: z.string(), ages: z.string(), url: z.string().url(), logo: image.optional(),
+  location: z.string(), place, format: z.string(), ages: z.string(), url: z.string().url(), logo: image.optional(),
   brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex }),
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });

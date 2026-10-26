@@ -96,7 +96,11 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
                   <div key={s.id} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px 20px', padding: '14px 18px', background: 'rgba(27,29,36,.92)' }}>
                     <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
                       <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{s.name} · {regionLabel(s.region)}</span>
-                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{[s.ages, s.dates, s.venueName, sessionLabel(s, today).text].filter(Boolean).join(' · ')}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>
+                        {[s.ages, s.dates].filter(Boolean).join(' · ')}
+                        {s.venueName ? <> · <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${s.venueName}`} style={{ color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{s.venueName}</a></> : null}
+                        {' · '}{sessionLabel(s, today).text}
+                      </span>
                     </div>
                     <span style={{ flex: 'none', font: '500 20px/1 var(--font-heading)', letterSpacing: '-.02em' }}>{money(s.cost)}</span>
                     <a href={s.url} {...(/^https?:/.test(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 16px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Register →</a>

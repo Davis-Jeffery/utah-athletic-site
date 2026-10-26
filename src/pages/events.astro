@@ -21,7 +21,7 @@ const org = { '@id': new URL('/#organization', Astro.site).href };
 const eventsLd = data.events.map((e) => ({
   '@context': 'https://schema.org', '@type': 'SportsEvent', name: e.name, description: e.tagline, sport: 'Soccer',
   startDate: e.start, endDate: e.end, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-  location: { '@type': 'Place', name: e.location, address: e.location }, url: e.url, organizer: org,
+  location: { '@type': 'Place', name: e.location, address: e.location, ...(e.geo ? { geo: { '@type': 'GeoCoordinates', latitude: e.geo.lat, longitude: e.geo.lng } } : {}) }, url: e.url, organizer: org,
   ...(e.logo ? { image: e.logo.src } : {}),
 }));
 const A = await buildAssets();

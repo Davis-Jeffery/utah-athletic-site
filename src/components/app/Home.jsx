@@ -103,7 +103,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           {eventsWithStatus(data.events, today).slice(0, 4).map((e) => {
             const st = STATUS_STYLE[e.status];
             return (
-              <a key={e.id} href={e.url} target="_blank" rel="noopener" className="hv-event-sm" style={{ '--ev-accent': e.brand.accent, display: 'flex', flexDirection: 'column', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-surface)', color: 'var(--color-text)', boxShadow: 'var(--shadow-sm)', transition: 'transform .25s,box-shadow .25s' }}>
+              // The whole card opens the event's site (a cover link); the location is its own directions link on top.
+              <div key={e.id} className="hv-event-sm" style={{ '--ev-accent': e.brand.accent, position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-surface)', color: 'var(--color-text)', boxShadow: 'var(--shadow-sm)', transition: 'transform .25s,box-shadow .25s' }}>
+                <a href={e.url} target="_blank" rel="noopener" aria-label={`${e.name}: event site`} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
                 <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden', background: `radial-gradient(ellipse at 30% 20%,${e.brand.bg2},${e.brand.bg} 70%)` }}>
                   {e.logo ? <img src={e.logo.src} alt={e.logo.alt || `${e.name} logo`} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: e.logo.pos }} /> : null}
                   <span style={{ position: 'absolute', left: '12px', top: '12px', display: 'flex', alignItems: 'center', gap: '7px', padding: '5px 9px', borderRadius: '6px', background: 'rgba(17,19,24,.75)', boxShadow: st.ring, fontSize: '10px', letterSpacing: '.08em', textTransform: 'uppercase', color: st.fg }}>
@@ -113,10 +115,10 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '14px 16px 16px' }}>
                   <span style={{ font: '500 19px/1.1 var(--font-heading)', letterSpacing: '-.02em' }}>{e.name}</span>
-                  <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{e.dates} · {e.location}</span>
+                  <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{e.dates} · <a href={e.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${e.location}`} style={{ position: 'relative', zIndex: 2, color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{e.location}</a></span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingTop: '6px', fontSize: '13px', color: e.brand.accent }}>Event site <ArrowUpRight aria-hidden="true" /></span>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>

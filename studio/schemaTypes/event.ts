@@ -27,6 +27,10 @@ export const event = defineType({
     defineField({ name: 'regOpen', title: 'Opens', type: 'date', group: 'details', fieldset: 'reg', validation: (r) => r.required() }),
     defineField({ name: 'regClose', title: 'Closes', type: 'date', group: 'details', fieldset: 'reg', validation: (r) => r.required().min(r.valueOfField('regOpen')) }),
     str('location', 'Location', { required: true, group: 'details' }),
+    defineField({
+      name: 'place', title: 'Map location', type: 'place', group: 'details',
+      description: 'Optional. Search for where it\'s played, so the location becomes a directions link to that spot. Without it, the link searches for the Location text.',
+    }),
     str('format', 'Format', { required: true, group: 'details', description: 'e.g. "7v7 · 9v9 · 11v11".' }),
     str('ages', 'Ages', { required: true, group: 'details', description: 'e.g. "U9 to U19 · Boys and Girls".' }),
     link('url', 'Registration or info link', { required: true, group: 'details' }),
