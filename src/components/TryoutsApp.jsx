@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER } from '../data/site';
-import { fmtDate, tryoutsFor, moreDays, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
+import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
 import { ACC, Field, ClassList, FormGuard, useSubmit, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
@@ -69,9 +69,11 @@ export default function TryoutsApp({ data }) {
         : { id, p, kicker, title: 'No posted sessions', empty: true, head: 'Sessions to be announced', copy: `We'll post ${R.label} ${p.name} sessions here as soon as they're set.`, cta: 'Get notified when registration opens', href: `/${id}/${region}/#notify` };
     }
     const rows = tryoutsFor(data, { program: id, region }, today);
-    count += rows.length;
+    // Each age group is a session families can register for.
+    count += rows.reduce((n, t) => n + t.groups.length, 0);
     return rows.length
-      ? { id, p, kicker, title: `${rows.length} tryout sessions`, rows }
+      // One tryout: its name is the heading ("2027 Academy Tryouts"); several: how many.
+      ? { id, p, kicker, title: rows.length === 1 ? rows[0].name : `${rows.length} tryouts`, rows }
       : { id, p, kicker, title: 'No posted dates', empty: true, head: 'Dates to be announced', copy: `We'll post ${R.label} dates here as soon as they're set.`, cta: p.invite ? 'Request an invitation' : 'Get notified', href: p.invite ? '#invite' : `/contact/?region=${region}&program=${id}` };
   });
   // Sections the editor hid (Tryouts page > Hide sections). The region and level filters always show.
@@ -104,7 +106,7 @@ export default function TryoutsApp({ data }) {
               <span style={label10}>Showing</span>
               <span aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '40px', padding: '0 14px', borderRadius: '8px', background: 'rgba(120,183,179,.12)', boxShadow: 'inset 0 0 0 1px #78b7b3', font: '500 14px/1 var(--font-body)', color: '#e9e9ed', whiteSpace: 'nowrap' }}>
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ACC, boxShadow: '0 0 8px #78b7b3' }} />
-                {R.label} · {level ? P[level].name : 'All levels'}{count ? ` · ${count} sessions` : ''}
+                {R.label} · {level ? P[level].name : 'All levels'}{count ? ` · ${count} session${count === 1 ? '' : 's'}` : ''}
               </span>
             </div>
           </div>
@@ -123,10 +125,15 @@ export default function TryoutsApp({ data }) {
               <a href={`/${b.id}/${region}/`} style={{ fontSize: '13px', color: 'var(--color-accent-300)' }}>About {b.p.name} →</a>
             </div>
 
-            {b.rows ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {b.rows.map((r) => (
-                  <div key={r.id} className="hv-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', padding: '14px 16px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s' }}>
+            {/* Each tryout: its dates, ages and players, then each age group with its days and Register. */}
+            {b.rows ? b.rows.map((t) => (
+              <div key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', alignItems: 'baseline', fontSize: '14px', color: 'var(--color-neutral-300)' }}>
+                  {b.rows.length > 1 ? <span style={{ font: '500 18px/1.2 var(--font-heading)', color: 'var(--color-text)' }}>{t.name}</span> : null}
+                  <span>{t.when} · {t.ages} · {t.players}</span>
+                </span>
+                {t.groups.map((r) => (
+                  <div key={r.key} className="hv-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', padding: '14px 16px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s' }}>
                     <Cell label="Age group" flex="1 1 120px"><span style={{ font: '500 18px/1 var(--font-heading)', letterSpacing: '-.02em' }}>{r.age}</span></Cell>
                     <Cell label="Gender" flex="0 1 70px">{r.gender}</Cell>
                     {/* Each day still to come: a tryout can run over several days, each with its own field and times. */}
@@ -142,11 +149,11 @@ export default function TryoutsApp({ data }) {
                         </div>
                       ))}
                     </div>
-                    <a href={r.url} target="_blank" rel="noopener" aria-label={`Register for ${b.p.name} ${r.age} ${r.gender}, ${fmtDate(r.next.date)}${moreDays(r.more)}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
+                    <a href={r.url} target="_blank" rel="noopener" aria-label={`Register for ${t.name}, ${r.age} ${r.gender}`} className="hv-t14" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minHeight: '44px', padding: '0 18px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)', transition: 'background .2s' }}>Register →</a>
                   </div>
                 ))}
               </div>
-            ) : null}
+            )) : null}
 
             {b.empty ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', padding: '22px', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: '0 0 0 1px var(--color-divider)' }}>

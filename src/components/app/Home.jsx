@@ -33,8 +33,11 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
   const region = data.regions.find((r) => r.id === (myRegion || 'north'));
   const tryoutsHref = `/tryouts/?region=${region.id}`;
-  // No tryout dates posted anywhere (past dates drop off on the visitor's date).
-  const noTryouts = !data.tryouts.some((t) => t.end >= today);
+  // "Play for us" cards: only programs with something to register for in this region (past dates
+  // drop off on the visitor's date); nothing posted, no card. With no tryouts here, Academy and
+  // Club become a trial request form.
+  const cards = ORDER.map((id) => ({ id, n: nextFor(data, id, region.id, today) })).filter((c) => c.n.kind !== 'none');
+  const noTryouts = !cards.some((c) => c.n.kind === 'tryout');
   const { home, pro } = data;
   // Sections the editor hid (Home page > Hide sections).
   const on = (k) => !home.hide.includes(k);
@@ -78,14 +81,14 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
           <OutlineLink href={tryoutsHref}>All tryouts →</OutlineLink>
         </div>
-        {/* With no tryout dates posted anywhere, Academy and Club become a trial request form. */}
+        {/* With no tryouts posted in this region, Academy and Club become a trial request form. */}
         <div style={noTryouts ? { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'stretch' } : { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '10px' }}>
           {noTryouts ? <TrialRequest key={region.id} data={data} region={region.id} /> : null}
-          {noTryouts ? (
+          {noTryouts ? (cards.length ? (
             <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {ORDER.filter((id) => P[id].kind === 'season').map((id) => <PlayCard key={id} P={P} id={id} n={nextFor(data, id, region.id, today)} />)}
+              {cards.map((c) => <PlayCard key={c.id} P={P} id={c.id} n={c.n} />)}
             </div>
-          ) : ORDER.map((id) => <PlayCard key={id} P={P} id={id} n={nextFor(data, id, region.id, today)} />)}
+          ) : null) : cards.map((c) => <PlayCard key={c.id} P={P} id={c.id} n={c.n} />)}
         </div>
       </section>
       ) : null}

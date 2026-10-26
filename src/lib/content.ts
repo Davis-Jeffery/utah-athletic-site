@@ -266,23 +266,29 @@ async function build() {
     return { id: r.key, label: r.label, area: r.area, leaders: [...leaders.values()] };
   });
 
-  // Tryouts: one registration (Ollie link) over one or more days, each with its own field and times.
-  // `date` is the first day and `end` the last; which days are still to come is worked out on the
-  // visitor's date (tryoutsFor in schedule.ts).
+  // Tryouts: a named tryout (e.g. "2027 Academy Tryouts") per program and region, with age groups,
+  // each with its own days (date, venue, times). Older documents were one age group each. `date`
+  // and `end` span every group; which days are still to come is worked out on the visitor's date
+  // (tryoutsFor in schedule.ts).
   const tryouts = c.tryoutSession
     .map((t) => {
-      const days = [...t.days].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)).map((d) => {
-        const v = venue(d.venue._ref);
-        return { date: d.date, time: fmtTimeRange(d.startTime, d.endTime), startTime: d.startTime, venue: v.id, venueName: v.name, mapUrl: v.mapUrl };
-      });
+      const url = t.registerUrl ?? programDoc(t.program).registerUrl;
+      const raw = t.groups?.length ? t.groups : [{ minAge: t.minAge!, maxAge: t.maxAge!, gender: t.gender!, days: t.days!, registerUrl: undefined }];
+      const groups = raw.map((g, n) => {
+        const days = [...g.days].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)).map((d) => {
+          const v = venue(d.venue._ref);
+          return { date: d.date, time: fmtTimeRange(d.startTime, d.endTime), startTime: d.startTime, venue: v.id, venueName: v.name, mapUrl: v.mapUrl };
+        });
+        // This group's own Ollie link, else the tryout's, else the program's.
+        return { key: `${idOf(t._id)}-${n}`, age: fmtAges(g.minAge, g.maxAge), minAge: g.minAge, maxAge: g.maxAge, gender: g.gender, url: g.registerUrl ?? url, days };
+      }).sort((a, b) => a.minAge - b.minAge || a.gender.localeCompare(b.gender));
+      const all = groups.flatMap((g) => g.days.map((d) => d.date)).sort();
       return {
-        id: idOf(t._id), program: t.program, region: t.region, days, date: days[0].date, end: days.at(-1)!.date,
-        age: fmtAges(t.minAge, t.maxAge), minAge: t.minAge, gender: t.gender,
-        // This tryout's Ollie link, else the program's default.
-        url: t.registerUrl ?? programDoc(t.program).registerUrl,
+        id: idOf(t._id), program: t.program, region: t.region, url, groups, date: all[0], end: all.at(-1)!,
+        name: t.name?.trim() || `${all[0].slice(0, 4)} ${programDoc(t.program).name} Tryouts`,
       };
     })
-    .sort((a, b) => a.date.localeCompare(b.date) || a.minAge - b.minAge || a.gender.localeCompare(b.gender) || a.days[0].startTime.localeCompare(b.days[0].startTime));
+    .sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name));
 
   const events = c.event.map(({ _id, logo, place, ...e }) => ({
     id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end),

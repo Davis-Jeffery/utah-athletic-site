@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER, NO_COACH_LIST } from '../../data/site';
 import StaffBio from '../StaffBio.jsx';
-import { fmtDate, tryoutsFor, moreDays, money, sessionsFor, sessionLabel } from '../../lib/schedule';
+import { tryoutsFor, money, sessionsFor, sessionLabel } from '../../lib/schedule';
 import { Kicker, SectionHead, Field, SubmitButton, Sent, Headshot, ClassList, FormGuard, useSubmit, ROW_RULE } from '../ui.jsx';
 
 const isExternal = (href) => /^https?:/.test(href);
@@ -258,7 +258,7 @@ function Tryouts({ p, rm, data, today, n }) {
       const l = sessionLabel(s, today);
       return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${money(s.cost)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: p.id === 'futures' ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
     })
-    : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: `${t.age} · ${t.gender}`, when: `${fmtDate(t.next.date)} · ${t.next.time}${moreDays(t.more)}`, where: t.next.venueName, mapUrl: t.next.mapUrl, cta: 'Register', href: t.url, pick: `${fmtDate(t.next.date)}, ${t.age} ${t.gender}` }));
+    : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: t.name, when: `${t.when} · ${t.ages} · ${t.players}`, where: t.next.venueName, mapUrl: t.next.mapUrl, cta: 'See days and times', href: `/tryouts/?region=${rm.id}&level=${p.id}`, pick: t.name }));
   // Nothing posted yet: the register-interest form takes the place of sign-up.
   const notify = season && !rows.length;
   // Futures has no form beside its sessions: each session's button opens the registration page.

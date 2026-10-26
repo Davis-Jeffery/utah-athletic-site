@@ -156,7 +156,7 @@ function programExtras(S: StructureBuilder, id: string, title: string, list: Lis
     return [S.listItem().title('Tryout sessions').id(`${id}-tryouts`).icon(CalendarIcon).child(
       S.documentList().title(`${title} tryout sessions`).schemaType('tryoutSession')
         .filter('_type == "tryoutSession" && program == $program').params({ program: id })
-        .defaultOrdering([{ field: 'minAge', direction: 'asc' }, { field: 'gender', direction: 'asc' }])
+        .defaultOrdering([{ field: 'name', direction: 'asc' }])
         .initialValueTemplates([S.initialValueTemplateItem(`tryout-${id}`)]),
     )];
   }
