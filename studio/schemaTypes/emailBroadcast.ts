@@ -25,7 +25,9 @@ export const emailBroadcast = defineType({
     ro('audienceLabel', 'Sent to'),
     ro('recipientCount', 'Families', 'number'),
     ro('subject', 'Subject'),
-    ro('body', 'Message', 'text'),
+    ro('body', 'Message', 'text', { description: 'As plain text. Families got it with its bold, italics, links and lists.' }),
+    // The formatted message the email was built from (studio/shared/richText.ts), as JSON.
+    ro('bodyRich', 'Formatted message', 'text', { hidden: true }),
     ro('sentBy', 'Sent by'),
     ro('createdAt', 'Created', 'datetime'),
     ro('sentAt', 'Sent', 'datetime'),

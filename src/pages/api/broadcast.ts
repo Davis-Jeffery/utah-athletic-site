@@ -7,6 +7,7 @@ import type { APIRoute } from 'astro';
 import { brandEmails, env, groupMessage, json, sanity } from '../../lib/server';
 import { STUDIO_ORIGINS } from '../../lib/server/origins';
 import { PROGRAM_LABEL, SOURCES, matches, recipientsOf, type Audience } from '../../../studio/shared/registrants';
+import { fillFields, fillText, parseRich } from '../../../studio/shared/richText';
 
 export const prerender = false;
 
@@ -24,7 +25,7 @@ const reply = (request: Request, body: unknown, status = 200) => {
 export const OPTIONS: APIRoute = ({ request }) => new Response(null, { status: 204, headers: cors(request) });
 
 const MAX_FAMILIES = 1000;
-type Broadcast = { _id: string; _rev: string; status: string; createdAt: string; subject: string; body: string; audience: Audience; audienceLabel: string; sentBy?: string };
+type Broadcast = { _id: string; _rev: string; status: string; createdAt: string; subject: string; body: string; bodyRich?: string; audience: Audience; audienceLabel: string; sentBy?: string };
 
 export const POST: APIRoute = async ({ request }) => {
   const key = env('RESEND_API_KEY'), from = env('EMAIL_FROM');
@@ -60,8 +61,12 @@ export const POST: APIRoute = async ({ request }) => {
   const main = await db.fetch<string>('*[_id == "siteSettings"][0].mainEmail');
   const replyTo = sender && /@utathletic\.com$/i.test(sender[2]) ? sender[2] : main;
   await brandEmails();
+  // The formatted message from the Studio's editor, checked again here; the plain text when there's none.
+  const rich = b.bodyRich ? parseRich(b.bodyRich) : null;
+  if (b.bodyRich && !rich) return fail('The message\'s formatting couldn\'t be read. Write it again.', 400);
   const emails = families.map((f) => {
-    const m = groupMessage({ subject: b.subject.trim(), body: b.body.trim(), audienceLabel: b.audienceLabel, parentName: f.name, players: f.players, programName: PROGRAM_LABEL[source.program], sender: sender?.[1] });
+    // Name fields ({Parent first name} …) filled in with this family's names.
+    const m = groupMessage({ subject: fillText(b.subject.trim(), f), body: fillText(b.body.trim(), f), rich: rich && fillFields(rich, f), audienceLabel: b.audienceLabel, parentName: f.name, players: f.players, programName: PROGRAM_LABEL[source.program], sender: sender?.[1] });
     return { from, to: [f.email], reply_to: replyTo, subject: m.subject, html: m.html, text: m.text };
   });
 
