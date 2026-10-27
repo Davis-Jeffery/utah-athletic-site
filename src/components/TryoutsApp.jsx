@@ -220,9 +220,9 @@ export default function TryoutsApp({ data }) {
     <>
       <div style={{ position: 'sticky', top: 0, zIndex: 30 }}>
         <div style={{ background: 'linear-gradient(180deg,rgba(27,29,36,.97),rgba(21,23,29,.97))', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', boxShadow: 'inset 0 1px 0 rgba(120,183,179,.25),0 12px 30px rgba(0,0,0,.45)' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px clamp(16px,4vw,56px)', display: 'flex', flexWrap: 'wrap', gap: '12px 28px', alignItems: 'center' }}>
+          <div className="tf-bar" style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px clamp(16px,4vw,56px)', display: 'flex', flexWrap: 'wrap', gap: '12px 28px', alignItems: 'center' }}>
             <div role="group" aria-label="Region" style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
-              <span style={label10}>Region</span>
+              <span className="tf-label" style={label10}>Region</span>
               <div style={{ display: 'flex', gap: '4px', padding: '3px', borderRadius: '10px', background: 'var(--color-surface)' }}>
                 {data.regions.map((r) => (
                   <button key={r.id} type="button" aria-pressed={region === r.id} onClick={() => update({ region: r.id })} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 16px', borderRadius: '8px', border: 0, font: '500 14px/1 var(--font-body)', transition: 'all .2s', ...seg(region === r.id) }}>{r.label}</button>
@@ -230,14 +230,14 @@ export default function TryoutsApp({ data }) {
               </div>
             </div>
             <div role="group" aria-label="Level" style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0, maxWidth: '100%' }}>
-              <span style={label10}>Level</span>
+              <span className="tf-label" style={label10}>Level</span>
               <div style={{ display: 'flex', gap: '4px', padding: '3px', borderRadius: '10px', background: 'var(--color-surface)', overflowX: 'auto' }}>
                 {LEVELS.map(([k, l]) => (
                   <button key={k || 'all'} type="button" aria-pressed={level === k} onClick={() => update({ level: k })} style={{ flex: 'none', cursor: 'pointer', minHeight: '40px', padding: '0 14px', borderRadius: '8px', border: 0, font: '500 14px/1 var(--font-body)', transition: 'all .2s', ...seg(level === k) }}>{l || P[k].name}</button>
                 ))}
               </div>
             </div>
-            <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+            <div className="tf-showing" style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
               <span style={label10}>Showing</span>
               <span aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '40px', padding: '0 14px', borderRadius: '8px', background: 'rgba(120,183,179,.12)', boxShadow: 'inset 0 0 0 1px #78b7b3', font: '500 14px/1 var(--font-body)', color: '#e9e9ed', whiteSpace: 'nowrap' }}>
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ACC, boxShadow: '0 0 8px #78b7b3' }} />

@@ -9,7 +9,7 @@ import { ADULT, NO_COACH_LIST, NO_PRICE_LIST } from '../data/site';
 import { CITIES } from '../data/locations';
 
 // Image widths, matching the sizes the design uses.
-const W = { hero: 2000, section: 760, logo: 320, headshot: 400, video: 960 } as const;
+const W = { hero: 2000, phoneHero: 1200, section: 760, logo: 320, headshot: 400, video: 960 } as const;
 
 const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
@@ -343,7 +343,8 @@ async function build() {
       contact: { ...settings.contactPage, hide: settings.contactHide }, futures: settings.futuresPages,
     },
     programs, adult, regions, venues, tryouts, sessions, events,
-    collage: settings.collage.map((x) => img(x, W.section, 66)!),
+    // lg: a larger copy for the phone hero, which shows one photo full screen instead of the collage.
+    collage: settings.collage.map((x) => ({ ...img(x, W.section, 66)!, lg: imageUrl(x, W.phoneHero, 66)! })),
     videos: settings.videos.map((v) => ({ title: v.title, len: v.len, url: v.url, img: img(v.thumbnail, W.video)! })),
     settings: {
       mainEmail: settings.mainEmail,

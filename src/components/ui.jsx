@@ -71,11 +71,6 @@ export function Sent({ head, copy, again = 'Send another', onAgain, pad = '52px 
   );
 }
 
-// Dashed tag marking copy or images still to be supplied.
-export const Placeholder = ({ children }) => (
-  <span style={{ alignSelf: 'flex-start', font: '500 10px/1 ui-monospace,Menlo,monospace', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-neutral-400)', border: '1px dashed var(--color-neutral-600)', borderRadius: '5px', padding: '5px 7px' }}>{children}</span>
-);
-
 // Striped box standing in for a photo that hasn't been supplied yet.
 export const PhotoSlot = ({ label, style }) => (
   <div style={{ background: 'repeating-linear-gradient(135deg,#20232b 0 8px,#252830 8px 16px)', display: 'flex', alignItems: 'flex-end', padding: '8px', font: '500 10px/1 ui-monospace,Menlo,monospace', color: 'var(--color-neutral-600)', textTransform: 'uppercase', ...style }}>{label}</div>

@@ -349,6 +349,34 @@ select.ua-input{padding:8px 10px}
 @media (max-width: 960px){ .ov-switcher{display:none !important} }
 @media (max-width: 720px){ .ov-esc{display:none !important} .ov-cta{display:none !important} }
 
+/* Tryouts filters: on phones just the two button rows, so the sticky bar stays short.
+   The Showing summary stays readable to screen readers (it announces filter changes). */
+@media (max-width: 720px){
+  .tf-bar{padding-top:8px !important;padding-bottom:8px !important;gap:6px !important}
+  .tf-label{display:none}
+  .tf-showing{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
+
+/* Home hero: phones get one rotating photo (PhotoRotator) instead of the collage.
+   Hidden backgrounds aren't fetched, so each screen only loads its own photos. */
+.hero-single{display:none}
+@media (max-width: 720px){ .hero-collage{display:none} .hero-single{display:block} }
+
+/* Home hero on phones: a Pyramid / List switch shows one of the two (data-view on #programs). */
+.hero-toggle,.row-kicker,.row-pyr{display:none}
+@media (max-width: 720px){
+  .hero-toggle{display:flex}
+  .row-kicker{display:inline}
+  .row-pyr{display:block}
+  .row-num{display:none}
+  #programs[data-view="pyramid"] .hero-list{display:none !important}
+  #programs[data-view="list"] .hero-pyr{display:none !important}
+}
+
+/* Pyramid hint: touch screens get "Tap" wording */
+.hint-touch{display:none}
+@media (hover: none){ .hint-mouse{display:none} .hint-touch{display:inline} }
+
 /* Pages that arrive from the pyramid's Professional tier zoom in */
 @keyframes ua-page-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
 .page-zoom-in{animation:ua-page-in .8s cubic-bezier(.2,.8,.2,1) both}
@@ -360,6 +388,7 @@ select.ua-input{padding:8px 10px}
 
 /* Network map: pulsing ring on each club */
 .netmap-ring{fill:none;stroke:#78b7b3;transform-box:fill-box;transform-origin:center;animation:netmap-pulse 2.4s cubic-bezier(.2,.8,.2,1) infinite}
+@media (max-width: 720px){ .netmap-box{min-height:340px !important} }
 @keyframes netmap-pulse{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.8);opacity:0}}
 
 /* Text for screen readers only (e.g. "Read more about Jason Perrenoud"). */

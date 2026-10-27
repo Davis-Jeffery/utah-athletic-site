@@ -42,11 +42,12 @@
 @keyframes uamap-pulse { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(2.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .uamap .pin .ring { animation: none; } }
 
-/* Phones: finder and hub cards scroll sideways above a fixed-height map. */
+/* Phones: finder and hub cards stack above a fixed-height map. */
 @media (max-width: 720px) {
   .uamap { height: auto; padding: 8px; }
   .uamap-wrap { grid-template-columns: 1fr; grid-template-rows: auto 420px; }
-  .uamap-list { flex-direction: row; overflow-x: auto; }
-  .uamap-find, .uamap-site { flex: none; width: 240px; }
+  .uamap-list { overflow: visible; }
+  .uamap-site { padding: 12px 16px; gap: 4px; }
+  .uamap-site .n { font-size: 18px; }
   .uamap-ctrls button { height: 30px; padding: 0 9px; }
 }

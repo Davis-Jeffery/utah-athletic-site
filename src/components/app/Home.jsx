@@ -1,11 +1,11 @@
 // Home page: collage hero with the pathway pyramid, tryouts near you, tournaments,
 // the Athletic Global teaser, the docuseries and the closing call to action.
 import React, { useEffect, useRef, useState } from 'react';
-import { CalendarBlank, MapPin, ArrowUpRight } from '@phosphor-icons/react';
+import { CalendarBlank, MapPin, ArrowUpRight, Triangle, ListBullets } from '@phosphor-icons/react';
 import { ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
 import { orderOf } from '../../../studio/shared/sections';
 import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
-import { ACC, Kicker, Rule, OutlineLink, Placeholder, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
+import { ACC, Kicker, Rule, OutlineLink, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
 import SiteFooter from '../SiteFooter.jsx';
 
 const ptsAttr = (id) => PTS[id].slice(0, id === 'pro' ? 3 : 4).map((q) => q.join(',')).join(' ');
@@ -25,6 +25,7 @@ const HeroHeading = ({ as: Tag, ...rest }) => <Tag {...rest} />;
 
 export default function Home({ data, hover, focus, intro, introDone, active, tilt: tiltOn, myRegion, today, onHover, onOpen, onNetwork }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [heroView, setHeroView] = useState('list'); // phones only: pyramid or list (.hero-view in global.css)
   const heroMove = (e) => {
     if (!tiltOn || active) return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -107,7 +108,6 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
             <Kicker line>{home.pathway.kicker}</Kicker>
             <h2 style={{ margin: 0, font: '500 clamp(36px,4.4vw,60px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>{home.pathway.heading}</h2>
             <p style={{ margin: 0, maxWidth: '520px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.pathway.body}</p>
-            {home.pathway.placeholderNote ? <Placeholder>{home.pathway.placeholderNote}</Placeholder> : null}
             <a href="/network/" onClick={(e) => { if (!e.metaKey && !e.ctrlKey) { e.preventDefault(); onNetwork(); } }} className="hv-t10" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', padding: '14px 20px', borderRadius: '8px', transition: 'background .2s' }}>{home.pathway.button} →</a>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -159,24 +159,26 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
     <>
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <Collage photos={data.collage} tf={`scale(1.04) translate(${(tilt.x * -14).toFixed(1)}px,${(tilt.y * -10).toFixed(1)}px)`} />
+          <div className="hero-collage"><Collage photos={data.collage} tf={`scale(1.04) translate(${(tilt.x * -14).toFixed(1)}px,${(tilt.y * -10).toFixed(1)}px)`} /></div>
+          <div className="hero-single"><PhotoRotator photos={data.collage} /></div>
           <div style={{ position: 'absolute', inset: 0, background: '#78b7b3', mixBlendMode: 'color', opacity: 0.5 }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#111318 0%,rgba(17,19,24,.88) 30%,rgba(17,19,24,.35) 62%,rgba(17,19,24,.55) 100%)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(17,19,24,.6) 0%,transparent 25%,transparent 70%,#111318 100%)' }} />
         </div>
-        <section id="programs" onMouseMove={heroMove} onMouseLeave={heroLeave} style={{ position: 'relative', maxWidth: '1440px', margin: '0 auto', padding: 'clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '56px', alignItems: 'center' }}>
+        <section id="programs" data-view={heroView} onMouseMove={heroMove} onMouseLeave={heroLeave} style={{ position: 'relative', maxWidth: '1440px', margin: '0 auto', padding: 'clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '56px', alignItems: 'center' }}>
           <div aria-hidden="true" style={{ position: 'absolute', right: '8%', top: '18%', width: '520px', height: '520px', maxWidth: '100%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(120,183,179,.16),transparent 65%)', pointerEvents: 'none', transform: `translate(${(tilt.x * 40).toFixed(1)}px,${(tilt.y * 40).toFixed(1)}px)`, transition: 'transform .5s ease' }} />
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '26px' }}>
             <Kicker line>{home.hero.kicker}</Kicker>
             {/* The page's one main heading, unless a program is open on top (it has its own). */}
             <HeroHeading as={active ? 'p' : 'h1'} style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></HeroHeading>
             <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.hero.intro}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
-              <LevelRow num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}
+            <ViewToggle view={heroView} onChange={setHeroView} />
+            <div className="hero-list" style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
+              <LevelRow id="pro" num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}
                 onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
               {ORDER.map((id) => {
                 const p = P[id];
-                return <LevelRow key={id} num={p.num} name={p.name} line={p.line} right={`${p.ages} →`} on={focus === id}
+                return <LevelRow key={id} id={id} num={p.num} kicker={p.kicker} name={p.name} line={p.line} right={`${p.ages} →`} on={focus === id}
                   onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
               })}
             </div>
@@ -257,11 +259,43 @@ function TrialRequest({ data, region: start }) {
   );
 }
 
-function LevelRow({ num, name, line, right, on, onEnter, onLeave, onClick }) {
+// Phones only, in place of the row number: the whole pyramid in outline with this row's piece filled.
+function MiniPyramid({ id, on }) {
+  return (
+    <svg className="row-pyr" viewBox="-8 -8 616 496" width="36" height="29" aria-hidden="true" style={{ overflow: 'visible' }}>
+      {['pro', ...ORDER].map((k) => (
+        <polygon key={k} points={ptsAttr(k)} vectorEffect="non-scaling-stroke" strokeWidth="1"
+          fill={k === id ? (on ? ACC : 'var(--color-accent-300)') : 'transparent'} stroke={k === id ? 'none' : 'rgba(120,183,179,.45)'} />
+      ))}
+    </svg>
+  );
+}
+
+// Phones only: switch the hero between the program list and the pyramid (the adult boxes stay in both).
+function ViewToggle({ view, onChange }) {
+  const opt = (k, Icon, label) => (
+    <button type="button" aria-pressed={view === k} onClick={() => onChange(k)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', minHeight: '40px', padding: '0 14px', borderRadius: '8px', border: 0, font: '500 14px/1 var(--font-body)', transition: 'all .2s', background: view === k ? 'rgba(120,183,179,.14)' : 'transparent', boxShadow: view === k ? 'inset 0 0 0 1px #78b7b3' : 'none', color: view === k ? ACC : 'var(--color-neutral-300)' }}>
+      <Icon size={18} weight={view === k ? 'fill' : 'regular'} aria-hidden="true" />{label}
+    </button>
+  );
+  return (
+    <div role="group" aria-label="Show programs as" className="hero-toggle" style={{ alignSelf: 'center', gap: '4px', padding: '3px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'inset 0 0 0 1px var(--color-divider)' }}>
+      {opt('list', ListBullets, 'List')}
+      {opt('pyramid', Triangle, 'Pyramid')}
+    </div>
+  );
+}
+
+function LevelRow({ id, num, kicker, name, line, right, on, onEnter, onLeave, onClick }) {
   return (
     <button type="button" onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave} onClick={onClick} style={{ all: 'unset', cursor: 'pointer', display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: '12px', padding: '15px 14px', borderRadius: '8px', background: on ? 'rgba(120,183,179,.08)' : 'transparent', transition: 'background .25s' }}>
-      <span style={{ fontSize: '12px', color: on ? ACC : 'var(--color-neutral-500)', fontVariantNumeric: 'tabular-nums' }}>{num}</span>
+      <span style={{ fontSize: '12px', color: on ? ACC : 'var(--color-neutral-500)', fontVariantNumeric: 'tabular-nums' }}>
+        <span className="row-num">{num}</span>
+        <MiniPyramid id={id} on={on} />
+      </span>
       <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        {/* The pyramid's tier label (Elite, Competitive ...); phones only, where the list stands in for the pyramid. */}
+        {kicker ? <span className="row-kicker" style={{ fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: on ? ACC : 'var(--color-accent-300)' }}>{kicker}</span> : null}
         <span style={{ font: '500 21px/1.1 var(--font-heading)', letterSpacing: '-.02em' }}>{name}</span>
         <span style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{line}</span>
       </span>
@@ -303,11 +337,12 @@ function Pyramid({ P, proTier, adult, hover, focus, intro, introDone, tilt, onHo
   const lab = (id) => ({ op: !intro ? 0 : hover && hover !== id ? 0.45 : 1, lift: hover === id ? 'translateY(-8px)' : '', kc: hover === id ? ACC : 'var(--color-accent-300)' });
   const pro = lab('pro');
   const glow = hover || null;
-  const hint = hover === 'pro' ? proTier.hint : hover ? 'Click to open ' + P[hover].name : 'Hover a level · click to explore';
+  const hint = hover === 'pro' ? proTier.hint : hover ? 'Click to open ' + P[hover].name
+    : <><span className="hint-mouse">Hover a level · click to explore</span><span className="hint-touch">Tap a level to explore</span></>;
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
       <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '120%', height: '120%', transform: 'translate(-50%,-50%)', background: 'radial-gradient(ellipse at center,rgba(17,19,24,.85) 0%,rgba(17,19,24,.55) 40%,transparent 70%)', pointerEvents: 'none' }} />
-      <div data-pyr="1" style={{ position: 'relative', width: 'min(100%,600px)', aspectRatio: '600 / 480', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,.6))', transform: tilt ? `perspective(1400px) rotateY(${(tilt.x * 14).toFixed(2)}deg) rotateX(${(-tilt.y * 10).toFixed(2)}deg)` : 'none', transition: 'transform .45s cubic-bezier(.2,.8,.2,1)' }}>
+      <div data-pyr="1" className="hero-pyr" style={{ position: 'relative', width: 'min(100%,600px)', aspectRatio: '600 / 480', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,.6))', transform: tilt ? `perspective(1400px) rotateY(${(tilt.x * 14).toFixed(2)}deg) rotateX(${(-tilt.y * 10).toFixed(2)}deg)` : 'none', transition: 'transform .45s cubic-bezier(.2,.8,.2,1)' }}>
         <svg viewBox="0 0 600 480" role="group" aria-label="The Utah Athletic pathway" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
           <defs>
             <linearGradient id="uaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#78b7b3" stopOpacity=".42" /><stop offset="1" stopColor="#78b7b3" stopOpacity=".08" /></linearGradient>
@@ -345,7 +380,7 @@ function Pyramid({ P, proTier, adult, hover, focus, intro, introDone, tilt, onHo
         })}
       </div>
       {adult ? <AdultPathways adult={adult} show={intro} dim={!!hover} /> : null}
-      <div style={{ position: 'relative', fontSize: '12px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-300)' }}>{hint}</div>
+      <div className="hero-pyr" style={{ position: 'relative', fontSize: '12px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-300)' }}>{hint}</div>
     </div>
   );
 }
@@ -375,6 +410,35 @@ function AdultPathways({ adult, show, dim }) {
   );
 }
 
+// Phones (max-width 720px, matching .hero-single in global.css) show PhotoRotator instead of the collage.
+const PHONE = typeof window === 'undefined' ? { matches: false } : matchMedia('(max-width: 720px)');
+
+// Phone hero: one full-screen photo at a time, crossfading every 5s through the collage photos.
+// Like the collage, the next photo only starts loading one step before it's shown.
+function PhotoRotator({ photos }) {
+  const [cur, setCur] = useState(0);
+  const [armed, setArmed] = useState(() => new Set([0, 1 % photos.length]));
+  useEffect(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    let i = 0;
+    const timer = setInterval(() => {
+      if (document.hidden || !PHONE.matches) return;
+      i = (i + 1) % photos.length;
+      setCur(i);
+      setArmed((s) => new Set(s).add((i + 1) % photos.length));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [photos.length]);
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 'min(100%,100svh)', overflow: 'hidden', background: '#111318', filter: 'grayscale(1) contrast(1.2) brightness(.82)', WebkitMaskImage: 'linear-gradient(180deg,#000 55%,transparent)', maskImage: 'linear-gradient(180deg,#000 55%,transparent)' }}>
+      {photos.map((photo, k) => {
+        const on = cur === k;
+        return <div key={k} style={{ position: 'absolute', inset: 0, backgroundImage: armed.has(k) ? `url("${photo.lg}")` : 'none', backgroundSize: 'cover', backgroundPosition: photo.pos || 'center 30%', opacity: on ? 1 : 0, transform: on ? 'scale(1)' : 'scale(1.08)', transition: 'opacity 1.4s ease,transform 7s cubic-bezier(.2,.8,.2,1)' }} />;
+      })}
+    </div>
+  );
+}
+
 // Rotating photo collage behind the hero. Each tile crossfades to its next photo; one tile
 // changes every 1.7s in shuffled order, paused while the tab is hidden. A tile's next photo
 // only starts loading one step before it's shown, so the page doesn't fetch all 20 up front.
@@ -390,7 +454,7 @@ function Collage({ photos, tf }) {
     const arm = (t) => setArmed((s) => new Set(s).add(t + ':' + ((curRef.current[t] + 1) % 3)));
     arm(order[0]);
     const timer = setInterval(() => {
-      if (document.hidden) return;
+      if (document.hidden || PHONE.matches) return;
       const t = order[step % n];
       step += 1;
       const next = curRef.current.slice();
