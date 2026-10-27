@@ -8,11 +8,12 @@ import { CalendarIcon } from '@sanity/icons/Calendar';
 import { StarIcon } from '@sanity/icons/Star';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { SunIcon } from '@sanity/icons/Sun';
-import { headingPair, hideSections, link, photo, placeholderNote, section, seo, str, txt } from './helpers';
+import { headingPair, hideSections, pageLayout, link, photo, placeholderNote, section, seo, str, txt } from './helpers';
 
 // ---------- Home page, in the order sections appear on the page ----------
 export const HOME_FIELDS = [
-  hideSections('homeHide', 'home'),
+  pageLayout('homeSectionOrder', 'home', 'homeHide'),
+  { ...hideSections('homeHide', 'home'), hidden: true },
   section('homeHero', 'Hero', undefined, [
     str('kicker', 'Small heading', { required: true, description: 'Above the big heading, e.g. "The Utah Athletic pathway".' }),
     str('heading', 'Heading, first line', { required: true }),
@@ -92,7 +93,8 @@ export const HOME_FIELDS = [
 
 // ---------- Tryouts page ----------
 export const TRYOUTS_FIELDS = [
-  hideSections('tryoutsHide', 'tryouts'),
+  pageLayout('tryoutsSectionOrder', 'tryouts', 'tryoutsHide', { description: 'Move sections up or down, or switch them off. The region and level filters stay at the top. Publish to update the website.' }),
+  { ...hideSections('tryoutsHide', 'tryouts'), hidden: true },
   section('tryoutsPage', 'Page intro', undefined, [
     ...headingPair(),
     txt('intro', 'Intro', { required: true, rows: 2 }),
@@ -103,7 +105,8 @@ export const TRYOUTS_FIELDS = [
 
 // ---------- Tournaments & Events page ----------
 export const EVENTS_FIELDS = [
-  hideSections('eventsHide', 'events'),
+  pageLayout('eventsSectionOrder', 'events', 'eventsHide'),
+  { ...hideSections('eventsHide', 'events'), hidden: true },
   section('eventsPage', 'Page intro and cards', undefined, [
     str('kicker', 'Small heading', { required: true, description: 'e.g. "Tournaments & Events".' }),
     ...headingPair(),

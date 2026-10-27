@@ -3,7 +3,7 @@
 // but can't add or delete programs.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
-import { AGE_OPTIONS, MONTH_OPTIONS, hideSections, link, photo, seo, str, txt } from './helpers';
+import { AGE_OPTIONS, MONTH_OPTIONS, hideSections, pageLayout, link, photo, seo, str, txt } from './helpers';
 import { TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
@@ -164,7 +164,7 @@ export const program = defineType({
   icon: DocumentsIcon,
   groups: [
     { name: 'overview', title: 'Overview', default: true },
-    { name: 'sections', title: 'Hide sections' },
+    { name: 'sections', title: 'Page layout' },
     { name: 'photos', title: 'Photos' },
     { name: 'join', title: 'Registration' },
     { name: 'cost', title: 'Cost and what\'s included' },
@@ -177,8 +177,11 @@ export const program = defineType({
     { name: 'dev-only', title: 'Developer', hidden: notAdmin },
   ],
   fields: [
-    hideSections('hide', 'program', { group: 'sections', title: 'Hide sections on the program page', description: 'Tick a section to hide it on this program\'s overview page. Untick it to show it again. The hero always shows. The development model is switched on or off per program in Site-wide components, Development model.' }),
-    hideSections('hideRegion', 'region', { group: 'sections', title: 'Hide sections on region tabs', description: 'Applies to this program\'s North, South and West tabs. The region heading always shows.' }),
+    pageLayout('sectionOrder', 'program', 'hide', { group: 'sections', title: 'Program page', description: 'The overview page\'s sections: move them up or down, or switch them off. The development model also follows Site-wide components, Development model. Publish to update the website.' }),
+    pageLayout('regionSectionOrder', 'region', 'hideRegion', { group: 'sections', title: 'Region tabs', description: 'Applies to this program\'s North, South and West tabs. The region heading stays at the top. Publish to update the website.' }),
+    // The switches above write these.
+    { ...hideSections('hide', 'program', { group: 'sections', title: 'Hide sections on the program page', description: 'Tick a section to hide it on this program\'s overview page. Untick it to show it again. The hero always shows. The development model is switched on or off per program in Site-wide components, Development model.' }), hidden: true },
+    { ...hideSections('hideRegion', 'region', { group: 'sections', title: 'Hide sections on region tabs', description: 'Applies to this program\'s North, South and West tabs. The region heading always shows.' }), hidden: true },
 
     // Overview
     str('name', 'Name', { required: true, group: 'overview' }),

@@ -2,6 +2,7 @@
 // writing rules (no em dashes) and placeholder checks apply everywhere without repeating them.
 import { defineField, type ImageRule, type StringRule, type TextRule, type UrlRule } from 'sanity';
 import { SECTIONS, type PageKind } from '../shared/sections';
+import { SectionLayoutInput } from '../components/SectionLayoutInput';
 
 type Opts = { description?: string; required?: boolean; group?: string; fieldset?: string; hidden?: any; readOnly?: boolean; rows?: number };
 
@@ -114,4 +115,18 @@ export const hideSections = (name: string, kind: PageKind, o: { group?: string |
     description: o.description ?? 'Tick a section to hide it on the website. Untick it to show it again. The top of the page (hero) always shows.',
     of: [{ type: 'string' }],
     options: { list: SECTIONS[kind].map(([value, title]) => ({ value, title })), layout: 'grid' },
+  });
+
+/**
+ * "Page layout": a page's sections in order, with ↑ ↓ and a Show switch each (studio/components/
+ * SectionLayoutInput.tsx). Saves the order here; the switches write `hideField` (the page's Hide
+ * sections list, kept hidden). Empty is the usual order.
+ */
+export const pageLayout = (name: string, kind: PageKind, hideField: string, o: { group?: string; title?: string; description?: string } = {}) =>
+  defineField({
+    name, title: o.title ?? 'Page layout', type: 'array', group: o.group,
+    description: o.description ?? 'Move sections up or down, or switch them off. Publish to update the website.',
+    of: [{ type: 'string' }],
+    components: { input: SectionLayoutInput as never },
+    options: { kind, hideField } as object,
   });

@@ -11,6 +11,7 @@ import CompareTable from './CompareTable.jsx';
 import RegionTab from './RegionTab.jsx';
 import RecFormats from '../RecFormats.jsx';
 import { Season, WeekGrid, StaffGrid } from './sections.jsx';
+import { orderOf } from '../../../studio/shared/sections';
 
 // The map (d3 + geometry) loads only in the browser, after the page is up.
 const UtahMap = React.lazy(() => import('../UtahMap.jsx'));
@@ -181,14 +182,19 @@ const StatusCell = ({ k, children, flex = '1 1 180px' }) => (
 );
 
 function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onRegion }) {
-  // Sections the editor hid (program > Hide sections) and the development model (Site-wide
-  // components) drop out; section numbers follow the sections shown.
+  // Sections in the editor's order (Studio > program > Page layout), less hidden ones and those with
+  // nothing to show; the development model also follows Site-wide components. Numbers follow the
+  // sections shown.
   const on = (k) => !p.hide.includes(k);
-  const shown = ['who', ...(p.showDev ? ['dev'] : []), 'leagues', ...(p.phases.length ? ['season'] : []), 'week', 'cost', 'staff', 'regions'].filter((k) => k === 'dev' || on(k));
+  const has = { dev: p.showDev, season: p.phases.length > 0 };
+  const order = orderOf('program', p.order).filter((k) => on(k) && has[k] !== false);
+  // Whether section `k` comes straight after `before` (spacing depends on it).
+  const follows = (k, before) => order[order.indexOf(k) - 1] === before;
+  const shown = order.filter((k) => !['cta', 'pathway'].includes(k));
   const num = (k) => String(shown.indexOf(k) + 1).padStart(2, '0');
-  return (
-    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
-      {on('who') ? (
+  // The sections in the editor's order (program > Page layout), drawn by key.
+  const SECTION = {
+    who: () => (
       <section id="sec-overview" style={{ padding: '88px 0 64px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,400px),1fr))', gap: 'clamp(28px,4vw,64px)', alignItems: 'stretch' }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '18px' }}>
@@ -203,10 +209,9 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
           </div>
         </div>
       </section>
-      ) : null}
-
-      {on('cta') ? (
-      <section style={{ position: 'relative', margin: on('who') ? '8px 0 24px' : '64px 0 24px', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-bg)', boxShadow: '0 0 0 1px rgba(120,183,179,.3),0 24px 60px rgba(0,0,0,.45)' }}>
+    ),
+    cta: () => (
+      <section style={{ position: 'relative', margin: follows('cta', 'who') ? '8px 0 24px' : '64px 0 24px', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-bg)', boxShadow: '0 0 0 1px rgba(120,183,179,.3),0 24px 60px rgba(0,0,0,.45)' }}>
         <img src={p.photos.cta.src} alt={p.photos.cta.alt || ''} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.photos.cta.pos, filter: 'grayscale(1) contrast(1.15) brightness(.7)' }} />
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: '#78b7b3', mixBlendMode: 'color', opacity: 0.5 }} />
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(90deg,rgba(17,19,24,.94) 0%,rgba(17,19,24,.72) 50%,rgba(17,19,24,.35) 100%)' }} />
@@ -218,12 +223,15 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
           <button type="button" onClick={onJoin} className="hv-t18" style={{ flex: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '50px', padding: '0 22px', borderRadius: '10px', border: '1px solid #78b7b3', background: 'rgba(17,19,24,.6)', backdropFilter: 'blur(8px)', color: '#b5e1dd', font: '500 16px/1 var(--font-body)', transition: 'background .2s,transform .2s' }}>{ctaLabel}<span style={{ fontSize: '18px' }}>→</span></button>
         </div>
       </section>
-      ) : null}
-
-      {p.showDev || on('pathway') ? (
-      <section id="sec-dev" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {p.showDev ? <DevModel program={p} num={num('dev')} /> : null}
-        {on('pathway') ? (
+    ),
+    dev: () => (
+      <section id="sec-dev" style={{ padding: order[order.indexOf('dev') + 1] === 'pathway' ? '64px 0 32px' : '64px 0' }}>
+        <DevModel program={p} num={num('dev')} />
+      </section>
+    ),
+    // Right under the development model it reads as part of it; elsewhere it's a section of its own.
+    pathway: () => (
+      <section id="sec-pathway" style={{ padding: follows('pathway', 'dev') ? '0 0 64px' : '64px 0' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>Pathway position</span>
           <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', alignItems: 'stretch', gap: '8px', flexWrap: 'wrap' }}>
@@ -241,11 +249,9 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             })}
           </ol>
         </div>
-        ) : null}
       </section>
-      ) : null}
-
-      {on('leagues') ? (
+    ),
+    leagues: () => (
       <section id="sec-leagues" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <SectionHead kicker={`${num('leagues')} · Competition`} title="Where we play" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '12px' }}>
@@ -267,13 +273,10 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
         </div>
         {p.formats ? <RecFormats formats={p.formats} /> : null}
       </section>
-      ) : null}
-
-      {shown.includes('season') ? <Season p={p} kicker={`${num('season')} · The year`} /> : null}
-
-      {shown.includes('week') ? <WeekGrid week={p.week} note={p.commitNote} kicker={`${num('week')} · Commitment`} /> : null}
-
-      {on('cost') ? (
+    ),
+    season: () => <Season p={p} kicker={`${num('season')} · The year`} />,
+    week: () => <WeekGrid week={p.week} note={p.commitNote} kicker={`${num('week')} · Commitment`} />,
+    cost: () => (
       <section id="sec-cost" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         {p.fees ? <Fees p={p} kicker={`${num('cost')} · What's included`} /> : (
           <>
@@ -286,17 +289,15 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
           </>
         )}
       </section>
-      ) : null}
-
-      {on('staff') ? (
+    ),
+    staff: () => (
       <section id="sec-staff" style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <SectionHead kicker={`${num('staff')} · Leadership`} title={p.leadershipHeading} maxWidth="640px" intro={p.leadershipIntro || `Utah Athletic leadership sets the standard for every region. Regional ${NO_COACH_LIST.includes(p.id) ? 'leaders are' : 'leaders and coaches are'} listed under each region.`} />
         {p.leadership.length ? null : <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Program leadership will be listed here soon.</p>}
         <StaffGrid people={p.leadership} />
       </section>
-      ) : null}
-
-      {on('regions') ? (
+    ),
+    regions: () => (
       <section id="sec-regions" style={{ padding: '64px 0 96px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <SectionHead kicker={`${num('regions')} · Regions`} title="Choose your region" maxWidth="640px" intro="Tryouts, staff, locations and registration are run by region. Pick yours and we'll remember it across every program." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '12px' }}>
@@ -323,7 +324,12 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
           </React.Suspense>
         ) : <div className="uamap-placeholder" />}
       </section>
-      ) : <div style={{ height: '48px' }} />}
+    ),
+  };
+  return (
+    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
+      {order.map((k) => <React.Fragment key={k}>{SECTION[k]()}</React.Fragment>)}
+      {order.at(-1) === 'regions' ? null : <div style={{ height: '48px' }} />}
     </div>
   );
 }

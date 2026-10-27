@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, MapPin, ArrowUpRight } from '@phosphor-icons/react';
 import { ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
+import { orderOf } from '../../../studio/shared/sections';
 import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
 import { ACC, Kicker, Rule, OutlineLink, Placeholder, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
 import SiteFooter from '../SiteFooter.jsx';
@@ -42,37 +43,9 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   // Sections the editor hid (Home page > Hide sections).
   const on = (k) => !home.hide.includes(k);
 
-  return (
-    <>
-      <div style={{ position: 'relative', overflow: 'hidden' }}>
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <Collage photos={data.collage} tf={`scale(1.04) translate(${(tilt.x * -14).toFixed(1)}px,${(tilt.y * -10).toFixed(1)}px)`} />
-          <div style={{ position: 'absolute', inset: 0, background: '#78b7b3', mixBlendMode: 'color', opacity: 0.5 }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#111318 0%,rgba(17,19,24,.88) 30%,rgba(17,19,24,.35) 62%,rgba(17,19,24,.55) 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(17,19,24,.6) 0%,transparent 25%,transparent 70%,#111318 100%)' }} />
-        </div>
-        <section id="programs" onMouseMove={heroMove} onMouseLeave={heroLeave} style={{ position: 'relative', maxWidth: '1440px', margin: '0 auto', padding: 'clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '56px', alignItems: 'center' }}>
-          <div aria-hidden="true" style={{ position: 'absolute', right: '8%', top: '18%', width: '520px', height: '520px', maxWidth: '100%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(120,183,179,.16),transparent 65%)', pointerEvents: 'none', transform: `translate(${(tilt.x * 40).toFixed(1)}px,${(tilt.y * 40).toFixed(1)}px)`, transition: 'transform .5s ease' }} />
-          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '26px' }}>
-            <Kicker line>{home.hero.kicker}</Kicker>
-            {/* The page's one main heading, unless a program is open on top (it has its own). */}
-            <HeroHeading as={active ? 'p' : 'h1'} style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></HeroHeading>
-            <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.hero.intro}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
-              <LevelRow num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}
-                onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
-              {ORDER.map((id) => {
-                const p = P[id];
-                return <LevelRow key={id} num={p.num} name={p.name} line={p.line} right={`${p.ages} →`} on={focus === id}
-                  onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
-              })}
-            </div>
-          </div>
-          <Pyramid P={P} proTier={pro} adult={home.adult} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
-        </section>
-      </div>
-
-      {on('tryouts') ? (
+  // The sections under the hero, drawn in the editor's order (Studio > Home page > Page layout).
+  const SECTION = {
+    tryouts: () => (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '56px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -91,9 +64,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           ) : null) : cards.map((c) => <PlayCard key={c.id} P={P} id={c.id} n={c.n} />)}
         </div>
       </section>
-      ) : null}
-
-      {on('events') ? (
+    ),
+    events: () => (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '40px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -126,9 +98,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           })}
         </div>
       </section>
-      ) : null}
-
-      {on('pathway') ? (
+    ),
+    pathway: () => (
       <section id="network" style={{ maxWidth: '1440px', margin: '0 auto', padding: '40px clamp(20px,4vw,56px) 72px', display: 'flex', flexDirection: 'column', gap: '36px' }}>
         <Rule />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: 'clamp(32px,5vw,72px)', alignItems: 'start' }}>
@@ -150,9 +121,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
         </div>
       </section>
-      ) : null}
-
-      {on('inside') ? (
+    ),
+    inside: () => (
       <section id="inside" style={{ maxWidth: '1440px', margin: '0 auto', padding: '48px clamp(20px,4vw,56px) 88px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
         <Rule />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '20px', flexWrap: 'wrap' }}>
@@ -171,9 +141,8 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           ))}
         </div>
       </section>
-      ) : null}
-
-      {on('play') ? (
+    ),
+    play: () => (
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px) 96px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: 'clamp(32px,5vw,64px)', borderRadius: '14px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.18),transparent 60%),var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
           <h2 style={{ margin: 0, font: '500 clamp(40px,6vw,88px)/.95 var(--font-heading)', letterSpacing: '-.045em' }}>{home.play.heading}</h2>
@@ -184,7 +153,40 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
           </div>
         </div>
       </section>
-      ) : null}
+    ),
+  };
+  return (
+    <>
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          <Collage photos={data.collage} tf={`scale(1.04) translate(${(tilt.x * -14).toFixed(1)}px,${(tilt.y * -10).toFixed(1)}px)`} />
+          <div style={{ position: 'absolute', inset: 0, background: '#78b7b3', mixBlendMode: 'color', opacity: 0.5 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#111318 0%,rgba(17,19,24,.88) 30%,rgba(17,19,24,.35) 62%,rgba(17,19,24,.55) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(17,19,24,.6) 0%,transparent 25%,transparent 70%,#111318 100%)' }} />
+        </div>
+        <section id="programs" onMouseMove={heroMove} onMouseLeave={heroLeave} style={{ position: 'relative', maxWidth: '1440px', margin: '0 auto', padding: 'clamp(48px,7vw,104px) clamp(20px,4vw,56px) 72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: '56px', alignItems: 'center' }}>
+          <div aria-hidden="true" style={{ position: 'absolute', right: '8%', top: '18%', width: '520px', height: '520px', maxWidth: '100%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(120,183,179,.16),transparent 65%)', pointerEvents: 'none', transform: `translate(${(tilt.x * 40).toFixed(1)}px,${(tilt.y * 40).toFixed(1)}px)`, transition: 'transform .5s ease' }} />
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '26px' }}>
+            <Kicker line>{home.hero.kicker}</Kicker>
+            {/* The page's one main heading, unless a program is open on top (it has its own). */}
+            <HeroHeading as={active ? 'p' : 'h1'} style={{ margin: 0, font: '500 clamp(54px,7.2vw,112px)/.94 var(--font-heading)', letterSpacing: '-.045em', textWrap: 'balance' }}>{home.hero.heading}<br /><span style={{ color: ACC }}>{home.hero.headingAccent}</span></HeroHeading>
+            <p style={{ margin: 0, maxWidth: '470px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{home.hero.intro}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '520px' }}>
+              <LevelRow num="Pro" name={pro.rowName} line={pro.rowLine} right={`${pro.rowLink} →`} on={focus === 'pro'}
+                onEnter={() => onHover('pro')} onLeave={() => onHover(null)} onClick={onNetwork} />
+              {ORDER.map((id) => {
+                const p = P[id];
+                return <LevelRow key={id} num={p.num} name={p.name} line={p.line} right={`${p.ages} →`} on={focus === id}
+                  onEnter={() => onHover(id)} onLeave={() => onHover(null)} onClick={() => onOpen(id)} />;
+              })}
+            </div>
+          </div>
+          <Pyramid P={P} proTier={pro} adult={home.adult} hover={hover} focus={focus} intro={intro} introDone={introDone} tilt={tiltOn ? tilt : null} onHover={onHover} onOpen={onOpen} onNetwork={onNetwork} />
+        </section>
+      </div>
+
+      {/* Sections in the editor's order; hidden ones are left out. */}
+      {orderOf('home', home.order).filter(on).map((k) => <React.Fragment key={k}>{SECTION[k]()}</React.Fragment>)}
       <SiteFooter social={data.settings.social} />
     </>
   );

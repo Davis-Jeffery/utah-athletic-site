@@ -47,6 +47,8 @@ const session = z.object({ time: z.string(), label: z.string(), kind: z.enum(['t
 const opt = z.string().optional();
 /** Hide sections (studio/shared/sections.ts): the keys of the sections an editor ticked. */
 const hide = z.array(z.string()).default([]);
+/** Page layout: the editor's section order (keys, studio/shared/sections.ts orderOf); empty is the default order. */
+const order = z.array(z.string()).default([]);
 
 /** A place picked with the Studio's place search (studio/shared/places.ts). */
 const place = z.object({ name: opt, address: opt, location: z.object({ lat: z.number(), lng: z.number() }).optional(), placeId: opt }).optional();
@@ -68,7 +70,7 @@ const program = z.object({
   name: z.string(), tier: z.string(), ages: z.string(), kicker: z.string(), line: z.string(), tagline: z.string(), forHead: z.string(), intro: z.string(),
   leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
   includedIntro: opt, included: feeItems, notIncluded: feeItems, ageTabs: z.array(ageTab).default([]),
-  hide, hideRegion: hide,
+  hide, hideRegion: hide, sectionOrder: order, regionSectionOrder: order,
   leadershipHeading: opt, leadershipIntro: opt, seo,
   mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: opt, place, shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
   formats: z.object({
@@ -136,7 +138,7 @@ const settingsHome = {
   proTier: z.object({ rowName: z.string(), rowLine: z.string(), rowLink: z.string(), pyramidKicker: z.string(), pyramidName: z.string(), pyramidSub: z.string(), hint: z.string() }),
 };
 const networkPage = z.object({
-  _id: z.string(), seo, hide,
+  _id: z.string(), seo, hide, sectionOrder: order,
   hero: z.object({ kicker: z.string(), ...heading, intro: z.string(), placeholderNote: opt }),
   network: z.object({
     kicker: z.string(), heading: z.string(),
@@ -166,7 +168,7 @@ const settings = z.object({
   development: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
   // Program pages showing the development model (Site-wide components); missing means all.
   devShowOn: z.array(z.string()).optional(),
-  homeHide: hide, tryoutsHide: hide, eventsHide: hide, contactHide: hide,
+  homeHide: hide, tryoutsHide: hide, eventsHide: hide, contactHide: hide, homeSectionOrder: order, tryoutsSectionOrder: order, eventsSectionOrder: order,
   ...settingsHome,
 });
 
@@ -174,7 +176,7 @@ const settings = z.object({
 const waiver = z.object({ _id: z.string(), title: z.string(), text: z.string(), requiredFor: z.array(z.string()).default([]), checkboxLabel: opt });
 
 const adultLeague = z.object({
-  _id: z.string(), key: z.enum(['upsl', 'rec']), hide, name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(), seo,
+  _id: z.string(), key: z.enum(['upsl', 'rec']), hide, sectionOrder: order, name: z.string(), tier: z.string(), ages: z.string(), homeLine: z.string(), tagline: z.string(), seo,
   stats: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
   forHead: z.string(), intro: z.string(),
   expect: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
