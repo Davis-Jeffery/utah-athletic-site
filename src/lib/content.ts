@@ -187,7 +187,7 @@ async function build() {
     // Fee breakdown: when `included` has items, it replaces the Compare programs table.
     fees: p.included.length ? { intro: p.includedIntro, included: p.included, notIncluded: p.notIncluded } : null,
     // Sections the editor hid (program > Hide sections), on the overview and on every region tab.
-    hide: p.hide, hideRegion: p.hideRegion,
+    hide: p.hide, hideRegion: p.hideRegion, order: p.sectionOrder, regionOrder: p.regionSectionOrder,
     // Site-wide components > Development model > Show on these program pages (unset: all).
     showDev: !settings.devShowOn || settings.devShowOn.includes(p.key),
     // The timeline axis runs Aug (0) to Jul (11); `to` is the end of the last month.
@@ -240,7 +240,7 @@ async function build() {
     if (!a) return [];
     const stand = (n: number) => img(settings.collage[(i * 3 + n) % settings.collage.length], W.section)!;
     return [{
-      id: key, slug, form, href: `/adult/${slug}/`, hide: a.hide,
+      id: key, slug, form, href: `/adult/${slug}/`, hide: a.hide, order: a.sectionOrder,
       name: a.name, tier: a.tier, ages: a.ages, homeLine: a.homeLine, tagline: a.tagline, stats: a.stats,
       forHead: a.forHead, intro: a.intro, expect: a.expect, placeholderNote: a.placeholderNote?.trim() || undefined,
       leagues: a.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
@@ -307,7 +307,7 @@ async function build() {
   const note = (s?: string) => s?.trim() || undefined;
   const { homeHero, homeAdult, homeTryouts, homeEvents, homePathway, homeInside, homePlay, proTier } = settings;
   const home = {
-    hide: settings.homeHide, hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: counted(homeEvents), inside: homeInside, play: homePlay,
+    hide: settings.homeHide, order: settings.homeSectionOrder, hero: homeHero, adult: adult.length ? { kicker: homeAdult?.kicker ?? 'Adult pathways', items: adult.map((a) => ({ name: a.name, details: a.homeLine, href: a.href })) } : null, tryouts: homeTryouts, events: counted(homeEvents), inside: homeInside, play: homePlay,
     pathway: {
       ...homePathway, placeholderNote: note(homePathway.placeholderNote),
       cards: homePathway.cards.map(({ crest, ...card }) => ({ ...card, crest: card.useClubLogo ? undefined : img(crest, W.logo) })),
@@ -315,7 +315,7 @@ async function build() {
   };
   const n = c.networkPage[0];
   const network = {
-    hide: n.hide,
+    hide: n.hide, order: n.sectionOrder,
     hero: { ...n.hero, placeholderNote: note(n.hero.placeholderNote) },
     network: n.network,
     means: { ...n.means, placeholderNote: note(n.means.placeholderNote) },
@@ -338,7 +338,7 @@ async function build() {
     // Page copy for /tryouts, /events, /contact and the Futures registration pages.
     // Each with the sections hidden on it (Hide sections, studio/shared/sections.ts).
     pages: {
-      tryouts: { ...settings.tryoutsPage, hide: settings.tryoutsHide }, events: { ...counted(settings.eventsPage), hide: settings.eventsHide },
+      tryouts: { ...settings.tryoutsPage, hide: settings.tryoutsHide, order: settings.tryoutsSectionOrder }, events: { ...counted(settings.eventsPage), hide: settings.eventsHide, order: settings.eventsSectionOrder },
       contact: { ...settings.contactPage, hide: settings.contactHide }, futures: settings.futuresPages,
     },
     programs, adult, regions, venues, tryouts, sessions, events,

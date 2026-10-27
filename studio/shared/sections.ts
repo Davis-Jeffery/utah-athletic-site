@@ -14,6 +14,7 @@ export const SECTIONS = {
   program: [
     ['who', 'Who it\'s for'],
     ['cta', '"Do you have what it takes?" banner'],
+    ['dev', 'Development model (also set per program in Site-wide components)'],
     ['pathway', 'Pathway position'],
     ['leagues', 'Where we play'],
     ['season', 'Season overview'],
@@ -72,3 +73,24 @@ export const DEV_PROGRAMS = [
   ['rec', 'Recreation'],
   ['futures', 'Futures'],
 ] as const;
+
+/** Sections that stay where they are whatever the order (they can still be hidden). */
+export const FIXED_SECTIONS: Partial<Record<PageKind, readonly string[]>> = {
+  program: ['explore'],
+};
+
+/**
+ * A page's sections in the editor's order (Studio > Page layout): the saved keys first, then any
+ * section not in the saved order yet (e.g. one added since), placed after the section it follows
+ * by default. Unknown keys are dropped. With nothing saved, the default order.
+ */
+export function orderOf(kind: PageKind, saved?: readonly string[] | null): string[] {
+  const all = SECTIONS[kind].map(([k]) => k as string).filter((k) => !FIXED_SECTIONS[kind]?.includes(k));
+  const out = (saved ?? []).filter((k, i, a) => all.includes(k) && a.indexOf(k) === i);
+  all.forEach((k, i) => {
+    if (out.includes(k)) return;
+    const before = all.slice(0, i).reverse().find((p) => out.includes(p));
+    out.splice(before ? out.indexOf(before) + 1 : 0, 0, k);
+  });
+  return out;
+}

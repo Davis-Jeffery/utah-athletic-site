@@ -5,6 +5,7 @@ import SiteHeader from '../components/SiteHeader.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import EventsApp from '../components/EventsApp.jsx';
 import { loadSite } from '../lib/content';
+import { orderOf } from '../../studio/shared/sections';
 import { buildAssets } from '../lib/assets';
 import { FlagBanner, Handshake } from '@phosphor-icons/react';
 
@@ -37,48 +38,53 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
       <p style="margin:0;max-width:560px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
     <main style="max-width:1280px;margin:0 auto;padding:8px clamp(16px,4vw,56px) 48px;display:flex;flex-direction:column;gap:56px">
-      {on('list') && <EventsApp client:load events={data.events} builtOn={data.builtOn} />}
-
-      {on('cards') && pg.cards.length ? (
-        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px">
-          {pg.cards.map((c, i) => {
-            const Icon = ICONS[c.icon];
-            const ext = /^https?:/.test(c.href);
-            return (
-              <div style={`${card};` + (i === 0 ? 'background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)' : 'background:var(--color-surface);box-shadow:var(--shadow-sm)')}>
-                <span style={kicker}>{Icon ? <Icon size={18} aria-hidden="true" /> : null}{c.kicker}</span>
-                <h2 style="margin:0;font:500 clamp(24px,2.6vw,32px)/1.08 var(--font-heading);letter-spacing:-.03em">{c.heading}</h2>
-                <p style="margin:0;font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">{c.body}</p>
-                <a href={c.href} {...(ext ? { target: '_blank', rel: 'noopener' } : {})} class="hv-t14" style={btn}>{c.button} →</a>
-              </div>
-            );
-          })}
-        </section>
-      ) : null}
-
-      {on('reel') && (
-      <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="reel-title">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">{pg.reelKicker}</span>
-            <h2 id="reel-title" style="margin:0;font:500 clamp(28px,3.2vw,44px)/1 var(--font-heading);letter-spacing:-.04em">{pg.reelHeading}</h2>
+      {/* Sections in the editor's order (Studio > Page layout); hidden ones are left out. */}
+      {orderOf('events', pg.order).filter(on).map((k) => (
+        <Fragment>
+        {k === 'list' && <EventsApp client:load events={data.events} builtOn={data.builtOn} />}
+  
+        {k === 'cards' && pg.cards.length ? (
+          <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px">
+            {pg.cards.map((c, i) => {
+              const Icon = ICONS[c.icon];
+              const ext = /^https?:/.test(c.href);
+              return (
+                <div style={`${card};` + (i === 0 ? 'background:radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.14),transparent 60%),var(--color-surface);box-shadow:0 0 0 1px var(--color-accent-800)' : 'background:var(--color-surface);box-shadow:var(--shadow-sm)')}>
+                  <span style={kicker}>{Icon ? <Icon size={18} aria-hidden="true" /> : null}{c.kicker}</span>
+                  <h2 style="margin:0;font:500 clamp(24px,2.6vw,32px)/1.08 var(--font-heading);letter-spacing:-.03em">{c.heading}</h2>
+                  <p style="margin:0;font-size:14px;line-height:1.6;color:var(--color-neutral-400);text-wrap:pretty">{c.body}</p>
+                  <a href={c.href} {...(ext ? { target: '_blank', rel: 'noopener' } : {})} class="hv-t14" style={btn}>{c.button} →</a>
+                </div>
+              );
+            })}
+          </section>
+        ) : null}
+  
+        {k === 'reel' && (
+        <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="reel-title">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)">{pg.reelKicker}</span>
+              <h2 id="reel-title" style="margin:0;font:500 clamp(28px,3.2vw,44px)/1 var(--font-heading);letter-spacing:-.04em">{pg.reelHeading}</h2>
+            </div>
+            <span aria-hidden="true" style="font-size:13px;color:var(--color-neutral-500)">Scroll →</span>
           </div>
-          <span aria-hidden="true" style="font-size:13px;color:var(--color-neutral-500)">Scroll →</span>
-        </div>
-        <div tabindex="0" aria-label="Tournament photos" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px">
-          {data.settings.eventReel.map(({ photo, event, caption }) => (
-            <figure style="flex:none;width:min(78vw,340px);aspect-ratio:4 / 5;position:relative;margin:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#15171d">
-              <img src={photo.src} alt={photo.alt || `${event}: ${caption}`} loading="lazy" decoding="async" class="hv-zoom" style={'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s' + (photo.pos ? `;object-position:${photo.pos}` : '')} />
-              <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(17,19,24,.9));pointer-events:none"></div>
-              <figcaption style="position:absolute;left:14px;bottom:12px;display:flex;flex-direction:column;gap:3px;pointer-events:none;margin:0">
-                <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b5e1dd">{event}</span>
-                <span style="font:500 15px/1.2 var(--font-heading);color:var(--color-text)">{caption}</span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-      )}
+          <div tabindex="0" aria-label="Tournament photos" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px">
+            {data.settings.eventReel.map(({ photo, event, caption }) => (
+              <figure style="flex:none;width:min(78vw,340px);aspect-ratio:4 / 5;position:relative;margin:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#15171d">
+                <img src={photo.src} alt={photo.alt || `${event}: ${caption}`} loading="lazy" decoding="async" class="hv-zoom" style={'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s' + (photo.pos ? `;object-position:${photo.pos}` : '')} />
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(17,19,24,.9));pointer-events:none"></div>
+                <figcaption style="position:absolute;left:14px;bottom:12px;display:flex;flex-direction:column;gap:3px;pointer-events:none;margin:0">
+                  <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b5e1dd">{event}</span>
+                  <span style="font:500 15px/1.2 var(--font-heading);color:var(--color-text)">{caption}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+        )}
+        </Fragment>
+      ))}
     </main>
     <SiteFooter note="Event schedules and registration are hosted on each event's own site." />
   </div>

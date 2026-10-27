@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { REGION_ORDER, NO_COACH_LIST } from '../../data/site';
+import { orderOf } from '../../../studio/shared/sections';
 import StaffBio from '../StaffBio.jsx';
 import { tryoutsFor, money, sessionsFor, sessionLabel } from '../../lib/schedule';
 import { Kicker, SectionHead, Field, SubmitButton, Sent, Headshot, ClassList, FormGuard, useSubmit, ROW_RULE } from '../ui.jsx';
@@ -17,13 +18,12 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
   const isAcademy = p.id === 'academy';
   // Volunteer-coached programs never list coaches; others only once a coach is added.
   const showCoaches = !NO_COACH_LIST.includes(p.id) && rd.coaches.length > 0;
-  // Section numbers follow the sections shown.
-  // Futures registers online, so its sign-up comes first, right under the region heading.
-  const signupFirst = p.id === 'futures';
-  // Sections the editor hid (program > Hide sections on region tabs) drop out too.
-  const shown = [...(signupFirst ? ['try'] : []), 'lead', ...(showCoaches ? ['coach'] : []), ...(signupFirst ? [] : ['try']), ...(isAcademy ? [] : ['fee']), 'contact']
-    .filter((k) => !p.hideRegion.includes(k));
-  const on = (k) => shown.includes(k);
+  // Sections in the editor's order (Studio > program > Page layout on region tabs); with none
+  // saved, Futures puts its sign-up first, since it registers online. Hidden sections and ones with
+  // nothing to show drop out; section numbers follow the sections shown.
+  const has = { coach: showCoaches, fee: !isAcademy };
+  const shown = orderOf('region', p.regionOrder?.length ? p.regionOrder : p.id === 'futures' ? ['try', 'lead', 'coach', 'fee', 'contact'] : [])
+    .filter((k) => has[k] !== false && !p.hideRegion.includes(k));
   const num = (s) => String(shown.indexOf(s) + 1).padStart(2, '0');
   const line = rd.status === 'active'
     ? `The same ${p.name} program and standard, run locally from ${rd.hub}. Staff, tryouts${isAcademy ? '' : ', fees'} and contacts below are specific to the ${rm.label} region.`
@@ -38,18 +38,9 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
     return () => clearTimeout(t);
   }, []);
 
-  return (
-    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
-      <section style={{ padding: '72px 0 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <Kicker>{rm.label} region · {rm.area}</Kicker>
-        <h2 style={{ margin: 0, font: '500 clamp(48px,6.4vw,96px)/.95 var(--font-heading)', letterSpacing: '-.05em' }}>{title}</h2>
-        <p style={{ margin: 0, maxWidth: '620px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{line}</p>
-      </section>
-
-      {rd.status === 'active' ? (
-        <>
-          {signupFirst && on('try') ? <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} /> : null}
-          {on('lead') ? (
+  // The active region's sections, drawn in order by key.
+  const SECTION = {
+    lead: () => (
           <section id="sec-rlead" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <SectionHead kicker={`${num('lead')} · Regional leadership`} title={`Who runs ${title}`} />
             {rd.leaders.length ? (
@@ -60,8 +51,8 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
               <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Leaders for {title} will be listed here soon.</p>
             )}
           </section>
-          ) : null}
-          {on('coach') ? (
+    ),
+    coach: () => (
           <section id="sec-rcoach" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <SectionHead kicker={`${num('coach')} · Coaching staff`} title={`${title} coaches`} />
             {rd.coaches.length ? (
@@ -80,10 +71,9 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
               <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-neutral-400)' }}>Coaches for {title} will be listed here soon.</p>
             )}
           </section>
-          ) : null}
-          {!signupFirst && on('try') ? <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} /> : null}
-          {on('fee') && rd.tabs.length ? <FeeTabs p={p} tabs={rd.tabs} n={num('fee')} /> : null}
-          {on('fee') && !rd.tabs.length ? (
+    ),
+    try: () => <Tryouts p={p} rm={rm} data={data} today={today} n={num('try')} />,
+    fee: () => (rd.tabs.length ? <FeeTabs p={p} tabs={rd.tabs} n={num('fee')} /> : (
             <section id="sec-rfee" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <Kicker>{num('fee')} · Fees</Kicker>
@@ -116,8 +106,8 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
                 ))}
               </div>
             </section>
-          ) : null}
-          {on('contact') ? (
+    )),
+    contact: () => (
           <section id="sec-rcontact" style={{ padding: '24px 0 96px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap', padding: 'clamp(22px,3vw,32px) clamp(22px,3vw,36px)', borderRadius: '14px', background: 'radial-gradient(ellipse at 0% 0%,rgba(120,183,179,.16),transparent 60%),var(--color-surface)', boxShadow: '0 0 0 1px var(--color-accent-800)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -128,7 +118,21 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
               <a href={`/contact/?region=${rm.id}&program=${p.id}`} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '10px', minHeight: '48px', padding: '0 20px', borderRadius: '10px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 15px/1 var(--font-body)', transition: 'background .2s' }}>Contact us →</a>
             </div>
           </section>
-          ) : <div style={{ height: '48px' }} />}
+    ),
+  };
+
+  return (
+    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(20px,4vw,56px)' }}>
+      <section style={{ padding: '72px 0 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Kicker>{rm.label} region · {rm.area}</Kicker>
+        <h2 style={{ margin: 0, font: '500 clamp(48px,6.4vw,96px)/.95 var(--font-heading)', letterSpacing: '-.05em' }}>{title}</h2>
+        <p style={{ margin: 0, maxWidth: '620px', fontSize: '17px', lineHeight: 1.6, color: 'var(--color-neutral-300)', textWrap: 'pretty' }}>{line}</p>
+      </section>
+
+      {rd.status === 'active' ? (
+        <>
+          {shown.map((k) => <React.Fragment key={k}>{SECTION[k]()}</React.Fragment>)}
+          {shown.at(-1) === 'contact' ? null : <div style={{ height: '48px' }} />}
         </>
       ) : null}
 
