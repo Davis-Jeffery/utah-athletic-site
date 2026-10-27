@@ -52,7 +52,7 @@ The Studio opens on **Start here**: big buttons for the common jobs (new message
 | Home page collage or video thumbnails | **Home page** |
 | UPSL and Adult Recreation pages, and their boxes under the home pyramid | **Adult: UPSL** or **Adult: Adult Recreation**. The box uses its Name and Home page line. The small heading above the boxes is in **Home page**, **Adult pathways**. |
 | Adult league staff (shown on the page; they get that league's form messages) | **Adult: UPSL** or **Adult: Adult Recreation**, **Staff and fields** tab |
-| The "Professional" top of the pyramid and its row in the program list | **Home page**, **Professional tier** |
+| The "Professional" top of the pyramid and its row in the program list | **Home page**, **Professional tier**. **Pyramid: text inside the top triangle** is the short word in the triangle ("Pro"); the pyramid label (small heading, name and line under it) shows beside the triangle when someone points at it. |
 | Anything on the Network page | **Network page**. Tabs follow the page from top to bottom. |
 | Add or remove an affiliate academy card | **Network page**, **The network** tab, **Affiliate academies in development** |
 | The professional club's crest, photo or facts | **Network page**, **Professional club** tab |
