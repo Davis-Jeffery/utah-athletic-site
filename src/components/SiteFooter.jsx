@@ -6,8 +6,9 @@ export default function SiteFooter({ note, social = [] }) {
     <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap', padding: '28px clamp(16px,4vw,56px)', fontSize: '13px', color: 'var(--color-neutral-500)' }}>
       <span>© {new Date().getFullYear()} Utah Athletic · Part of Athletic Global</span>
       {note ? <span>{note}</span> : (
-        <div style={{ display: 'flex', gap: '20px' }}>
-          {social.map((s) => <a key={s.label} href={s.href} className="hv-white" style={{ color: 'var(--color-neutral-400)' }}>{s.label}</a>)}
+        <div style={{ display: 'flex', gap: '8px', margin: '-12px -6px' }}>
+          {/* Padded to a 44px tap target; the negative margin keeps the visible spacing. */}
+          {social.map((s) => <a key={s.label} href={s.href} className="hv-white" style={{ padding: '12px 6px', color: 'var(--color-neutral-400)' }}>{s.label}</a>)}
         </div>
       )}
     </footer>

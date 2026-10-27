@@ -6,7 +6,6 @@ import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import NetworkMap from '../components/NetworkMap.jsx';
-import { Placeholder } from '../components/ui.jsx';
 import { loadSite } from '../lib/content';
 import { orderOf } from '../../studio/shared/sections';
 import { buildAssets } from '../lib/assets';
@@ -33,7 +32,6 @@ const pending = (v: string) => /to be supplied/i.test(v);
         <div style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)"><span style="width:28px;height:1px;background:var(--color-accent)"></span>{N.hero.kicker}</div>
         <h1 style="margin:0;max-width:980px;font:500 clamp(48px,6.6vw,104px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">{N.hero.heading}{N.hero.headingAccent && <> <span style="color:#78b7b3">{N.hero.headingAccent}</span></>}</h1>
         <p style="margin:0;max-width:600px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{N.hero.intro}</p>
-        {N.hero.placeholderNote && <Placeholder>{N.hero.placeholderNote}</Placeholder>}
       </div>
     </section>
 
@@ -86,7 +84,6 @@ const pending = (v: string) => /to be supplied/i.test(v);
               </div>
             ))}
           </div>
-          {N.means.placeholderNote && <Placeholder>{N.means.placeholderNote}</Placeholder>}
         </section>
         )}
   
@@ -115,7 +112,6 @@ const pending = (v: string) => /to be supplied/i.test(v);
                 ))}
               </dl>
               <p style="margin:0;font-size:15px;line-height:1.65;color:var(--color-neutral-300);text-wrap:pretty">{N.club.description}</p>
-              {N.club.placeholderNote && <Placeholder>{N.club.placeholderNote}</Placeholder>}
             </div>
             {N.club.photo
               ? <div style="position:relative;min-height:360px;border-radius:12px;overflow:hidden;background:var(--color-surface)"><img src={N.club.photo.src} alt={N.club.photo.alt || ''} loading="lazy" decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover${N.club.photo.pos ? `;object-position:${N.club.photo.pos}` : ''}`} /></div>

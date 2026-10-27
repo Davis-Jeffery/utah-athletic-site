@@ -10,15 +10,34 @@ import 'd3-transition';
 import GEO from '../data/world-geo.json';
 import { NETWORK_NODES as NODES } from '../data/site';
 
-const W = 960, H = 520;
+// Wide boxes draw in a fixed 960 x 520 canvas scaled to fit; narrow ones (phones) draw at the
+// box's own pixel size so labels keep their real size; there the dots spread wider and each
+// label points inward, Utah's above its dot and Vichy's below, so both fit.
+const WIDE = [960, 520], NARROW = 640;
 const HOME = ['840', '250']; // USA, France
 
 export default function NetworkMap() {
   const svgRef = useRef(null);
+  const boxRef = useRef(null);
+  const [[W, H], setDims] = useState(WIDE);
   const api = useRef({});
   const [view, setView] = useState('link');
 
   useEffect(() => {
+    const el = boxRef.current;
+    const fit = () => {
+      const w = Math.round(el.clientWidth), h = Math.round(el.clientHeight);
+      const next = w && w < NARROW ? [w, h] : WIDE;
+      setDims((d) => (d[0] === next[0] && d[1] === next[1] ? d : next));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const narrow = W < NARROW;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const svg = select(svgRef.current);
     svg.selectAll('*').remove();
@@ -53,9 +72,10 @@ export default function NetworkMap() {
       if (!reduce) g.append('circle').attr('class', 'netmap-ring').attr('r', 10);
       g.append('circle').attr('r', 6).attr('fill', '#111318').attr('stroke', '#78b7b3').attr('stroke-width', 2);
       g.append('circle').attr('r', 2.6).attr('fill', '#78b7b3');
-      const lab = g.append('g'), tx = 16 * n.side, anchor = n.side > 0 ? 'start' : 'end';
-      lab.append('text').attr('x', tx).attr('y', -3).attr('text-anchor', anchor).attr('fill', '#e9e9ed').attr('font-size', 15).attr('font-weight', 500).text(n.name);
-      lab.append('text').attr('x', tx).attr('y', 14).attr('text-anchor', anchor).attr('fill', '#8b8d98').attr('font-size', 11).text(n.sub);
+      const lab = g.append('g'), tx = narrow ? -10 * n.side : 16 * n.side, ty = narrow ? (n.side > 0 ? 30 : -44) : 0;
+      const anchor = (n.side > 0) !== narrow ? 'start' : 'end';
+      lab.append('text').attr('x', tx).attr('y', ty - 3).attr('text-anchor', anchor).attr('fill', '#e9e9ed').attr('font-size', 15).attr('font-weight', 500).text(n.name);
+      lab.append('text').attr('x', tx).attr('y', ty + 14).attr('text-anchor', anchor).attr('fill', '#8b8d98').attr('font-size', 11).text(n.sub);
       const bb = lab.node().getBBox();
       lab.insert('rect', 'text').attr('x', bb.x - 9).attr('y', bb.y - 7).attr('width', bb.width + 18).attr('height', bb.height + 14).attr('rx', 7).attr('fill', 'rgba(17,19,24,.92)').attr('stroke', 'rgba(120,183,179,.45)');
     });
@@ -69,8 +89,9 @@ export default function NetworkMap() {
     place();
 
     const goLink = (ms = 900) => {
-      const a = proj(NODES[0].ll), b = proj(NODES[1].ll), k = Math.min(8, (0.5 * W) / Math.abs(b[0] - a[0]));
-      const t = zoomIdentity.translate(W / 2, H / 2 + 20).scale(k).translate(-(a[0] + b[0]) / 2, -(a[1] + b[1]) / 2 + 20);
+      const a = proj(NODES[0].ll), b = proj(NODES[1].ll), k = Math.min(8, ((narrow ? 0.7 : 0.5) * W) / Math.abs(b[0] - a[0]));
+      const dy = narrow ? 0 : 20;
+      const t = zoomIdentity.translate(W / 2, H / 2 + dy).scale(k).translate(-(a[0] + b[0]) / 2, -(a[1] + b[1]) / 2 + dy);
       (reduce ? svg : svg.transition().duration(ms).ease(easeCubicInOut)).call(zoom.transform, t);
       setView('link');
     };
@@ -78,11 +99,11 @@ export default function NetworkMap() {
     api.current = { goLink, goWorld };
     const t = setTimeout(() => goLink(1400), 300);
     return () => { clearTimeout(t); cancelAnimationFrame(raf); svg.interrupt(); };
-  }, []);
+  }, [W, H]);
 
   const btn = (on) => ({ cursor: 'pointer', minHeight: '36px', minWidth: '36px', padding: '0 12px', borderRadius: '8px', border: `1px solid ${on ? '#78b7b3' : 'rgba(233,233,237,.1)'}`, background: on ? 'rgba(120,183,179,.12)' : 'rgba(17,19,24,.85)', backdropFilter: 'blur(8px)', color: on ? '#78b7b3' : '#e9e9ed', font: '500 12px/1 var(--font-body)', transition: 'border-color .2s,color .2s' });
   return (
-    <div style={{ position: 'relative', flex: 1, height: '100%', minHeight: 'clamp(380px,52vh,520px)', borderRadius: '10px', overflow: 'hidden', background: 'radial-gradient(ellipse at 45% 40%,rgba(120,183,179,.08),transparent 60%),#15171d', boxShadow: 'inset 0 0 0 1px rgba(233,233,237,.1)' }}>
+    <div ref={boxRef} className="netmap-box" style={{ position: 'relative', flex: 1, height: '100%', minHeight: 'clamp(380px,52vh,520px)', borderRadius: '10px', overflow: 'hidden', background: 'radial-gradient(ellipse at 45% 40%,rgba(120,183,179,.08),transparent 60%),#15171d', boxShadow: 'inset 0 0 0 1px rgba(233,233,237,.1)' }}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of the Athletic Global network: Utah Athletic in Utah, USA, linked to RC Vichy Athletic in Vichy, France" style={{ display: 'block', width: '100%', height: '100%', cursor: 'grab', fontFamily: 'var(--font-body)' }} />
       <div style={{ position: 'absolute', right: '12px', top: '12px', display: 'flex', gap: '6px' }}>
         <button type="button" aria-pressed={view === 'link'} onClick={() => api.current.goLink?.()} className="hv-outline" style={btn(view === 'link')}>Utah ↔ Vichy</button>

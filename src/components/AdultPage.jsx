@@ -4,7 +4,7 @@
 import React from 'react';
 import { MapPin, Plus } from '@phosphor-icons/react';
 import { money } from '../lib/schedule';
-import { ACC, Kicker, SectionHead, Field, FormGuard, Placeholder, Sent, SubmitButton, useSubmit } from './ui.jsx';
+import { ACC, Kicker, SectionHead, Field, FormGuard, Sent, SubmitButton, useSubmit } from './ui.jsx';
 import { Season, WeekGrid, StaffGrid } from './app/sections.jsx';
 import { orderOf } from '../../studio/shared/sections';
 
@@ -34,7 +34,6 @@ export default function AdultPage({ league: a, other }) {
               <Kicker>{num('who')} · Who it's for</Kicker>
               <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em', textWrap: 'balance' }}>{a.forHead}</h2>
               <p style={{ margin: 0, fontSize: '17px', lineHeight: 1.65, color: 'var(--color-neutral-300)', maxWidth: '520px', textWrap: 'pretty' }}>{a.intro}</p>
-              {a.placeholderNote ? <Placeholder>{a.placeholderNote}</Placeholder> : null}
             </div>
             <div style={{ position: 'relative', minHeight: '280px', overflow: 'hidden', background: 'var(--color-bg)', clipPath: 'polygon(16% 0,100% 0,100% 100%,0 100%)' }}>
               <img src={a.photos.who.src} alt={a.photos.who.alt || `${a.name} players`} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: a.photos.who.pos, filter: 'grayscale(.35)' }} />
