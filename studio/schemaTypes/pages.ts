@@ -31,6 +31,7 @@ export const HOME_FIELDS = [
     str('rowName', 'Program list: name', { required: true, description: 'In the list under the home page heading.' }),
     str('rowLine', 'Program list: details', { required: true }),
     str('rowLink', 'Program list: link text', { required: true, description: 'The arrow is added for you.' }),
+    str('pyramidShort', 'Pyramid: text inside the top triangle', { description: 'Short, e.g. "Pro". The full label below shows beside the triangle when someone points at it.' }),
     str('pyramidKicker', 'Pyramid label: small heading', { required: true }),
     str('pyramidName', 'Pyramid label: name', { required: true }),
     str('pyramidSub', 'Pyramid label: line under the name', { required: true, description: 'The arrow is added for you.' }),

@@ -320,7 +320,12 @@ function Pyramid({ P, proTier, adult, hover, focus, intro, introDone, tilt, onHo
           {slice('pro', onNetwork)}
           {ORDER.map((id) => slice(id, () => onOpen(id)))}
         </svg>
-        <div aria-hidden="true" style={{ position: 'absolute', left: '61%', top: '11%', transform: `translateY(-50%) ${pro.lift}`, display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'none', whiteSpace: 'nowrap', opacity: pro.op, transition: 'transform .35s cubic-bezier(.2,.8,.2,1),opacity .5s' }}>
+        {/* Inside the top triangle: the short label ("Pro"). */}
+        <div aria-hidden="true" style={{ position: 'absolute', left: PYRAMID_LABELS.pro.x, top: PYRAMID_LABELS.pro.y, transform: `translate(-50%,-50%) ${pro.lift}`, pointerEvents: 'none', whiteSpace: 'nowrap', opacity: pro.op, transition: 'transform .35s cubic-bezier(.2,.8,.2,1),opacity .5s' }}>
+          <span style={{ font: `500 ${PYRAMID_LABELS.pro.fs}/1 var(--font-heading)`, letterSpacing: '-.02em', color: hover === 'pro' ? 'var(--color-text)' : '#d6f0ee' }}>{proTier.pyramidShort}</span>
+        </div>
+        {/* Beside it, only while the top triangle is pointed at (or focused): the full label. */}
+        <div aria-hidden="true" style={{ position: 'absolute', left: '61%', top: '11%', transform: `translateY(-50%) ${pro.lift} ${hover === 'pro' ? '' : 'translateX(-10px)'}`, display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'none', whiteSpace: 'nowrap', opacity: hover === 'pro' ? 1 : 0, transition: 'transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s' }}>
           <span style={{ width: '28px', height: '1px', background: 'linear-gradient(to left,#78b7b3,transparent)' }} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <span style={{ fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: pro.kc }}>{proTier.pyramidKicker}</span>

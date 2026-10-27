@@ -39,8 +39,10 @@ export const PYRAMID_POINTS: Record<ProgramKey | 'pro', number[][]> = {
   rec: [[77.5, 356], [297, 356], [297, 480], [0, 480]],
   futures: [[303, 356], [522.5, 356], [600, 480], [303, 480]],
 };
-// Where each level's label sits on the pyramid, and its size.
-export const PYRAMID_LABELS: Record<ProgramKey, { x: string; y: string; fs: string }> = {
+// Where each level's label sits on the pyramid, and its size. `pro` is the short label inside the top
+// triangle (its full label shows beside it on hover).
+export const PYRAMID_LABELS: Record<ProgramKey | 'pro', { x: string; y: string; fs: string }> = {
+  pro: { x: '50%', y: '14%', fs: '17px' },
   academy: { x: '50%', y: '34.6%', fs: '22px' },
   club: { x: '50%', y: '60%', fs: '30px' },
   rec: { x: '28%', y: '87.5%', fs: '24px' },

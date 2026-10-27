@@ -135,7 +135,7 @@ const settingsHome = {
   }),
   homeInside: z.object({ heading: z.string(), kicker: z.string() }),
   homePlay: z.object({ heading: z.string(), body: z.string(), primaryButton: z.string(), secondaryButton: z.string() }),
-  proTier: z.object({ rowName: z.string(), rowLine: z.string(), rowLink: z.string(), pyramidKicker: z.string(), pyramidName: z.string(), pyramidSub: z.string(), hint: z.string() }),
+  proTier: z.object({ rowName: z.string(), rowLine: z.string(), rowLink: z.string(), pyramidShort: opt, pyramidKicker: z.string(), pyramidName: z.string(), pyramidSub: z.string(), hint: z.string() }),
 };
 const networkPage = z.object({
   _id: z.string(), seo, hide, sectionOrder: order,

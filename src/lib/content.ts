@@ -324,7 +324,8 @@ async function build() {
   };
 
   return {
-    home, pro: proTier, network,
+    // pyramidShort: the word inside the pyramid's top triangle ("Pro" unless the editor set one).
+    home, pro: { ...proTier, pyramidShort: proTier.pyramidShort?.trim() || 'Pro' }, network,
     // Search and sharing for the main pages (programs, regions and adult leagues carry their own).
     seo: {
       shareDefault,
