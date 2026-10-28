@@ -31,6 +31,10 @@ const builder = createImageUrlBuilder(sanity);
 // ---------- schemas for the raw documents ----------
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+// Links from the Studio end up in href attributes, so only web, email and phone links pass
+// (webUrl alone also accepts javascript: links). siteHref also allows paths on this site.
+const webUrl = z.string().url().regex(/^(https?:\/\/|mailto:|tel:)/i, 'Use a link starting with https://');
+const siteHref = z.string().regex(/^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i, 'Use a link starting with https:// or /');
 const ref = z.object({ _ref: z.string() });
 export const image = z.object({ asset: ref, crop: z.any().optional(), hotspot: z.any().optional(), alt: z.string().optional() });
 const keyedImage = image.extend({ _key: z.string() });
@@ -68,7 +72,7 @@ const ageTab = z.object({
 const program = z.object({
   _id: z.string(), key: z.enum(['academy', 'club', 'rec', 'futures']), order: z.number(), num: z.string(), kind: z.enum(['tryout', 'season']), invite: z.boolean().default(false),
   name: z.string(), tier: z.string(), ages: z.string(), kicker: z.string(), line: z.string(), tagline: z.string(), forHead: z.string(), intro: z.string(),
-  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: z.string().url().optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
+  leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), url: webUrl.optional(), logo: image.optional(), lw: z.number().optional(), lh: z.number().optional() })).default([]),
   includedIntro: opt, included: feeItems, notIncluded: feeItems, ageTabs: z.array(ageTab).default([]),
   hide, hideRegion: hide, sectionOrder: order, regionSectionOrder: order,
   leadershipHeading: opt, leadershipIntro: opt, seo,
@@ -79,7 +83,7 @@ const program = z.object({
   }).optional(),
   img: image,
   photos: z.object({ who: image, cta: image, core: image }),
-  registerUrl: z.string().url(), enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
+  registerUrl: webUrl, enrollment: z.enum(['trial', 'tryouts']).optional(), nextTryout: opt, registrationOpens: opt,
   joinCopy: z.string(), cta: z.string(), sessionLabel: z.string(),
   cost: z.number().optional(), unit: z.enum(['per year', 'per season']), costNote: z.string(), includes: z.array(z.string()).default([]), commit: z.string(), commitNote: z.string(),
   phases: z.array(z.object({ label: z.string(), d: z.string(), startMonth: z.number().min(0).max(11), endMonth: z.number().min(0).max(11) })).default([]),
@@ -92,17 +96,17 @@ const program = z.object({
 
 const hhmmTime = z.string().regex(/^\d{2}:\d{2}$/);
 const tryoutDay = z.object({ date: isoDate, venue: ref, startTime: hhmmTime, endTime: hhmmTime });
-const tryoutGroup = z.object({ minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']), days: z.array(tryoutDay).min(1), registerUrl: z.string().url().optional() });
+const tryoutGroup = z.object({ minAge: z.number(), maxAge: z.number(), gender: z.enum(['Boys', 'Girls', 'Coed']), days: z.array(tryoutDay).min(1), registerUrl: webUrl.optional() });
 /** A tryout and its age groups. Older documents were one age group each (minAge … days at the top). */
 const tryout = z.object({
   _id: z.string(), name: opt, program: z.enum(['academy', 'club']), region: z.enum(['north', 'south', 'west']),
-  registerUrl: z.string().url().optional(), groups: z.array(tryoutGroup).optional(),
+  registerUrl: webUrl.optional(), groups: z.array(tryoutGroup).optional(),
   minAge: z.number().optional(), maxAge: z.number().optional(), gender: z.enum(['Boys', 'Girls', 'Coed']).optional(), days: z.array(tryoutDay).optional(),
 }).refine((t) => t.groups?.length || t.days?.length, 'Add at least one age group with a day.');
 const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
 const sessionBase = {
   _id: z.string(), name: z.string(), region: z.enum(['north', 'south', 'west']), venue: ref, minAge: z.number().optional(), maxAge: z.number().optional(),
-  cost: z.number(), registrationOpens: isoDate, registrationCloses: isoDate, start: isoDate, end: isoDate, registerUrl: z.string().url().optional(),
+  cost: z.number(), registrationOpens: isoDate, registrationCloses: isoDate, start: isoDate, end: isoDate, registerUrl: webUrl.optional(),
 };
 const recSession = z.object({ ...sessionBase, status: z.enum(['auto', 'open', 'closed', 'full']).default('auto') });
 const futuresSession = z.object({
@@ -112,7 +116,7 @@ const futuresSession = z.object({
 const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
 const event = z.object({
   _id: z.string(), name: z.string(), tagline: z.string(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate,
-  location: z.string(), place, format: z.string(), ages: z.string(), url: z.string().url(), logo: image.optional(),
+  location: z.string(), place, format: z.string(), ages: z.string(), url: webUrl, logo: image.optional(),
   brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex }),
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });
@@ -124,7 +128,7 @@ const settingsHome = {
   tryoutsPage: z.object({ ...heading, intro: z.string() }),
   eventsPage: z.object({
     kicker: z.string(), ...heading, intro: z.string(), reelKicker: z.string(), reelHeading: z.string(),
-    cards: z.array(z.object({ icon: z.enum(['flag', 'handshake', 'none']).default('flag'), kicker: z.string(), heading: z.string(), body: z.string(), button: z.string(), href: z.string() })).default([]),
+    cards: z.array(z.object({ icon: z.enum(['flag', 'handshake', 'none']).default('flag'), kicker: z.string(), heading: z.string(), body: z.string(), button: z.string(), href: siteHref })).default([]),
   }),
   contactPage: z.object({ kicker: z.string(), ...heading, intro: z.string(), topics: z.array(z.string()).min(1) }),
   futuresPages: z.object({ ...heading, intro: z.string(), thanksHeading: z.string(), thanksHeadingAccent: opt, thanksBody: z.string() }),
@@ -160,9 +164,9 @@ const settings = z.object({
     ga4: opt, metaPixel: opt, googleAds: opt, gtm: opt,
     adsLabels: z.object({ futures: opt, trial: opt, interest: opt, contact: opt, ollie: opt }).optional(),
   }).optional(), homeSeo: seo, tryoutsSeo: seo, eventsSeo: seo, contactSeo: seo,
-  social: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
+  social: z.array(z.object({ label: z.string(), href: webUrl })).default([]),
   collage: z.array(keyedImage).min(11),
-  videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: z.string().url() })).default([]),
+  videos: z.array(z.object({ title: z.string(), len: z.string(), thumbnail: image, url: webUrl })).default([]),
   tryoutBring: z.array(z.string()).default([]),
   eventReel: z.array(z.object({ photo: image, event: z.string(), caption: z.string() })).default([]),
   development: z.object({ heading: opt, headingAccent: opt, intro: opt, technical: pillar, tactical: pillar, physical: pillar, mental: pillar }),
@@ -182,7 +186,7 @@ const adultLeague = z.object({
   expect: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
   leagues: z.array(z.object({ name: z.string(), level: z.string(), d: z.string(), logo: image.optional() })).default([]),
   placeholderNote: opt,
-  join: z.object({ status: z.string(), heading: z.string(), headingAccent: opt, body: z.string(), button: z.string(), url: z.string().url().optional(), formHeading: z.string() }),
+  join: z.object({ status: z.string(), heading: z.string(), headingAccent: opt, body: z.string(), button: z.string(), url: webUrl.optional(), formHeading: z.string() }),
   phases: z.array(z.object({ label: z.string(), d: z.string(), startMonth: z.number().min(0).max(11), endMonth: z.number().min(0).max(11) })).default([]),
   week: z.object(Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, z.array(session).default([])]))).default({}),
   commitNote: opt,
