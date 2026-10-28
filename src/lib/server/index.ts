@@ -58,6 +58,11 @@ export async function spamCheck(body: Record<string, unknown>, ip: string | null
   return out.success ? null : 'The check didn\'t pass. Please try again.';
 }
 
+/** Auto-replies echo what was typed (names, the message) to whatever address was typed, so on the live
+ *  site they only go out once Turnstile is on; otherwise bots could use them to send spam from the club's
+ *  mail domain. Submissions are still saved and staff still emailed. Previews and local dev always send. */
+export const autoRepliesOn = () => !!env('TURNSTILE_SECRET_KEY') || env('VERCEL_ENV') !== 'production';
+
 /** Trimmed string field, capped so nobody can store a novel. */
 export const s = (v: unknown, max = 500) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
