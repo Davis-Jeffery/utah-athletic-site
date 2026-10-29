@@ -2,7 +2,7 @@
 // the Athletic Global teaser, the docuseries and the closing call to action.
 import React, { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, MapPin, ArrowUpRight, Triangle, ListBullets } from '@phosphor-icons/react';
-import { ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
+import { ORDER, REGION_ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
 import { orderOf } from '../../../studio/shared/sections';
 import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
 import { ACC, Kicker, Rule, OutlineLink, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
@@ -33,13 +33,20 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
   };
   const heroLeave = () => { setTilt({ x: 0, y: 0 }); onHover(null); };
   const P = Object.fromEntries(data.programs.map((p) => [p.id, p]));
-  const region = data.regions.find((r) => r.id === (myRegion || 'north'));
-  const tryoutsHref = `/tryouts/?region=${region.id}`;
-  // "Play for us" cards: only programs with something to register for in this region (past dates
-  // drop off on the visitor's date); nothing posted, no card. With no tryouts here, Academy and
-  // Club become a trial request form.
-  const cards = ORDER.map((id) => ({ id, n: nextFor(data, id, region.id, today) })).filter((c) => c.n.kind !== 'none');
+  // No region chosen (header menu): "Play for us" shows every region, each card naming its region.
+  const region = data.regions.find((r) => r.id === myRegion) ?? null;
+  const tryoutsHref = `/tryouts/?region=${region ? region.id : 'all'}`;
+  // "Play for us" cards: only programs with something to register for in the region (past dates
+  // drop off on the visitor's date); nothing posted, no card. With no tryouts, Academy and Club
+  // become a trial request form.
+  const cards = ORDER.flatMap((id) => (region ? [region.id] : REGION_ORDER).map((r) => ({ id, r, n: nextFor(data, id, r, today) })))
+    .filter((c) => c.n.kind !== 'none');
   const noTryouts = !cards.some((c) => c.n.kind === 'tryout');
+  // Nothing in the visitor's region, but tryouts elsewhere: say so, so the page doesn't look empty.
+  const elsewhere = region && noTryouts
+    ? data.regions.filter((r) => r.id !== region.id && ORDER.some((id) => nextFor(data, id, r.id, today).kind === 'tryout')).map((r) => r.label)
+    : [];
+  const label = (r) => (region ? null : data.regions.find((x) => x.id === r).label);
   const { home, pro } = data;
   // Sections the editor hid (Home page > Hide sections).
   const on = (k) => !home.hide.includes(k);
@@ -50,19 +57,25 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '56px clamp(20px,4vw,56px) 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Kicker line>{home.tryouts.kicker} · {region.label} region</Kicker>
+            <Kicker line>{home.tryouts.kicker} · {region ? `${region.label} region` : 'All regions'}</Kicker>
             <h2 style={{ margin: 0, font: '500 clamp(32px,3.8vw,52px)/1 var(--font-heading)', letterSpacing: '-.04em' }}><Head h={home.tryouts} /></h2>
           </div>
           <OutlineLink href={tryoutsHref}>All tryouts →</OutlineLink>
         </div>
-        {/* With no tryouts posted in this region, Academy and Club become a trial request form. */}
+        {elsewhere.length ? (
+          <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: 'var(--color-neutral-300)' }}>
+            No tryouts posted in {region.label} yet. {elsewhere.join(' and ')} {elsewhere.length === 1 ? 'has' : 'have'} tryouts open.{' '}
+            <a href="/tryouts/?region=all" style={{ color: 'var(--color-accent-300)', whiteSpace: 'nowrap' }}>See all regions →</a>
+          </p>
+        ) : null}
+        {/* With no tryouts posted, Academy and Club become a trial request form. */}
         <div style={noTryouts ? { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'stretch' } : { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '10px' }}>
-          {noTryouts ? <TrialRequest key={region.id} data={data} region={region.id} /> : null}
+          {noTryouts ? <TrialRequest key={region ? region.id : 'all'} data={data} region={region ? region.id : REGION_ORDER[0]} /> : null}
           {noTryouts ? (cards.length ? (
             <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {cards.map((c) => <PlayCard key={c.id} P={P} id={c.id} n={c.n} />)}
+              {cards.map((c) => <PlayCard key={c.id + c.r} P={P} id={c.id} n={c.n} place={label(c.r)} />)}
             </div>
-          ) : null) : cards.map((c) => <PlayCard key={c.id} P={P} id={c.id} n={c.n} />)}
+          ) : null) : cards.map((c) => <PlayCard key={c.id + c.r} P={P} id={c.id} n={c.n} place={label(c.r)} />)}
         </div>
       </section>
     ),
@@ -195,11 +208,12 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
 }
 
 // One "Play for us" card: the next tryout or session a family in the region can sign up for.
-function PlayCard({ P, id, n }) {
+// `place` names the region when the cards show every region.
+function PlayCard({ P, id, n, place }) {
   return (
     <div className="hv-lift-sm" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '18px', borderRadius: '12px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow .2s,transform .2s' }}>
       <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{P[id].name}</span>
+        <span style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>{P[id].name}{place ? ` · ${place}` : ''}</span>
         <span style={{ fontSize: '11px', color: 'var(--color-neutral-500)' }}>{n.kind === 'season' || (n.kind === 'none' && P[id].kind === 'season') ? 'Season sign-up' : n.kind === 'tryout' ? 'Next tryout' : 'Not yet posted'}</span>
       </span>
       <span style={{ font: '500 20px/1.15 var(--font-heading)', letterSpacing: '-.02em' }}>{n.title}</span>
