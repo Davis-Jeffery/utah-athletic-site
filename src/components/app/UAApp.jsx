@@ -190,10 +190,10 @@ export default class UAApp extends React.Component {
   }
 
   // Pick a region tab. Scrolls back up to the tabs if the visitor is further down the page.
+  // Looking at a region tab doesn't change the visitor's region; only the header menu does.
   setRegion(r) {
     if (r === this.state.region) { this.setState({ regMenu: false }); return; }
     this.setState({ region: r, regMenu: false });
-    if (r) { rememberRegion(r); this.setState({ myRegion: r }); }
     this.nav(this.path(this.state.active, r), true);
     requestAnimationFrame(() => {
       const c = this.scrollRef.current, hero = c && c.querySelector('#ovhero');
