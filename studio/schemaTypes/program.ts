@@ -44,13 +44,29 @@ export const people = (name: string, title: string, o: { description?: string; g
   });
 
 // A fee breakdown list: what the fee covers, or what it doesn't.
-const feeItems = (name: string, title: string, description: string, o: { group?: string; hidden?: any } = {}) =>
+// Fee items. With `regions` (Club age groups), an item can be limited to some regions: empty shows it
+// on every region's page.
+const REGION_TITLES: Record<string, string> = { north: 'North', south: 'South', west: 'West' };
+const feeItems = (name: string, title: string, description: string, o: { group?: string; hidden?: any; regions?: boolean } = {}) =>
   defineField({
     name, title, type: 'array', group: o.group, hidden: o.hidden, description,
     of: [defineArrayMember({
       type: 'object', name: 'feeItem',
-      fields: [str('item', 'Item', { required: true, description: 'e.g. "Technical training sessions".' }), str('detail', 'Detail', { description: 'e.g. "3× per week (U14 and under), year-round".' })],
-      preview: { select: { title: 'item', subtitle: 'detail' } },
+      fields: [
+        str('item', 'Item', { required: true, description: 'e.g. "Technical training sessions".' }),
+        str('detail', 'Detail', { description: 'e.g. "3× per week (U14 and under), year-round".' }),
+        defineField({
+          name: 'regions', title: 'Only in', type: 'array', of: [{ type: 'string' }], hidden: !o.regions,
+          options: { list: Object.entries(REGION_TITLES).map(([value, title]) => ({ value, title })), layout: 'grid' },
+          description: 'Leave empty to show this item in every region. Tick regions to show it only there.',
+        }),
+      ],
+      preview: {
+        select: { title: 'item', detail: 'detail', regions: 'regions' },
+        prepare: ({ title, detail, regions }: any) => ({
+          title, subtitle: [detail, regions?.length ? `Only ${regions.map((r: string) => REGION_TITLES[r]).join(', ')}` : ''].filter(Boolean).join(' · '),
+        }),
+      },
     })],
   });
 
@@ -106,8 +122,8 @@ const ageTabsField = defineField({
         })),
       }),
       str('note', 'Note (optional)', { description: 'Under the price, e.g. "Includes tournament entry".' }),
-      feeItems('included', 'Included', 'What this fee covers.'),
-      feeItems('notIncluded', 'Not included', 'e.g. kit package, tournament travel. Shown under Included.'),
+      feeItems('included', 'Included', 'What this fee covers. An item can be limited to some regions.', { regions: true }),
+      feeItems('notIncluded', 'Not included', 'e.g. kit package, tournament travel. Shown under Included. An item can be limited to some regions.', { regions: true }),
     ],
     preview: {
       select: { min: 'minAge', max: 'maxAge', n: 'prices.north', s: 'prices.south', w: 'prices.west' },

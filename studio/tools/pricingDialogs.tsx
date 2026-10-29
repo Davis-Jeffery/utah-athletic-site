@@ -28,27 +28,40 @@ export function weeklyClasses(start: string, end: string, day: number, startTime
 }
 
 
-// Included / Not included: a list of items, each with an optional detail.
-type ItemRow = { _key: string; item: string; detail: string };
-const toRows = (list?: unknown[]): ItemRow[] => ((list ?? []) as { _key?: string; item?: string; detail?: string }[]).map((x) => ({ _key: x._key ?? key(), item: x.item ?? '', detail: x.detail ?? '' }));
-const fromRows = (list: ItemRow[]) => list.filter((x) => x.item.trim()).map((x) => ({ _key: x._key, _type: 'feeItem', item: x.item.trim(), ...(x.detail.trim() ? { detail: x.detail.trim() } : {}) }));
-function ItemsEditor({ label, hint, list, onChange }: { label: string; hint?: string; list: ItemRow[]; onChange: (l: ItemRow[]) => void }) {
+// Included / Not included: a list of items, each with an optional detail and, with `regions`, the
+// regions it applies to (none ticked: every region).
+type ItemRow = { _key: string; item: string; detail: string; regions: string[] };
+const toRows = (list?: unknown[]): ItemRow[] => ((list ?? []) as { _key?: string; item?: string; detail?: string; regions?: string[] }[]).map((x) => ({ _key: x._key ?? key(), item: x.item ?? '', detail: x.detail ?? '', regions: x.regions ?? [] }));
+const fromRows = (list: ItemRow[]) => list.filter((x) => x.item.trim()).map((x) => ({ _key: x._key, _type: 'feeItem', item: x.item.trim(), ...(x.detail.trim() ? { detail: x.detail.trim() } : {}), ...(x.regions.length ? { regions: x.regions } : {}) }));
+function ItemsEditor({ label, hint, list, onChange, regions }: { label: string; hint?: string; list: ItemRow[]; onChange: (l: ItemRow[]) => void; regions?: Opt[] }) {
   const edit = (k: string, field: 'item' | 'detail') => (e: React.FormEvent<HTMLInputElement>) => {
     const v = e.currentTarget.value;
     onChange(list.map((x) => (x._key === k ? { ...x, [field]: v } : x)));
   };
+  // Ticking every region is the same as all regions, so it's saved as none.
+  const setRegions = (k: string, r: string[]) => onChange(list.map((x) => (x._key === k ? { ...x, regions: regions && r.length >= regions.length ? [] : r } : x)));
+  const toggle = (x: ItemRow, r: string) => setRegions(x._key, x.regions.includes(r) ? x.regions.filter((y) => y !== r) : [...x.regions, r]);
   return (
     <Stack gap={2}>
       <Label>{label}</Label>
       {hint ? <Text muted size={0}>{hint}</Text> : null}
       {list.map((x) => (
-        <div key={x._key} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px,1fr) minmax(140px,1.4fr) auto', gap: 8, alignItems: 'center' }}>
-          <TextInput aria-label="Item" placeholder="Item, e.g. Licensed coaching" value={x.item} onChange={edit(x._key, 'item')} />
-          <TextInput aria-label="Detail" placeholder="Detail (optional)" value={x.detail} onChange={edit(x._key, 'detail')} />
-          <Button mode="bleed" tone="critical" fontSize={1} text="Remove" onClick={() => onChange(list.filter((y) => y._key !== x._key))} />
-        </div>
+        <Stack key={x._key} gap={2}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px,1fr) minmax(140px,1.4fr) auto', gap: 8, alignItems: 'center' }}>
+            <TextInput aria-label="Item" placeholder="Item, e.g. Licensed coaching" value={x.item} onChange={edit(x._key, 'item')} />
+            <TextInput aria-label="Detail" placeholder="Detail (optional)" value={x.detail} onChange={edit(x._key, 'detail')} />
+            <Button mode="bleed" tone="critical" fontSize={1} text="Remove" onClick={() => onChange(list.filter((y) => y._key !== x._key))} />
+          </div>
+          {regions && regions.length > 1 ? (
+            <Flex gap={1} wrap="wrap" align="center">
+              <Text muted size={0} style={{ marginRight: 4 }}>Shown in</Text>
+              <Button mode={x.regions.length ? 'bleed' : 'default'} tone={x.regions.length ? 'default' : 'primary'} fontSize={0} padding={2} text="All regions" onClick={() => setRegions(x._key, [])} />
+              {regions.map((r) => <Button key={r.value} mode={x.regions.includes(r.value) ? 'default' : 'bleed'} tone={x.regions.includes(r.value) ? 'primary' : 'default'} fontSize={0} padding={2} text={r.label} onClick={() => toggle(x, r.value)} />)}
+            </Flex>
+          ) : null}
+        </Stack>
       ))}
-      <Box><Button mode="ghost" fontSize={1} text="Add item" onClick={() => onChange([...list, { _key: key(), item: '', detail: '' }])} /></Box>
+      <Box><Button mode="ghost" fontSize={1} text="Add item" onClick={() => onChange([...list, { _key: key(), item: '', detail: '', regions: [] }])} /></Box>
     </Stack>
   );
 }
@@ -64,6 +77,8 @@ export function AgeGroupForm({ program, tab, regions, drafted, unit, onClose, on
   const tabs = program.ageTabs ?? [];
   const others = tabs.filter((t) => t._key !== tab?._key);
   const running = REGIONS.filter((r) => program[r]?.status === 'active' || tab?.prices?.[r] != null);
+  // Regions an item can be limited to: those running this program.
+  const offered = running.map((r) => ({ value: r, label: regions.find((x) => x.value === r)?.label ?? r }));
   const [min, setMin] = useState(tab ? String(tab.minAge) : '');
   const [max, setMax] = useState(tab ? String(tab.maxAge) : '');
   const [prices, setPrices] = useState<Record<string, string>>(Object.fromEntries(REGIONS.map((r) => [r, tab?.prices?.[r] != null ? String(tab.prices[r]) : ''])));
@@ -142,8 +157,8 @@ export function AgeGroupForm({ program, tab, regions, drafted, unit, onClose, on
               </Select>
             </Field>
           ) : null}
-          <ItemsEditor label="Included" hint="What this fee covers." list={included} onChange={setIncluded} />
-          <ItemsEditor label="Not included" hint="e.g. kit package, tournament travel." list={notIncluded} onChange={setNotIncluded} />
+          <ItemsEditor label="Included" hint="What this fee covers. Each item shows in every region unless you pick regions." list={included} onChange={setIncluded} regions={offered} />
+          <ItemsEditor label="Not included" hint="e.g. kit package, tournament travel." list={notIncluded} onChange={setNotIncluded} regions={offered} />
           <Problems list={min && max ? problems : []} />
         </Stack>
       </Box>

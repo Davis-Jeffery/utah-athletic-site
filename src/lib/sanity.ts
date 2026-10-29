@@ -63,7 +63,8 @@ const region = z.object({ _id: z.string(), key: z.enum(['north', 'south', 'west'
 const seo = z.object({ title: z.string().optional(), description: z.string().optional(), image: image.optional() }).optional();
 /** One pillar on a program's Development model: its own summary and photo; label, detail and focus override the shared text. */
 const devPillar = z.object({ summary: z.string(), photo: image, tag: opt, deep: opt, focus: z.array(z.string()).optional() });
-const feeItems = z.array(z.object({ item: z.string(), detail: opt })).default([]);
+/** Included / Not included items; `regions` (Club age groups) limits one to those regions, empty for all. */
+const feeItems = z.array(z.object({ item: z.string(), detail: opt, regions: z.array(z.enum(['north', 'south', 'west'])).optional() })).default([]);
 /** Club's fees by age group: ages, a price per region (empty: to be announced) and what is and isn't included. */
 const ageTab = z.object({
   _key: z.string(), minAge: z.number(), maxAge: z.number(), note: opt, included: feeItems, notIncluded: feeItems,

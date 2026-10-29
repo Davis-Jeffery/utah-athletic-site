@@ -49,6 +49,8 @@ function pic(im: SanityImage, width: number, quality?: number): Pic | undefined 
 
 /** "venue.lehi" -> "lehi" */
 const idOf = (_id: string) => _id.replace(/^[a-zA-Z]+\./, '');
+// A fee item limited to some regions (Club age groups) shows only on those regions' pages.
+const inRegion = <T extends { regions?: string[] }>(items: T[], k: string) => items.filter((x) => !x.regions?.length || x.regions.includes(k)).map(({ regions, ...x }) => x);
 
 /** "19:30" -> { h: "7:30", ap: "PM" } */
 const clock = (hhmm: string) => {
@@ -119,7 +121,7 @@ async function build() {
     // included. An age group with no price for this region isn't offered here, so it's left out.
     // They take the place of the region's Fees by age group.
     const tabs = hide ? [] : p.ageTabs.flatMap((t) => (t.prices[k] == null ? [] : [{
-      key: t._key, label: fmtAges(t.minAge, t.maxAge), min: t.minAge, max: t.maxAge, cost: t.prices[k]!, note: t.note, included: t.included, notIncluded: t.notIncluded,
+      key: t._key, label: fmtAges(t.minAge, t.maxAge), min: t.minAge, max: t.maxAge, cost: t.prices[k]!, note: t.note, included: inRegion(t.included, k), notIncluded: inRegion(t.notIncluded, k),
     }]));
     // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
     // age tabs, else the region's Fees by age group, else its sessions (Rec, Futures). Null when
