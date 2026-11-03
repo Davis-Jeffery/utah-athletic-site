@@ -17,6 +17,15 @@ export const TOWNS: [string, number, number][] = [
   ['Lindon', -111.7208, 40.3433], ['Eagle Mountain', -112.0069, 40.3141], ['Vineyard', -111.7469, 40.2972],
   ['Orem', -111.6946, 40.2969], ['Provo', -111.6585, 40.2338], ['Springville', -111.6107, 40.1652],
   ['Mapleton', -111.5785, 40.1302], ['Spanish Fork', -111.6549, 40.1149], ['Payson', -111.732, 40.0444],
+  ['Grantsville', -112.4644, 40.5999], ['Lake Point', -112.2622, 40.6802], ['Erda', -112.3044, 40.6127],
+  ['Stockton', -112.3633, 40.4527], ['Rush Valley', -112.4469, 40.3594],
 ];
+
+// Utah counties a program's map can shade (Programs > Map pins), by FIPS code as in src/data/utah-geo.json.
+export const COUNTIES: [string, string][] = [
+  ['Box Elder', '49003'], ['Cache', '49005'], ['Davis', '49011'], ['Juab', '49023'], ['Morgan', '49029'], ['Salt Lake', '49035'],
+  ['Summit', '49043'], ['Tooele', '49045'], ['Utah', '49049'], ['Wasatch', '49051'], ['Weber', '49057'],
+];
+export const COUNTY_OPTIONS = COUNTIES.map(([title, value]) => ({ title: `${title} County`, value }));
 
 export const TOWN_OPTIONS = [...TOWNS].sort((a, b) => a[0].localeCompare(b[0])).map(([name]) => ({ title: name, value: name }));

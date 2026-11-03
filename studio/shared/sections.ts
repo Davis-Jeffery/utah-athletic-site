@@ -17,6 +17,7 @@ export const SECTIONS = {
     ['dev', 'Development model (also set per program in Site-wide components)'],
     ['pathway', 'Pathway position'],
     ['leagues', 'Where we play'],
+    ['formats', 'How we play (Recreation)'],
     ['season', 'Season overview'],
     ['week', 'A typical week'],
     ['cost', 'Compare programs, or What your fee covers'],
@@ -28,7 +29,7 @@ export const SECTIONS = {
     ['lead', 'Regional leadership'],
     ['coach', 'Coaching staff'],
     ['try', 'Tryouts, or Sign up'],
-    ['fee', 'Fees'],
+    ['fee', 'Fees (not on Recreation: what\'s included is in its Sign up)'],
     ['contact', 'Want to contact our leaders?'],
   ],
   adult: [

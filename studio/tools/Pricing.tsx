@@ -30,7 +30,7 @@ const QUERY = `{
     _id, key, name, unit, ageTabs, "north": north{status, fees}, "south": south{status, fees}, "west": west{status, fees}
   },
   "sessions": *[_type in ["recSession", "futuresSession"] && !(_id in path("drafts.**"))] | order(start asc) {
-    _id, _type, name, region, start, end, cost, "venue": venue._ref, minAge, maxAge, registrationOpens, registrationCloses, registerUrl, capacity, status, classes
+    _id, _type, name, region, start, end, cost, earlyCost, earlyEnds, "venue": venue._ref, minAge, maxAge, registrationOpens, registrationCloses, registerUrl, capacity, status, classes
   },
   "venues": *[_type == "venue" && !(_id in path("drafts.**"))] | order(name asc) { _id, name },
   "adult": *[_type == "adultLeague" && !(_id in path("drafts.**"))] | order(_id asc) { _id, name, cost, unit },
@@ -59,6 +59,10 @@ const rowProps = (open: () => void) => ({
   className: 'pricing-row',
   onClick: (e: React.MouseEvent) => { if (!(e.target as HTMLElement).closest('input,select,textarea,button,a')) open(); },
 });
+// The early bird column: "$140 to Mar 1, 2027", set in the row's form (click the row).
+const earlyText = (x: { earlyCost?: number; earlyEnds?: string }) => (
+  <Text size={1} muted={x.earlyCost == null}>{x.earlyCost != null && x.earlyEnds ? `$${x.earlyCost} to ${new Date(`${x.earlyEnds}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}` : 'None'}</Text>
+);
 const RowLink = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
   <button type="button" onClick={onClick} title="See and edit all the details" style={{ all: 'unset', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: 3 }}>
     <Text size={1}>{children}</Text>
@@ -179,7 +183,7 @@ export function Pricing() {
       <Stack gap={5}>
         <Stack gap={3}>
           <Heading size={3}>Pricing</Heading>
-          <Text muted size={1}>Every price on the website. Change any box, then Publish prices to update them all at once. Leave a Club price empty where that age group isn't offered: its tab won't show in that region. An empty adult price shows "To be announced". Add Club age groups and Recreation or Futures sessions here too. Notes and what's included are on each program's page.</Text>
+          <Text muted size={1}>Every price on the website. Change any box, then Publish prices to update them all at once. Recreation early bird prices are set by clicking a row. Leave a Club price empty where that age group isn't offered: its tab won't show in that region. An empty adult price shows "To be announced". Add Club age groups and Recreation or Futures sessions here too. Notes and what's included are on each program's page.</Text>
           <Flex as="label" gap={2} align="center"><Checkbox checked={past} onChange={() => setPast((x) => !x)} /><Text size={1}>Show past sessions</Text></Flex>
         </Stack>
 
@@ -225,13 +229,14 @@ export function Pricing() {
                     <Text size={1} weight="medium">Region fees</Text>
                     <Text muted size={1}>The prices in a region's Fees section. Where a region has these, they're shown instead of its session prices.</Text>
                     <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                      <thead><tr>{['Region', 'Age group', 'Price ($)'].map((h) => <th key={h} style={th}><Text size={1} weight="medium">{h}</Text></th>)}</tr></thead>
+                      <thead><tr>{['Region', 'Age group', 'Regular ($)', 'Early bird'].map((h) => <th key={h} style={th}><Text size={1} weight="medium">{h}</Text></th>)}</tr></thead>
                       <tbody>
                         {fees.map(({ r, f }) => (
                           <tr key={r + f._key} {...rowProps(() => setAdding({ fee: f, program: p._id, region: r }))}>
                             <td style={td}><RowLink onClick={() => setAdding({ fee: f, program: p._id, region: r })}>{regionLabel(r)}</RowLink></td>
                             <td style={td}><Text size={1}>{f.ages}{f.note ? ` · ${f.note}` : ''}</Text></td>
                             <td style={{ ...td, width: 180 }}>{cell(`${p._id}:${r}:${f._key}`, `${p.name} ${regionLabel(r)} ${f.ages}`)}</td>
+                            <td style={td}>{earlyText(f)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -242,7 +247,7 @@ export function Pricing() {
                   {fees.length ? <Text size={1} weight="medium">Sessions</Text> : null}
                   {list.length ? (
                     <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                      <thead><tr>{['Session', 'Region', 'Dates', 'Price ($)', ''].map((h) => <th key={h} style={th}><Text size={1} weight="medium">{h}</Text></th>)}</tr></thead>
+                      <thead><tr>{['Session', 'Region', 'Dates', kind === 'recSession' ? 'Regular ($)' : 'Price ($)', ...(kind === 'recSession' ? ['Early bird'] : []), ''].map((h) => <th key={h} style={th}><Text size={1} weight="medium">{h}</Text></th>)}</tr></thead>
                       <tbody>
                         {list.map((s) => (
                           <tr key={s._id} {...rowProps(() => setAdding({ kind, editing: s }))}>
@@ -250,6 +255,7 @@ export function Pricing() {
                             <td style={td}><Text size={1}>{regionLabel(s.region)}</Text></td>
                             <td style={td}><Text size={1}>{dates(s.start, s.end)}</Text></td>
                             <td style={{ ...td, width: 180 }}>{cell(s._id, `${s.name} price`)}</td>
+                            {kind === 'recSession' ? <td style={td}>{earlyText(s)}</td> : null}
                             <td style={{ ...td, whiteSpace: 'nowrap' }}>
                               <Flex gap={1}>
                                 <Button mode="bleed" fontSize={1} text="Copy" title="Start a new session with the same details" onClick={() => setAdding({ kind, from: s })} />

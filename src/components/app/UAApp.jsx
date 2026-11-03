@@ -191,10 +191,18 @@ export default class UAApp extends React.Component {
 
   // Pick a region tab. Scrolls back up to the tabs if the visitor is further down the page.
   // Looking at a region tab doesn't change the visitor's region; only the header menu does.
-  setRegion(r) {
-    if (r === this.state.region) { this.setState({ regMenu: false }); return; }
+  // `focus`: an element id on the region tab to scroll to once it's drawn (an overview session card).
+  setRegion(r, focus) {
+    if (r === this.state.region && !focus) { this.setState({ regMenu: false }); return; }
     this.setState({ region: r, regMenu: false });
     this.nav(this.path(this.state.active, r), true);
+    if (focus) {
+      setTimeout(() => {
+        const c = this.scrollRef.current, el = c && c.querySelector('#' + focus);
+        if (el) c.scrollTo({ top: el.getBoundingClientRect().top - c.getBoundingClientRect().top + c.scrollTop - 150, behavior: 'smooth' });
+      }, 250);
+      return;
+    }
     requestAnimationFrame(() => {
       const c = this.scrollRef.current, hero = c && c.querySelector('#ovhero');
       if (!hero) return;
@@ -282,7 +290,7 @@ export default class UAApp extends React.Component {
             <div ref={this.scrollRef} role="main" style={{ position: 'absolute', inset: 0, overflowY: 'auto', overscrollBehavior: 'contain', background: 'var(--color-bg)', opacity: ov.cop, transition: 'opacity .35s ease' }}>
               <ProgramPage data={data} program={p} region={s.region} today={s.today} mounted={s.mounted} swap={s.swap}
                 regionMenu={this.regionMenu()} copied={s.copied}
-                onClose={() => this.close()} onSwitch={(k) => this.switchTo(k)} onRegion={(k) => this.setRegion(k)}
+                onClose={() => this.close()} onSwitch={(k) => this.switchTo(k)} onRegion={(k, focus) => this.setRegion(k, focus)}
                 onJoin={this.goJoin} onCopy={this.copyLink} />
             </div>
           </div>

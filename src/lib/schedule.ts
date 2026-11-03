@@ -137,11 +137,15 @@ export function nextFor(data: SiteData, program: string, region: string, today: 
   const r = data.regions.find((x) => x.id === region)!;
   const tryoutsPage = `/tryouts/?region=${region}&level=${program}`;
   if (p.kind === 'season') {
-    // Rec and Futures link to registration: the open session's sign-up, else the program's.
-    const reg = program === 'futures' ? '/futures/register/' : p.registerUrl;
+    // Rec and Futures link to registration: the open session's sign-up, else the region's (Rec) or the program's.
+    const reg = program === 'futures' ? '/futures/register/' : p.regions[region]?.registerUrl || p.registerUrl;
     // The first session families can still join, else the next one coming.
     const list = sessionsFor(data, program, region, today);
     const s = list.find((x) => sessionLabel(x, today).canJoin) || list.find((x) => sessionStatus(x, today) === 'upcoming') || list[0];
+    // Recreation with nothing posted: its region's registration site.
+    if (!s && program === 'rec') return {
+      kind: 'season', title: `${r.label} Recreation`, when: 'Sign up on our registration site', where: `${r.label} region`, href: reg, cta: 'Register', external: /^https?:/.test(reg),
+    };
     if (!s) return {
       // Nothing posted yet: send families to the region tab's "notify me" form (RegionTab, #notify).
       kind: 'none', title: 'Coming soon!', when: 'Registration dates to be announced', where: `${r.label} region`,
@@ -173,3 +177,20 @@ export function rememberRegion(r: string | null) {
 }
 
 export const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
+
+// Early bird prices (Recreation): a price is { cost, earlyCost?, earlyEnds? }. On the visitor's date the
+// early bird price applies through earlyEnds, then the regular cost.
+export type Price = { cost: number; earlyCost?: number | null; earlyEnds?: string | null };
+export type PriceNow = { cost: number; regular?: number; ends?: string };
+export function priceOn(x: Price, today: string): PriceNow {
+  return x.earlyCost != null && x.earlyEnds && today <= x.earlyEnds ? { cost: x.earlyCost, regular: x.cost, ends: x.earlyEnds } : { cost: x.cost };
+}
+/** The lowest of several prices on the visitor's date ("from" when they differ); null for none. */
+export function lowestPrice(items: Price[] | undefined, today: string): (PriceNow & { from: boolean }) | null {
+  if (!items?.length) return null;
+  const now = items.map((x) => priceOn(x, today));
+  const low = now.reduce((a, b) => (b.cost < a.cost ? b : a));
+  return { ...low, from: new Set(now.map((x) => x.cost)).size > 1 };
+}
+/** "Early bird until Mar 1, then $165", or null when the price isn't an early bird one. */
+export const earlyNote = (p: PriceNow | null) => (p?.ends && p.regular != null ? `Early bird until ${fmtDay(p.ends)}, then ${money(p.regular)}` : null);

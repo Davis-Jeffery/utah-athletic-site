@@ -3,8 +3,8 @@
 // but can't add or delete programs.
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons/Documents';
-import { AGE_OPTIONS, MONTH_OPTIONS, hideSections, pageLayout, link, photo, seo, str, txt } from './helpers';
-import { TOWN_OPTIONS } from './towns';
+import { AGE_OPTIONS, MONTH_OPTIONS, earlyBird, hideSections, pageLayout, link, photo, seo, str, txt } from './helpers';
+import { COUNTY_OPTIONS, TOWN_OPTIONS } from './towns';
 
 export const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']] as const;
 const PILLARS = [['technical', 'Technical'], ['tactical', 'Tactical'], ['physical', 'Physical'], ['mental', 'Mental']] as const;
@@ -146,6 +146,8 @@ const regionStatus = (name: string, title: string) =>
       str('hub', 'Hub', { description: 'Where it runs, e.g. "Draper / Sandy".', hidden: ({ parent }: any) => parent?.status === 'none' }),
       str('season', 'Launching', { description: 'e.g. "Fall 2027".', hidden: ({ parent }: any) => parent?.status !== 'soon' }),
       str('ages', 'Ages in this region', { description: 'Optional, e.g. "U3 to U15". Shown at the top of the page on this region\'s tab; leave empty to use the program\'s ages.', hidden: ({ parent }: any) => parent?.status !== 'active' }),
+      // Recreation registers through each region's own system: its Sign up buttons go here.
+      { ...link('registerUrl', 'Registration link', { description: 'Where families sign up in this region (e.g. its Ollie page). The Sign up section and the home page link here; sessions without their own link use it too. Empty uses the program\'s Default Ollie link.' }), hidden: ({ parent, document }: any) => parent?.status !== 'active' || document?.key !== 'rec' },
       defineField({
         name: 'fees', title: 'Fees by age group', type: 'array', hidden: ({ parent, document }: any) => parent?.status !== 'active' || NO_PRICE.includes(document?.key) || AGE_TAB_PROGRAMS.includes(document?.key),
         description: 'This region\'s prices, shown on its tab. Add a row per age group (or one row for everyone). The overview shows "From" the lowest price across regions.',
@@ -153,10 +155,14 @@ const regionStatus = (name: string, title: string) =>
           type: 'object', name: 'fee',
           fields: [
             str('ages', 'Age group', { required: true, description: 'e.g. "U9 to U12" or "All ages".' }),
-            defineField({ name: 'cost', title: 'Price ($)', type: 'number', validation: (r) => r.required().min(0) }),
+            defineField({ name: 'cost', title: 'Regular price ($)', type: 'number', validation: (r) => r.required().min(0) }),
+            ...earlyBird(),
             str('note', 'Note', { description: 'Optional, e.g. "Tooele and Stansbury Park" or "Includes uniform".' }),
           ],
-          preview: { select: { title: 'ages', cost: 'cost', note: 'note' }, prepare: ({ title, cost, note }: any) => ({ title, subtitle: [cost != null ? `$${cost}` : '', note].filter(Boolean).join(' · ') }) },
+          preview: {
+            select: { title: 'ages', cost: 'cost', early: 'earlyCost', ends: 'earlyEnds', note: 'note' },
+            prepare: ({ title, cost, early, ends, note }: any) => ({ title, subtitle: [cost != null ? `$${cost}` : '', early != null && ends ? `$${early} early bird to ${ends}` : '', note].filter(Boolean).join(' · ') }),
+          },
         })],
       }),
       people('leaders', 'Leaders', {
@@ -327,7 +333,7 @@ export const program = defineType({
     // Map pins on the program page's locations map.
     defineField({
       name: 'mapHubs', title: 'Map pins', type: 'array', group: 'map',
-      description: 'Where this program trains, as pins on the "Choose your region" map. Each town on the map is matched to its nearest pin. Pins with the same label share a color.',
+      description: 'Where this program trains, as pins on the "Choose your region" map. Each town on the map is matched to its nearest pin, unless a pin lists the towns it serves. Pins with the same label share a color.',
       of: [defineArrayMember({
         type: 'object', name: 'mapHub',
         fields: [
@@ -338,10 +344,18 @@ export const program = defineType({
           }),
           defineField({ name: 'place', title: 'Or find the place', type: 'place', description: 'Optional. Puts the pin at a place you search for (any town or field) instead of the town above.' }),
           str('shownAs', 'Shown as', { description: 'Optional. The place name on the pin if it isn\'t just the town, e.g. "Saratoga Springs / Lehi".' }),
+          defineField({
+            name: 'serves', title: 'Towns it serves', type: 'array', of: [{ type: 'string' }], options: { list: TOWN_OPTIONS },
+            description: 'Optional. Shown as "Serving …" and matched to this pin in the town search. Empty: the towns nearest the pin.',
+          }),
           defineField({ name: 'side', title: 'Label side', type: 'string', initialValue: 'right', options: { list: [{ title: 'Right of the pin', value: 'right' }, { title: 'Left of the pin', value: 'left' }], layout: 'radio', direction: 'horizontal' } }),
         ],
         preview: { select: { title: 'label', town: 'town', shownAs: 'shownAs', place: 'place.name' }, prepare: ({ title, town, shownAs, place }: any) => ({ title, subtitle: shownAs || place || town }) },
       })],
+    }),
+    defineField({
+      name: 'mapCounties', title: 'Highlighted counties', type: 'array', group: 'map', of: [{ type: 'string' }], options: { list: COUNTY_OPTIONS },
+      description: 'The counties shaded as this program\'s service area. Empty: the Wasatch Front counties.',
     }),
 
     // Recreation only: the "How we play" block under Where we play.
@@ -358,10 +372,11 @@ export const program = defineType({
               str('division', 'Division', { required: true, description: 'e.g. "U7".' }),
               str('format', 'Format', { required: true, description: 'e.g. "4v4".' }),
               defineField({ name: 'keepers', title: 'Goalkeepers', type: 'boolean', initialValue: false }),
-              str('field', 'Field (yards)', { description: 'Width x length, e.g. "25 x 35".' }),
-              str('goals', 'Goals (feet)', { description: 'Height x width, e.g. "6 x 12".' }),
+              str('field', 'Field (feet)', { description: 'Length x width, e.g. "120 x 80".' }),
+              str('goals', 'Goals (feet)', { description: 'Height x width, e.g. "6 x 12", or "Pop-up".' }),
               defineField({ name: 'ball', title: 'Ball size', type: 'number', options: { list: [3, 4, 5] } }),
-              str('roster', 'Roster', { description: 'e.g. "5 to 7".' }),
+              str('length', 'Game length', { description: 'e.g. "2 x 25 min halves".' }),
+              str('roster', 'Roster', { description: 'Optional, e.g. "5 to 7". The column shows when any division has one.' }),
               str('referees', 'Referees', { description: 'e.g. "None. Coaches guide play on the field."' }),
             ],
             preview: { select: { title: 'division', subtitle: 'format' } },
