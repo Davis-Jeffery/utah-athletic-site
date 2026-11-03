@@ -75,11 +75,16 @@ const leaders = (k: string) => `select(${k}.status != "none" => ${k}.leaders[]{ 
 /**
  * Who a form goes to, worked out the same way the page shows it: the program's leaders in the
  * region, else every leader in the region, else the main office. `leader` narrows it to one person.
- * `main` sends it to the main contact email only (the /contact form).
+ * `main` sends it to the main contact email only (the /contact form); `directors` sends it to a
+ * tournament's directors (contact form messages about an event, see `eventOf`), else the main email.
  * Returns people with name and title, so the auto-reply can say who will be in touch.
  */
-export async function recipients(o: { program?: string; region?: string; leader?: string; main?: boolean }): Promise<Person[]> {
+export async function recipients(o: { program?: string; region?: string; leader?: string; main?: boolean; directors?: Leader[] }): Promise<Person[]> {
   const main = async () => [{ ...MAIN, email: await sanity().fetch<string>('*[_id == "siteSettings"][0].mainEmail') }];
+  if (o.directors) {
+    const list = o.directors.filter((l) => l?.email);
+    return list.length ? unique(list).map(person) : main();
+  }
   if (o.main) return main();
   // Adult leagues: their own staff, else the main email.
   const adult = o.program ? ADULT_PROGRAMS[o.program] : undefined;
@@ -100,6 +105,12 @@ export async function recipients(o: { program?: string; region?: string; leader?
   const picked = o.leader ? list.filter((l) => l.id === o.leader) : [];
   const out = unique(picked.length ? picked : list).map(person);
   return out.length ? out : main();
+}
+/** A tournament or event by its id (with or without the `event.` prefix) and its directors, or null. */
+export async function eventOf(id: string) {
+  if (!id) return null;
+  return sanity().fetch<{ _id: string; name: string; directors: Leader[] | null } | null>(
+    '*[_type == "event" && _id in [$id, "event." + $id]][0]{ _id, name, "directors": directors[]{ "id": person->_id, "name": person->name, "email": person->email, "role": coalesce(title, person->title) } }', { id });
 }
 const unique = (list: Leader[]) => list.filter((l, i) => list.findIndex((x) => x.email === l.email) === i);
 

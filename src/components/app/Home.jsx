@@ -4,18 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, MapPin, ArrowUpRight, Triangle, ListBullets } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER, PYRAMID_POINTS as PTS, PYRAMID_LABELS, COLLAGE_TILES } from '../../data/site';
 import { orderOf } from '../../../studio/shared/sections';
-import { eventsWithStatus, nextFor, EVENT_STATUS_LABEL } from '../../lib/schedule';
+import { eventsWithStatus, isExternal, nextFor, EVENT_BADGE, EVENT_STATUS_LABEL } from '../../lib/schedule';
 import { ACC, Kicker, Rule, OutlineLink, Field, FormGuard, Sent, SubmitButton, useSubmit } from '../ui.jsx';
 import SiteFooter from '../SiteFooter.jsx';
 
 const ptsAttr = (id) => PTS[id].slice(0, id === 'pro' ? 3 : 4).map((q) => q.join(',')).join(' ');
-const STATUS_STYLE = {
-  open: { dot: '#78b7b3', fg: '#d6f0ee', ring: 'inset 0 0 0 1px #78b7b3' },
-  coming: { dot: '#e9e9ed', fg: '#e9e9ed', ring: 'inset 0 0 0 1px rgba(233,233,237,.25)' },
-  closed: { dot: '#e9e9ed', fg: '#e9e9ed', ring: 'inset 0 0 0 1px rgba(233,233,237,.25)' },
-  past: { dot: '#5f616b', fg: '#8b8d98', ring: 'inset 0 0 0 1px rgba(233,233,237,.25)' },
-};
-
 // A heading with an optional teal second part, as edited in Site settings.
 const Head = ({ h }) => <>{h.heading}{h.headingAccent ? <>{' '}<span style={{ color: ACC }}>{h.headingAccent}</span></> : null}</>;
 // "RC Vichy crest" -> "RC Vichy" / "crest", so the text wraps neatly inside the circle.
@@ -90,22 +83,22 @@ export default function Home({ data, hover, focus, intro, introDone, active, til
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: '10px' }}>
           {eventsWithStatus(data.events, today).slice(0, 4).map((e) => {
-            const st = STATUS_STYLE[e.status];
+            const st = EVENT_BADGE[e.status], s = e.session, out = !e.hosted && isExternal(e.href);
             return (
-              // The whole card opens the event's site (a cover link); the location is its own directions link on top.
+              // The whole card opens the event's page or site (a cover link); the location is its own directions link on top.
               <div key={e.id} className="hv-event-sm" style={{ '--ev-accent': e.brand.accent, position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-surface)', color: 'var(--color-text)', boxShadow: 'var(--shadow-sm)', transition: 'transform .25s,box-shadow .25s' }}>
-                <a href={e.url} target="_blank" rel="noopener" aria-label={`${e.name}: event site`} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
+                <a href={e.href} {...(out ? { target: '_blank', rel: 'noopener' } : {})} aria-label={`${e.name}: ${e.hosted ? 'tournament details' : 'event site'}`} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
                 <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden', background: `radial-gradient(ellipse at 30% 20%,${e.brand.bg2},${e.brand.bg} 70%)` }}>
                   {e.logo ? <img src={e.logo.src} alt={e.logo.alt || `${e.name} logo`} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: e.logo.pos }} /> : null}
                   <span style={{ position: 'absolute', left: '12px', top: '12px', display: 'flex', alignItems: 'center', gap: '7px', padding: '5px 9px', borderRadius: '6px', background: 'rgba(17,19,24,.75)', boxShadow: st.ring, fontSize: '10px', letterSpacing: '.08em', textTransform: 'uppercase', color: st.fg }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: st.dot }} />{EVENT_STATUS_LABEL[e.status]}
+                    <span className={e.status === 'live' ? 'ua-pulse' : undefined} style={{ width: '6px', height: '6px', borderRadius: '50%', background: st.dot }} />{EVENT_STATUS_LABEL[e.status]}
                   </span>
                   <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '3px', background: e.brand.accent }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '14px 16px 16px' }}>
                   <span style={{ font: '500 19px/1.1 var(--font-heading)', letterSpacing: '-.02em' }}>{e.name}</span>
-                  <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{e.dates} · <a href={e.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${e.location}`} style={{ position: 'relative', zIndex: 2, color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{e.location}</a></span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingTop: '6px', fontSize: '13px', color: e.brand.accent }}>Event site <ArrowUpRight aria-hidden="true" /></span>
+                  <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>{s.dates} · <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${s.location}`} style={{ position: 'relative', zIndex: 2, color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{s.location}</a></span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingTop: '6px', fontSize: '13px', color: e.brand.accent }}>{e.hosted ? <>Tournament details →</> : <>Event site <ArrowUpRight aria-hidden="true" /></>}</span>
                 </div>
               </div>
             );

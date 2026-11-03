@@ -84,7 +84,7 @@ export const structure: StructureResolver = (S) => {
         .icon(StarIcon)
         .child(S.list().title('Tournaments & Events').items([
           S.listItem().title('Page content').id('events-page').icon(DocumentIcon).child(pageDoc('pageEvents', 'Tournaments & Events page')),
-          S.listItem().title('Events').id('events-list').icon(StarIcon).child(S.documentTypeList('event').title('Events').defaultOrdering(BY_START)),
+          S.listItem().title('Events').id('events-list').icon(StarIcon).child(S.documentTypeList('event').title('Events').defaultOrdering([{ field: 'name', direction: 'asc' }])),
         ])),
       S.listItem()
         .title('Network page')

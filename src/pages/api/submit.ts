@@ -1,9 +1,10 @@
 // POST /api/submit: every site form except Futures registration (which pays through Stripe).
 // Saves a Submission in Sanity (Studio > Submissions), emails the people it's addressed to, and
 // sends the person who filled it in a confirmation naming who will get back to them
-// (src/lib/server/email.ts). The contact form always goes to the main contact email.
+// (src/lib/server/email.ts). The contact form goes to the main contact email, or, when it's about
+// a tournament or event, to that event's directors (Studio: the event's Directors tab).
 import type { APIRoute } from 'astro';
-import { ADULT_PROGRAMS, FORMS, autoReply, autoRepliesOn, brandEmails, isEmail, json, privateId, recipients, s, sanity, sendEmail, spamCheck, staffNotice } from '../../lib/server';
+import { ADULT_PROGRAMS, FORMS, autoReply, autoRepliesOn, brandEmails, eventOf, isEmail, json, privateId, recipients, s, sanity, sendEmail, spamCheck, staffNotice } from '../../lib/server';
 
 export const prerender = false;
 
@@ -37,10 +38,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (form === 'contact' && (!f.name || !f.message)) return json({ error: 'Please add your name and a message.' }, 400);
   if ((form === 'trial' || form === 'invite' || form === 'register') && !f.player) return json({ error: 'Please add the player\'s name.' }, 400);
 
-  const to = await recipients(form === 'contact' ? { main: true } : { program, region, leader: s(body.leader, 100) || undefined });
+  const event = form === 'contact' ? await eventOf(s(body.event, 100)) : null;
+  const to = await recipients(event ? { directors: event.directors ?? [] } : form === 'contact' ? { main: true } : { program, region, leader: s(body.leader, 100) || undefined });
   const doc = {
     _id: privateId('submission'), _type: 'submission', form, receivedAt: new Date().toISOString(), status: 'new',
     program, region, sentTo: to.map((p) => p.email), page: s(body.page, 300),
+    ...(event ? { event: { _type: 'reference', _ref: event._id, _weak: true } } : {}),
     ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)),
   };
   try {
@@ -54,6 +57,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     form, ...f,
     programName: program ? ADULT_PROGRAMS[program]?.name ?? NAMES[program] : undefined,
     regionName: region ? NAMES[region] : undefined,
+    eventName: event?.name,
   };
   await brandEmails();
   const staff = staffNotice(sent, FORMS[form]);

@@ -43,20 +43,69 @@ export function sessionsFor(data: SiteData, program: string, region: string, tod
 export const todayIso = (now = new Date()) =>
   `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-// Event status from its dates: Coming → Registration open → Registration closed → Past.
-export type EventStatus = 'coming' | 'open' | 'closed' | 'past';
-export const EVENT_STATUS_LABEL: Record<EventStatus, string> = { coming: 'Coming', open: 'Registration open', closed: 'Registration closed', past: 'Past' };
-export function eventStatus(e: { regOpen: string; regClose: string; end: string }, today: string): EventStatus {
-  if (today > e.end) return 'past';
-  if (today < e.regOpen) return 'coming';
-  if (today <= e.regClose) return 'open';
+// Event status from a session's dates: Coming → Registration open (or Sold out, when the editor
+// ticks Full) → Registration closed → Live (being played) → Complete.
+export type EventStatus = 'coming' | 'open' | 'full' | 'closed' | 'live' | 'complete';
+export const EVENT_STATUS_LABEL: Record<EventStatus, string> = { coming: 'Coming', open: 'Registration open', full: 'Sold out', closed: 'Registration closed', live: 'Live now', complete: 'Complete' };
+type EventDates = { start: string; end: string; regOpen: string; regClose: string; full?: boolean };
+export function eventStatus(s: EventDates, today: string): EventStatus {
+  if (today > s.end) return 'complete';
+  if (today >= s.start) return 'live';
+  if (today < s.regOpen) return 'coming';
+  if (today <= s.regClose) return s.full ? 'full' : 'open';
   return 'closed';
 }
-const STATUS_RANK: Record<EventStatus, number> = { open: 0, coming: 1, closed: 2, past: 3 };
-export function eventsWithStatus<E extends { start: string; regOpen: string; regClose: string; end: string }>(events: E[], today: string) {
+/** An event's sessions with their status, in date order. */
+export const sessionsWithStatus = <S extends EventDates>(sessions: S[], today: string) =>
+  [...sessions].sort((a, b) => a.start.localeCompare(b.start)).map((s) => ({ ...s, status: eventStatus(s, today) }));
+/**
+ * The event as cards and pages show it, on the visitor's date: `session` is the one that matters now
+ * (the first not yet complete, else the latest), `status` is its status, and `last` is the latest
+ * complete session (for results while the next one is coming). `between` is true when the latest
+ * session is over and the next one, if any, hasn't opened registration: the "See you next year" time.
+ */
+export function eventNow<S extends EventDates, E extends { sessions: S[] }>(e: E, today: string) {
+  const all = sessionsWithStatus(e.sessions, today);
+  const session = all.find((s) => s.status !== 'complete') ?? all.at(-1)!;
+  const last = all.filter((s) => s.status === 'complete').at(-1);
+  const between = !!last && (session === last || session.status === 'coming');
+  return { ...e, sessions: all, session, status: session.status, last, between };
+}
+/** Badge look per status on event cards and pages. */
+export const EVENT_BADGE: Record<EventStatus, { fg: string; ring: string; dot: string }> = {
+  open: { fg: '#d6f0ee', ring: 'inset 0 0 0 1px #78b7b3', dot: '#78b7b3' },
+  full: { fg: '#fff', ring: 'inset 0 0 0 1px var(--color-alert)', dot: 'var(--color-alert)' },
+  live: { fg: '#fff', ring: 'inset 0 0 0 1px var(--color-alert)', dot: 'var(--color-alert)' },
+  coming: { fg: '#e9e9ed', ring: 'inset 0 0 0 1px rgba(233,233,237,.35)', dot: '#e9e9ed' },
+  closed: { fg: '#b9bbc4', ring: 'inset 0 0 0 1px rgba(233,233,237,.2)', dot: '#8b8d98' },
+  complete: { fg: '#8b8d98', ring: 'inset 0 0 0 1px rgba(233,233,237,.12)', dot: '#5f616b' },
+};
+type Linked = { href: string; hosted: boolean; session: { status: EventStatus; regOpen: string; regClose: string; registerUrl: string | null; scheduleUrl: string | null; resultsUrl: string | null }; last?: { resultsUrl: string | null } };
+/**
+ * What an event offers right now: a one-line `note` and the main `action` ({ label, href }), from the
+ * session's status. Register while open, Schedule while live (and once registration closes, if
+ * posted), Results once complete; else the event's page or site.
+ */
+export function eventAction(e: Linked) {
+  const s = e.session, site = e.hosted ? 'Tournament details' : 'Visit event site';
+  const results = s.status === 'complete' ? s.resultsUrl : e.last?.resultsUrl;
+  switch (s.status) {
+    case 'open': return { note: `Registration closes ${fmtDay(s.regClose)}`, action: { label: 'Register', href: s.registerUrl ?? e.href } };
+    case 'full': return { note: 'Every spot is taken', action: { label: site, href: e.href } };
+    case 'coming': return { note: `Registration opens ${fmtDay(s.regOpen)}`, action: results ? { label: 'Last results', href: results } : { label: site, href: e.href } };
+    case 'closed': return { note: `Registration closed ${fmtDay(s.regClose)}`, action: s.scheduleUrl ? { label: 'View schedule', href: s.scheduleUrl } : { label: site, href: e.href } };
+    case 'live': return { note: 'Being played now', action: { label: 'View schedule', href: s.scheduleUrl ?? e.href } };
+    default: return { note: results ? 'Final results are in' : 'Thanks to every team that played', action: { label: results ? 'View results' : site, href: results ?? e.href } };
+  }
+}
+export const isExternal = (href: string) => /^https?:/.test(href);
+
+const STATUS_RANK: Record<EventStatus, number> = { live: 0, open: 1, full: 2, coming: 3, closed: 4, complete: 5 };
+export function eventsWithStatus<S extends EventDates, E extends { sessions: S[] }>(events: E[], today: string) {
   return events
-    .map((e) => ({ ...e, status: eventStatus(e, today) }))
-    .sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status] || a.start.localeCompare(b.start));
+    .filter((e) => e.sessions.length)
+    .map((e) => eventNow(e, today))
+    .sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status] || a.session.start.localeCompare(b.session.start));
 }
 
 // Tryouts for a program and/or region that still have a day to come, soonest first. Each comes

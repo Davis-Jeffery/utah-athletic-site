@@ -7,6 +7,7 @@ import EventsApp from '../components/EventsApp.jsx';
 import { loadSite } from '../lib/content';
 import { orderOf } from '../../studio/shared/sections';
 import { buildAssets } from '../lib/assets';
+import { sportsEvent } from '../lib/eventLd';
 import { FlagBanner, Handshake } from '@phosphor-icons/react';
 
 const data = await loadSite();
@@ -17,14 +18,10 @@ const on = (k: string) => !pg.hide.includes(k);
 const names = data.events.map((e) => e.name);
 const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? 'tournaments and events';
 const ICONS = { flag: FlagBanner, handshake: Handshake };
-// Each tournament as schema.org SportsEvent, so Google can show it as an event.
+// Each tournament session still to come as schema.org SportsEvent, so Google can show it as an event.
+// Hosted events describe themselves on their own page instead.
 const org = { '@id': new URL('/#organization', Astro.site).href };
-const eventsLd = data.events.map((e) => ({
-  '@context': 'https://schema.org', '@type': 'SportsEvent', name: e.name, description: e.tagline, sport: 'Soccer',
-  startDate: e.start, endDate: e.end, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-  location: { '@type': 'Place', name: e.location, address: e.location, ...(e.geo ? { geo: { '@type': 'GeoCoordinates', latitude: e.geo.lat, longitude: e.geo.lng } } : {}) }, url: e.url, organizer: org,
-  ...(e.logo ? { image: e.logo.src } : {}),
-}));
+const eventsLd = data.events.filter((e) => !e.hosted).flatMap((e) => e.sessions.filter((s) => s.end >= data.builtOn).map((s) => sportsEvent(e, s, Astro.site!, org)));
 const A = await buildAssets();
 const card = 'display:flex;flex-direction:column;gap:12px;padding:clamp(20px,3vw,32px);border-radius:14px';
 const kicker = 'display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent)';
@@ -86,6 +83,6 @@ const btn = 'align-self:flex-start;margin-top:4px;display:flex;align-items:cente
         </Fragment>
       ))}
     </main>
-    <SiteFooter note="Event schedules and registration are hosted on each event's own site." />
+    <SiteFooter note="Team registration is handled on each event's registration site." />
   </div>
 </Base>

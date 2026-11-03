@@ -1,4 +1,4 @@
-// Form submissions from the site (contact, trial application, invitation, interest, registration
+// Form submissions from the site (contact, with the tournament or event it's about, trial application, invitation, interest, registration
 // request). Created only by the site's /api/submit; staff track them with Status, Assigned to and Notes.
 // Ids contain a dot, so they're hidden from anonymous reads of the dataset.
 import { defineField, defineType } from 'sanity';
@@ -39,6 +39,7 @@ export const submission = defineType({
     ro('receivedAt', 'Received', 'datetime'),
     ro('program', 'Program', 'string', { options: { list: SUBMISSION_PROGRAMS } }),
     ro('region', 'Region', 'string', { options: { list: REGION_OPTIONS } }),
+    ro('event', 'Tournament or event', 'reference', { to: [{ type: 'event' }], weak: true }),
     ro('session', 'Session'),
     ro('name', 'Name'),
     ro('player', 'Player'),
@@ -55,10 +56,10 @@ export const submission = defineType({
   ],
   orderings: [{ title: 'Newest first', name: 'received', by: [{ field: 'receivedAt', direction: 'desc' }] }],
   preview: {
-    select: { form: 'form', name: 'name', player: 'player', email: 'email', program: 'program', region: 'region', at: 'receivedAt', status: 'status' },
-    prepare: ({ form, name, player, email, program, region, at, status }) => ({
+    select: { form: 'form', name: 'name', player: 'player', email: 'email', program: 'program', region: 'region', event: 'event.name', at: 'receivedAt', status: 'status' },
+    prepare: ({ form, name, player, email, program, region, event, at, status }) => ({
       title: `${status === 'new' ? '● ' : ''}${player || name || email}`,
-      subtitle: [label(FORM_OPTIONS, form), label(SUBMISSION_PROGRAMS, program), label(REGION_OPTIONS, region), at && new Date(at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })].filter(Boolean).join(' · '),
+      subtitle: [label(FORM_OPTIONS, form), label(SUBMISSION_PROGRAMS, program), label(REGION_OPTIONS, region), event, at && new Date(at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })].filter(Boolean).join(' · '),
     }),
   },
 });
