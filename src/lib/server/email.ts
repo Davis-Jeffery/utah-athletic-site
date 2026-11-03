@@ -150,6 +150,8 @@ export type Submitted = {
   video?: string; topic?: string; message?: string; session?: string;
   /** "Club", "Academy", "UPSL" … and "North" … as shown to people. */
   programName?: string; regionName?: string;
+  /** The tournament or event a contact message is about. */
+  eventName?: string;
 };
 
 /**
@@ -174,7 +176,7 @@ export function autoReply(f: Submitted, contact: Person): Email {
     register: [director, { kind: 'details', title: 'What you sent', rows: [['Player', f.player], ['Session', f.session], ['Age group', f.birthYear], ['Current club', f.club]] }],
     interest: [{ kind: 'details', title: 'What you signed up for', rows: [['Program', f.programName], ['Region', f.regionName], ['Age group', f.birthYear]] }],
     adult: [...(contact.name !== 'Utah Athletic' ? [director] : []), { kind: 'details', title: 'What you sent', rows: [['League', f.programName], ['Position', f.position], ['Joining as', f.topic], ['Played for', f.club]] }, ...quote],
-    contact: [{ kind: 'details', title: 'What you sent', rows: [['Topic', f.topic], ['Program', f.programName], ['Region', f.regionName]] }, ...quote],
+    contact: [{ kind: 'details', title: 'What you sent', rows: [['Topic', f.topic], ['Tournament or event', f.eventName], ['Program', f.programName], ['Region', f.regionName]] }, ...quote],
     futuresPaid: [],
   };
   return {
@@ -190,7 +192,7 @@ export function autoReply(f: Submitted, contact: Person): Email {
 
 /** What staff get when a form comes in. Reply goes straight to the person who sent it. */
 export function staffNotice(f: Submitted, formName: string): Email {
-  const where = [f.programName, f.regionName].filter(Boolean).join(' · ');
+  const where = [f.eventName, f.programName, f.regionName].filter(Boolean).join(' · ');
   const who = f.player || f.name || f.email;
   return {
     subject: `${formName}${where ? ` · ${where}` : ''}: ${who}`,
@@ -199,7 +201,7 @@ export function staffNotice(f: Submitted, formName: string): Email {
       kicker: `New · ${formName}`, heading: who,
       intro: `Sent from the website${where ? ` for ${where}` : ''}. Reply to this email to answer ${first(f.name) === 'there' ? 'them' : first(f.name)} directly.`,
       blocks: [
-        { kind: 'details', title: 'Details', rows: [['Name', f.name], ['Email', f.email], ['Phone', f.phone], ['Topic', f.topic], ['Player', f.player], ['Birth year or age group', f.birthYear], ['Session', f.session], ['Club', f.club], ['Position', f.position], ['Video', f.video], ['Program', f.programName], ['Region', f.regionName]] },
+        { kind: 'details', title: 'Details', rows: [['Name', f.name], ['Email', f.email], ['Phone', f.phone], ['Topic', f.topic], ['Tournament or event', f.eventName], ['Player', f.player], ['Birth year or age group', f.birthYear], ['Session', f.session], ['Club', f.club], ['Position', f.position], ['Video', f.video], ['Program', f.programName], ['Region', f.regionName]] },
         ...(f.message ? [{ kind: 'quote' as const, title: 'Message', body: f.message }] : []),
         { kind: 'button', label: 'Open Submissions in the Studio', href: STUDIO },
       ],

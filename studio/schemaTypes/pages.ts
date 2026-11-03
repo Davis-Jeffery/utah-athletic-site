@@ -148,8 +148,8 @@ export const CONTACT_FIELDS = [
     str('kicker', 'Small heading', { required: true, description: 'e.g. "Contact us".' }),
     ...headingPair(),
     txt('intro', 'Intro', { required: true, rows: 2 }),
-    defineField({ name: 'topics', title: 'Form topics', type: 'array', of: [{ type: 'string' }], description: 'The Topic choices on the contact form, in order.', validation: (r) => r.required().min(1) }),
-  ], 'Messages from the form go to the main contact email (Site settings).'),
+    defineField({ name: 'topics', title: 'Form topics', type: 'array', of: [{ type: 'string' }], description: 'The Topic choices on the contact form, in order. "Tournaments and events" is added at the end automatically while events are coming up; it asks which one and sends the message to that event\'s directors.', validation: (r) => r.required().min(1) }),
+  ], 'Messages from the form go to the main contact email (Site settings), except tournament questions, which go to that event\'s directors (the event\'s Directors tab).'),
   seo('contactSeo'),
 ];
 

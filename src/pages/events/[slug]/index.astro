@@ -1,0 +1,33 @@
+---
+// Hosted tournament pages: /events/<slug>/ for every event whose Event page is set to Host
+// (Studio > Tournaments & Events). Linked events keep pointing at their own sites.
+import Base from '../../../layouts/Base.astro';
+import SiteHeader from '../../../components/SiteHeader.jsx';
+import SiteFooter from '../../../components/SiteFooter.jsx';
+import EventPage from '../../../components/EventPage.jsx';
+import { loadEventPages, loadSite } from '../../../lib/content';
+import { sportsEvent } from '../../../lib/eventLd';
+
+export async function getStaticPaths() {
+  return (await loadEventPages()).map((ev) => ({ params: { slug: ev.slug }, props: { ev } }));
+}
+
+const { ev } = Astro.props;
+const data = await loadSite();
+const org = { '@id': new URL('/#organization', Astro.site).href };
+// Every session still to come as schema.org SportsEvent, plus the questions as FAQPage.
+const ld = [
+  ...ev.sessions.filter((s) => s.end >= data.builtOn).map((s) => sportsEvent(ev, s, Astro.site!, org)),
+  ...(ev.faqs.length ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: ev.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }] : []),
+];
+// The page carries only what the template draws; the rules' full text is on the rules page.
+const { rules, ...rest } = ev;
+const page = { ...rest, rules: rules.map((r) => ({ heading: r.heading, items: r.items.slice(0, 1) })) };
+---
+<Base title={ev.seo.title} description={ev.seo.description} image={ev.seo.image} jsonLd={ld} preload={ev.hero.photo?.src}>
+  <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+    <SiteHeader current="events" logo={data.logo} tryoutsLabel={data.settings.tryoutsLabel} />
+    <EventPage client:load ev={page} builtOn={data.builtOn} />
+    <SiteFooter social={data.settings.social} />
+  </div>
+</Base>

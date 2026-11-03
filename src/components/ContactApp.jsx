@@ -1,25 +1,40 @@
 // /contact: main office, regional leadership cards and the message form.
-// ?region=&program= prefill the form. Every message goes to the main contact email (Site settings);
-// the program and region picked travel with it so the team can pass it on. Sending saves a
-// Submission in the Studio and emails the sender a confirmation (see src/pages/api/submit.ts).
+// ?region=&program= prefill the form, ?event=<id> picks a tournament. Messages go to the main contact
+// email (Site settings), with the program and region picked so the team can pass them on; the
+// "Tournaments and events" topic (added in code when there are events) asks which one instead, and
+// that message goes to the event's directors. Sending saves a Submission in the Studio and emails
+// the sender a confirmation (see src/pages/api/submit.ts).
 import React, { useEffect, useState } from 'react';
 import { EnvelopeSimple, Check } from '@phosphor-icons/react';
 import { ORDER } from '../data/site';
 import { Field, FormGuard, useSubmit, ROW_RULE } from './ui.jsx';
 
+export const EVENT_TOPIC = 'Tournaments and events';
+const today = () => new Date().toLocaleDateString('en-CA');
+
 const pill = (on) => ({ border: `1px solid ${on ? '#78b7b3' : 'var(--color-divider)'}`, background: on ? 'rgba(120,183,179,.12)' : 'transparent', color: on ? '#78b7b3' : 'var(--color-neutral-300)' });
 
-export default function ContactApp({ regions, programs, mainEmail, topics }) {
+export default function ContactApp({ regions, programs, mainEmail, topics, events: allEvents = [] }) {
   const [region, setRegion] = useState(null);
   const [program, setProgram] = useState('');
+  // Events not yet over (checked again on the visitor's date, so a stale build drops past ones).
+  const [events, setEvents] = useState(allEvents);
+  const topicList = events.length ? [...topics, EVENT_TOPIC] : topics;
+  const [topic, setTopic] = useState(topics[0]);
+  const [event, setEvent] = useState('');
+  const aboutEvent = topic === EVENT_TOPIC;
 
   useEffect(() => {
     const q = new URLSearchParams(location.search);
     if (regions.some((r) => r.id === q.get('region'))) setRegion(q.get('region'));
     if (ORDER.includes(q.get('program'))) setProgram(q.get('program'));
-  }, [regions]);
+    const live = allEvents.filter((e) => e.end >= today());
+    setEvents(live);
+    if (live.some((e) => e.id === q.get('event'))) { setTopic(EVENT_TOPIC); setEvent(q.get('event')); }
+  }, [regions, allEvents]);
 
-  const f = useSubmit({ form: 'contact', program, region: region ?? '' });
+  const f = useSubmit(aboutEvent ? { form: 'contact', event } : { form: 'contact', program, region: region ?? '' });
+  const eventName = events.find((e) => e.id === event)?.name;
   const programOpts = [...programs.map((p) => [p.id, p.name]), ['', 'Not sure yet']];
 
   return (
@@ -59,16 +74,24 @@ export default function ContactApp({ regions, programs, mainEmail, topics }) {
           <form onSubmit={f.onSubmit} style={{ padding: 'clamp(22px,3vw,32px)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <h2 style={{ margin: 0, font: '500 26px/1.1 var(--font-heading)', letterSpacing: '-.03em' }}>Send a message</h2>
-              <span aria-live="polite" style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>To: <span style={{ color: 'var(--color-accent-300)' }}>{mainEmail}</span></span>
+              <span aria-live="polite" style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>To: <span style={{ color: 'var(--color-accent-300)' }}>{aboutEvent ? (eventName ? `${eventName} directors` : 'the tournament directors') : mainEmail}</span></span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
               <Field label="Your name"><input className="ua-input" name="name" required autoComplete="name" /></Field>
               <Field label="Email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
               <Field label="Phone"><input className="ua-input" name="phone" type="tel" placeholder="Optional" autoComplete="tel" /></Field>
               <Field label="Topic">
-                <select className="ua-input" name="topic">{topics.map((t) => <option key={t}>{t}</option>)}</select>
+                <select className="ua-input" name="topic" value={topic} onChange={(e) => setTopic(e.target.value)}>{topicList.map((t) => <option key={t}>{t}</option>)}</select>
               </Field>
             </div>
+            {aboutEvent ? (
+              <Field label="Which tournament or event?">
+                <select className="ua-input" required value={event} onChange={(e) => setEvent(e.target.value)}>
+                  <option value="" disabled>Choose one</option>
+                  {events.map((e) => <option key={e.id} value={e.id}>{e.name} · {e.dates}</option>)}
+                </select>
+              </Field>
+            ) : <>
             <Choice label="Program">
               {programOpts.map(([k, l]) => <button key={l} type="button" aria-pressed={program === k} onClick={() => setProgram(k)} style={{ cursor: 'pointer', minHeight: '40px', padding: '0 13px', borderRadius: '8px', font: '500 13px/1 var(--font-body)', transition: 'all .2s', ...pill(program === k) }}>{l}</button>)}
             </Choice>
@@ -79,6 +102,7 @@ export default function ContactApp({ regions, programs, mainEmail, topics }) {
                 </button>
               ))}
             </Choice>
+            </>}
             <Field label="Message"><textarea className="ua-input" name="message" required rows={5} placeholder="How can we help?" /></Field>
             <FormGuard error={f.error} />
             <button type="submit" disabled={f.busy} className="hv-t16" style={{ opacity: f.busy ? 0.6 : 1, cursor: 'pointer', minHeight: '50px', background: 'rgba(120,183,179,.08)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', font: '500 15px/1 var(--font-body)', borderRadius: '8px' }}>{f.busy ? 'Sending…' : 'Send message →'}</button>

@@ -56,6 +56,19 @@ export const SECTIONS = {
   contact: [
     ['form', 'Contact form'],
   ],
+  // A tournament's own page (events hosted on this site, /events/<slug>/).
+  eventPage: [
+    ['stats', 'Quick facts (cards at the bottom of the top section)'],
+    ['sessions', 'Dates, location and pricing'],
+    ['about', 'About the event'],
+    ['video', 'Video'],
+    ['highlights', 'Highlights'],
+    ['rules', 'Rules and format'],
+    ['sponsors', 'Sponsors'],
+    ['travel', 'Where to stay'],
+    ['faq', 'Questions'],
+    ['contact', 'Contact the directors'],
+  ],
   network: [
     ['network', 'The network'],
     ['means', 'What it means'],
@@ -77,6 +90,7 @@ export const DEV_PROGRAMS = [
 /** Sections that stay where they are whatever the order (they can still be hidden). */
 export const FIXED_SECTIONS: Partial<Record<PageKind, readonly string[]>> = {
   program: ['explore'],
+  eventPage: ['stats'],
 };
 
 /**

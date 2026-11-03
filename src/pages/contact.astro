@@ -12,6 +12,12 @@ const pg = data.pages.contact;
 const programs = data.programs.map(({ id, name, regions }) => ({
   id, name, leads: Object.fromEntries(Object.entries(regions).map(([k, r]) => [k, r.status === 'none' ? [] : r.leaders])),
 }));
+// Tournaments and events for the form's "Which one?" choice; their directors get those messages.
+// Each offers its latest session (the form drops events whose latest session is over).
+const events = data.events.map(({ id, name, sessions }) => {
+  const s = sessions.reduce((a, b) => (b.end > a.end ? b : a));
+  return { id, name, dates: s.dates, end: s.end };
+});
 ---
 <Base title={data.seo.contact.title} description={data.seo.contact.description} image={data.seo.contact.image}>
   <div style="position:relative;min-height:100vh;overflow-x:clip;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
@@ -20,7 +26,7 @@ const programs = data.programs.map(({ id, name, regions }) => ({
       <h1 style="margin:0;max-width:900px;font:500 clamp(48px,6.4vw,96px)/.95 var(--font-heading);letter-spacing:-.045em;text-wrap:balance">{pg.heading}{pg.headingAccent ? <> <span style="color:#78b7b3">{pg.headingAccent}</span></> : null}</h1>
       <p style="margin:0;max-width:560px;font-size:17px;line-height:1.6;color:var(--color-neutral-300);text-wrap:pretty">{pg.intro}</p>
     </PageHero>
-    {!pg.hide.includes('form') && <ContactApp client:load regions={data.regions} programs={programs} mainEmail={data.settings.mainEmail} topics={pg.topics} />}
+    {!pg.hide.includes('form') && <ContactApp client:load regions={data.regions} programs={programs} mainEmail={data.settings.mainEmail} topics={pg.topics} events={events} />}
     <SiteFooter social={data.settings.social} />
   </div>
 </Base>

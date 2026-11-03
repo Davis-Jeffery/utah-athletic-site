@@ -2,7 +2,7 @@
 // Content is edited in the Studio (studio/); this file reshapes it into what components expect,
 // so components never deal with Sanity documents or image references directly.
 import { buildAssets } from './assets';
-import { fetchContent, iconUrl, imageUrl, logoUrl, shareImageUrl, useLocalAssets } from './sanity';
+import { fetchContent, fileUrl, iconUrl, imageUrl, logoUrl, shareImageUrl, useLocalAssets } from './sanity';
 import { fmtRange } from './schedule';
 import { directions } from '../../studio/shared/places';
 import { ADULT, NO_COACH_LIST, NO_PRICE_LIST } from '../data/site';
@@ -73,9 +73,25 @@ export const ageGroupsFrom = (ages: string) => {
 export const fmtAges = (min: number, max: number) => (min === max ? `U${min}` : `U${min} to U${max}`);
 
 let cache: ReturnType<typeof build> | undefined;
-export function loadSite() {
+/** The site data every page and island shares. */
+export async function loadSite() {
   cache ??= build();
-  return cache;
+  return (await cache).site;
+}
+/** Hosted tournament pages (/events/<slug>/): card data and sessions plus the page content. Kept
+ *  out of loadSite's data, which the home and program islands ship to the browser whole. */
+export async function loadEventPages() {
+  cache ??= build();
+  return (await cache).eventPages;
+}
+
+/** A YouTube or Vimeo link as an address the page can play in place, else null. */
+export function embedUrl(url?: string) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube-nocookie.com/embed/${yt[1]}?rel=0`;
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  return vm ? `https://player.vimeo.com/video/${vm[1]}?dnt=1` : null;
 }
 
 async function build() {
@@ -292,11 +308,43 @@ async function build() {
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name));
 
-  const events = c.event.map(({ _id, logo, place, ...e }) => ({
-    id: idOf(_id), ...e, logo: img(logo, W.section, 80), dates: fmtRange(e.start, e.end),
-    // Directions: to the place found in the Studio, else a search for the Location text.
-    mapUrl: directions(place?.location ? place : { address: e.location }).href, geo: place?.location ?? null,
-  }));
+  // Tournaments: what cards and the contact form need (`events`, every page), and for hosted events
+  // their page content (`eventPages`, only the event pages load it; see loadEventPages).
+  const events = c.event.map((ev) => {
+    // Events saved before sessions existed keep their dates on the event: read them as one session.
+    const raw = ev.sessions.length ? ev.sessions : [{ _key: 'main', start: ev.start!, end: ev.end!, regOpen: ev.regOpen!, regClose: ev.regClose!, location: ev.location!, place: ev.place, full: false, fees: [] as { label: string; price: number; note?: string }[] }];
+    const page = ev.page === 'hosted' && ev.slug ? `/events/${ev.slug.current}/` : null;
+    return {
+      id: idOf(ev._id), name: ev.name, tagline: ev.tagline, brand: ev.brand, logo: img(ev.logo, W.section, 80),
+      // The card opens the hosted page, else the event's own site.
+      href: page ?? ev.url!, hosted: !!page, slug: ev.slug?.current ?? null,
+      sessions: raw.map((s) => ({
+        key: s._key, label: ('label' in s && s.label) || s.start.slice(0, 4), start: s.start, end: s.end, regOpen: s.regOpen, regClose: s.regClose, full: s.full,
+        dates: fmtRange(s.start, s.end), location: s.location, format: ('format' in s && s.format) || ev.format, ages: ('ages' in s && s.ages) || ev.ages,
+        // Directions: to the place found in the Studio, else a search for the Location text.
+        mapUrl: directions(s.place?.location ? s.place : { address: s.location }).href, geo: s.place?.location ?? null,
+        fees: s.fees, note: ('note' in s && s.note) || null,
+        registerUrl: ('registerUrl' in s && s.registerUrl) || null, scheduleUrl: ('scheduleUrl' in s && s.scheduleUrl) || null, resultsUrl: ('resultsUrl' in s && s.resultsUrl) || null,
+      })),
+    };
+  });
+  // Hosted event pages (an event's Page and Rules tabs).
+  const eventPages = c.event.filter((ev) => ev.page === 'hosted' && ev.slug).map((ev) => {
+    const card = events.find((e) => e.id === idOf(ev._id))!;
+    const about = ev.about.body?.trim() || ev.tagline;
+    return {
+      ...card, slug: ev.slug!.current, hide: ev.hide, order: ev.sectionOrder,
+      // Each session's card shows its own logo, else the event's (the Page logo, else the card logo).
+      sessions: card.sessions.map((s, i) => ({ ...s, logo: img(ev.sessions[i]?.logo ?? ev.hero.logo ?? ev.logo, W.logo, 90) ?? null })),
+      hero: { ...ev.hero, logo: img(ev.hero.logo, W.section, 90), photo: img(ev.hero.photo, W.hero, 70), video: fileUrl(ev.hero.video) ?? null },
+      about: { heading: ev.about.heading, body: ev.about.body, photo: img(ev.about.photo, W.section, 75) ?? null, video: fileUrl(ev.about.video) ?? null }, video: { ...ev.video, embed: embedUrl(ev.video.url) },
+      highlights: { heading: ev.highlights.heading, photos: ev.highlights.photos.map((p) => ({ ...img(p, W.section, 70)!, caption: p.caption })) },
+      sponsors: { ...ev.sponsors, list: ev.sponsors.list.map((x) => ({ ...x, logo: img(x.logo, W.logo, 85) })) },
+      sessionsHeading: ev.sessionsHeading?.trim() || 'Upcoming events', stats: ev.stats, travel: ev.travel, faqs: ev.faqs, after: ev.after,
+      rules: ev.rules.filter((r) => r.items.length), rulesIntro: ev.rulesIntro, rulesFile: fileUrl(ev.rulesFile) ?? null,
+      seo: seoOf(ev.seo, { title: `${ev.name}: Youth Soccer Tournament in Utah | Utah Athletic`, description: about, image: shareImageUrl(ev.hero.photo) ?? shareImageUrl(ev.logo) }),
+    };
+  });
 
   // "{count}" / "{Count}" in tournament copy become the number of events as a word ("three" / "Three"),
   // so headings like "Four events." can't go stale when an event is added or removed.
@@ -325,7 +373,7 @@ async function build() {
     closing: n.closing,
   };
 
-  return {
+  const site = {
     // pyramidShort: the word inside the pyramid's top triangle ("Pro" unless the editor set one).
     home, pro: { ...proTier, pyramidShort: proTier.pyramidShort?.trim() || 'Pro' }, network,
     // Search and sharing for the main pages (programs, regions and adult leagues carry their own).
@@ -385,4 +433,5 @@ async function build() {
     // Today at build time. Islands swap in the visitor's date after they load.
     builtOn,
   };
+  return { site, eventPages };
 }

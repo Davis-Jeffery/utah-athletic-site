@@ -115,10 +115,36 @@ const futuresSession = z.object({
   classes: z.array(z.object({ date: isoDate, startTime: hhmm, endTime: hhmm, note: z.string().optional() })).default([]),
 });
 const hex = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+const fee = z.object({ label: z.string(), price: z.number(), note: opt });
+const eventSession = z.object({
+  _key: z.string(), label: opt, logo: image.optional(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate, full: z.boolean().default(false),
+  location: z.string(), place, format: opt, ages: opt, fees: z.array(fee).default([]), note: opt,
+  registerUrl: webUrl.optional(), scheduleUrl: webUrl.optional(), resultsUrl: webUrl.optional(),
+});
+const file = z.object({ asset: ref });
 const event = z.object({
-  _id: z.string(), name: z.string(), tagline: z.string(), start: isoDate, end: isoDate, regOpen: isoDate, regClose: isoDate,
-  location: z.string(), place, format: z.string(), ages: z.string(), url: webUrl, logo: image.optional(),
-  brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex }),
+  _id: z.string(), name: z.string(), tagline: z.string(), page: z.enum(['link', 'hosted']).default('link'),
+  url: webUrl.optional(), slug: z.object({ current: z.string().regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers and dashes') }).optional(),
+  format: opt, ages: opt, sessions: z.array(eventSession).default([]),
+  // Before sessions, the dates and place were on the event itself; read as its one session until it's resaved.
+  start: isoDate.optional(), end: isoDate.optional(), regOpen: isoDate.optional(), regClose: isoDate.optional(), location: opt, place,
+  logo: image.optional(), brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex, accent2: hex.optional() }),
+  // Hosted page (Page and Rules tabs).
+  hide, sectionOrder: order, seo,
+  hero: z.object({ logo: image.optional(), heading: opt, headingAccent: opt, intro: opt, photo: image.optional(), video: file.optional() }).prefault({}),
+  about: z.object({ heading: opt, body: opt, photo: image.optional(), video: file.optional() }).prefault({}),
+  video: z.object({ heading: opt, url: webUrl.optional(), caption: opt }).prefault({}),
+  highlights: z.object({ heading: opt, photos: z.array(keyedImage.extend({ caption: opt })).default([]) }).prefault({}),
+  sponsors: z.object({ heading: opt, intro: opt, pitch: opt, list: z.array(z.object({ name: z.string(), logo: image.optional(), url: webUrl.optional() })).default([]) }).prefault({}),
+  travel: z.object({ heading: opt, intro: opt, list: z.array(z.object({ name: z.string(), detail: opt, url: webUrl.optional() })).default([]) }).prefault({}),
+  faqs: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
+  after: z.object({ heading: opt, body: opt }).prefault({}),
+  sessionsHeading: opt, stats: z.array(z.object({ value: z.string(), label: opt })).default([]),
+  rulesIntro: opt, rules: z.array(z.object({ heading: z.string(), items: z.array(z.string()).default([]) })).default([]), rulesFile: file.optional(),
+}).superRefine((e, ctx) => {
+  if (e.page === 'hosted' && !e.slug) ctx.addIssue({ code: 'custom', path: ['slug'], message: 'A hosted page needs a web address' });
+  if (e.page === 'link' && !e.url) ctx.addIssue({ code: 'custom', path: ['url'], message: 'Add the event website, or host its page here' });
+  if (!e.sessions.length && !(e.start && e.end && e.regOpen && e.regClose && e.location)) ctx.addIssue({ code: 'custom', path: ['sessions'], message: 'Add a session' });
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });
 const heading = { heading: z.string(), headingAccent: opt };
@@ -236,6 +262,16 @@ export async function fetchContent(): Promise<Docs> {
   }
   if (problems.length) throw new Error(`Sanity content doesn't match what the site needs:\n${problems.join('\n')}`);
   return out;
+}
+
+// ---------- files ----------
+
+/** CDN address of an uploaded file (video, PDF): "file-<id>-<ext>" becomes .../files/<project>/<dataset>/<id>.<ext>. */
+export function fileUrl(f: z.infer<typeof file> | undefined): string | undefined {
+  const m = f?.asset._ref.match(/^file-([a-f0-9]+)-(\w+)$/);
+  if (!m) return undefined;
+  const { projectId, dataset } = sanity.config();
+  return `https://cdn.sanity.io/files/${projectId}/${dataset}/${m[1]}.${m[2]}`;
 }
 
 // ---------- images ----------
