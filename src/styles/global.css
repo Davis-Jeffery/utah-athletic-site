@@ -404,6 +404,9 @@ select.ua-input{padding:8px 10px}
 .hv-ev:hover { background: color-mix(in srgb, var(--ev-accent) 18%, rgba(17,19,24,.45)) !important; }
 .hv-ev-solid:hover { filter: brightness(1.1); }
 @media (prefers-reduced-motion: reduce) { .ev-hero-video { display: none; } }
+
+/* Session cards (RegionTab.jsx SessionCard): on phones the price and button wrap under the details, left aligned. */
+@media (max-width: 560px) { .ua-sess-price { align-items: flex-start !important; } .ua-sess-price > span { align-self: flex-start !important; } }
 /* Hosted event hero: the registration card stacks on phones; from 720px its details sit beside Register. */
 .ev-hero-cta { grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 720px) { .ev-hero-cta { grid-template-columns: minmax(0, 1fr) auto; } }
