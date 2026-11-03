@@ -2,8 +2,9 @@
 // Overview tab: who it's for, development model, competition, season, week, comparison,
 // leadership and regions. Region tabs render RegionTab.
 import React from 'react';
+import { MapPin } from '@phosphor-icons/react';
 import { ORDER, PATHWAY, PYRAMID_POINTS as PTS, REGION_ORDER, NO_COACH_LIST } from '../../data/site';
-import { tryoutsFor, money, sessionLabel } from '../../lib/schedule';
+import { tryoutsFor, money, sessionLabel, priceOn, lowestPrice, earlyNote, fmtDay } from '../../lib/schedule';
 import { ACC, Kicker, SectionHead, Rule } from '../ui.jsx';
 import { RegionMenu } from '../SiteHeader.jsx';
 import DevModel from './DevModel.jsx';
@@ -31,8 +32,10 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
   // On a region tab the ages and price follow that region (Studio > Programs > Regions).
   const rr = region && p.regions[region].status === 'active' ? p.regions[region] : null;
   const ages = rr ? rr.ages : p.ages;
-  const price = rr ? rr.price : { cost: p.cost, from: p.costFrom };
+  // The lowest price on the visitor's date, with the early bird's end date and regular price when it applies.
+  const price = lowestPrice((rr ? rr.price : p.price)?.items, today);
   const investment = price ? (price.from ? 'From ' : '') + money(price.cost) + (p.unit === 'per year' ? ' / year' : ' / season') : 'To be announced';
+  const investmentNote = earlyNote(price);
   const status = en ? {
     label: en.label,
     next: p.enrollment === 'trial' ? p.nextTryout : firstTryout ? firstTryout.when : 'To be announced',
@@ -40,8 +43,9 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
   } : null;
   // Rec and Futures list every region's open sessions in the hero; with none open it shows the program facts.
   const regionLabel = (k) => data.regions.find((r) => r.id === k)?.label ?? k;
-  const openSessions = p.id === 'futures' || p.id === 'rec'
-    ? data.sessions.filter((s) => s.program === p.id && s.end >= today && sessionLabel(s, today).canJoin)
+  // Recreation and Futures: the sessions still to come (on a region tab, that region's), at the top of the page.
+  const heroSessions = p.kind === 'season'
+    ? data.sessions.filter((s) => s.program === p.id && s.end >= today && (!rr || s.region === region))
       .sort((a, b) => a.start.localeCompare(b.start) || a.region.localeCompare(b.region))
     : [];
 
@@ -90,30 +94,15 @@ export default function ProgramPage({ data, program: p, region, today, mounted, 
                 <StatusCell k="Tryout registration">{status.reg}</StatusCell>
                 <button type="button" onClick={onJoin} className="hv-t26" style={{ flex: '1 1 220px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', minHeight: '64px', padding: '16px 20px', border: 0, background: 'rgba(120,183,179,.16)', color: '#b5e1dd', font: '500 16px/1.2 var(--font-body)', textAlign: 'left', transition: 'background .2s' }}>{en.cta}<span style={{ fontSize: '20px' }}>→</span></button>
               </div>
-            ) : openSessions.length ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>
-                <span style={{ padding: '12px 18px', background: 'rgba(27,29,36,.92)', fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Registration open</span>
-                {openSessions.map((s) => (
-                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px 20px', padding: '14px 18px', background: 'rgba(27,29,36,.92)' }}>
-                    <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
-                      <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{s.name} · {regionLabel(s.region)}</span>
-                      <span style={{ fontSize: '13px', color: 'var(--color-neutral-400)' }}>
-                        {[s.ages, s.dates].filter(Boolean).join(' · ')}
-                        {s.venueName ? <> · <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" title={`Directions to ${s.venueName}`} style={{ color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '3px' }}>{s.venueName}</a></> : null}
-                        {' · '}{sessionLabel(s, today).text}
-                      </span>
-                    </div>
-                    <span style={{ flex: 'none', font: '500 20px/1 var(--font-heading)', letterSpacing: '-.02em' }}>{money(s.cost)}</span>
-                    <a href={s.url} {...(/^https?:/.test(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 16px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 14px/1 var(--font-body)' }}>Register →</a>
-                  </div>
-                ))}
-              </div>
+            ) : p.kind === 'season' ? (
+              <HeroSessions list={heroSessions} region={rr ? region : null} regionLabel={regionLabel} today={today} contactHref={`/contact/?program=${p.id}${rr ? `&region=${region}` : ''}`} onPick={(s) => onRegion(s.region, `session-${s.id}`)} />
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '1px', marginTop: '10px', borderRadius: '10px', overflow: 'hidden', background: 'var(--color-divider)' }}>
-                {[['Ages', ages], ['Competes in', p.line], ['Investment', investment], ['Training', p.commit]].map(([k, v]) => (
+                {[['Ages', ages], ['Competes in', p.line], ['Investment', investment, investmentNote], ['Training', p.commit]].map(([k, v, note]) => (
                   <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 18px', background: 'rgba(27,29,36,.92)' }}>
                     <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>{k}</span>
                     <span style={{ font: '500 20px/1.2 var(--font-heading)', letterSpacing: '-.02em' }}>{v}</span>
+                    {note ? <span style={{ fontSize: '12px', color: 'var(--color-accent-300)' }}>{note}</span> : null}
                   </div>
                 ))}
               </div>
@@ -186,7 +175,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
   // nothing to show; the development model also follows Site-wide components. Numbers follow the
   // sections shown.
   const on = (k) => !p.hide.includes(k);
-  const has = { dev: p.showDev, season: p.phases.length > 0 };
+  const has = { dev: p.showDev, season: p.phases.length > 0, formats: !!p.formats };
   const order = orderOf('program', p.order).filter((k) => on(k) && has[k] !== false);
   // Whether section `k` comes straight after `before` (spacing depends on it).
   const follows = (k, before) => order[order.indexOf(k) - 1] === before;
@@ -271,7 +260,11 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
             );
           })}
         </div>
-        {p.formats ? <RecFormats formats={p.formats} /> : null}
+      </section>
+    ),
+    formats: () => (
+      <section id="sec-formats" style={{ padding: '64px 0' }}>
+        <RecFormats formats={p.formats} kicker={`${num('formats')} · Competition`} />
       </section>
     ),
     season: () => <Season p={p} kicker={`${num('season')} · The year`} />,
@@ -320,7 +313,7 @@ function Overview({ data, p, P, status, ctaLabel, mounted, onJoin, onSwitch, onR
         {/* The map needs at least one pin (Studio > Programs > Map pins). */}
         {!p.mapHubs.length ? null : mounted ? (
           <React.Suspense fallback={<div className="uamap-placeholder" />}>
-            <UtahMap key={p.id} program={p.id} hubs={p.mapHubs} />
+            <UtahMap key={p.id} program={p.id} hubs={p.mapHubs} counties={p.mapCounties} />
           </React.Suspense>
         ) : <div className="uamap-placeholder" />}
       </section>
@@ -357,5 +350,45 @@ function Fees({ p, kicker }) {
         {p.fees.notIncluded.length ? list('Not included in the fee', p.fees.notIncluded, 'var(--color-error)', 'var(--color-error)') : null}
       </div>
     </>
+  );
+}
+
+// Recreation and Futures, top of the page: each session still to come (region, name, dates, price and
+// status, Full in red). A card opens its region tab at that session, where families sign up.
+function HeroSessions({ list, region, regionLabel, today, contactHref, onPick }) {
+  if (!list.length) return (
+    <p style={{ margin: '10px 0 0', maxWidth: '560px', padding: '16px 18px', borderRadius: '10px', background: 'rgba(27,29,36,.92)', fontSize: '15px', color: 'var(--color-neutral-300)' }}>
+      New sessions are posted here as soon as their dates are set. <a href={contactHref} className="hv-link" style={{ color: ACC }}>Questions? Contact us →</a>
+    </p>
+  );
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+      <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>Upcoming sessions{region ? ` in ${regionLabel(region)}` : ''}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,270px),1fr))', gap: '10px' }}>
+        {list.map((s) => {
+          const l = sessionLabel(s, today), x = priceOn(s, today), full = l.status === 'full';
+          return (
+            <button key={s.id} type="button" onClick={() => onPick(s)} className="hv-lift-sm" style={{ all: 'unset', boxSizing: 'border-box', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 18px', borderRadius: '12px', background: 'rgba(27,29,36,.92)', backdropFilter: 'blur(10px)', boxShadow: full ? '0 0 0 1px var(--color-alert)' : l.canJoin ? '0 0 0 1px var(--color-accent-800)' : 'inset 0 0 0 1px var(--color-divider)', transition: 'box-shadow .25s,transform .25s' }}>
+              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-neutral-300)' }}><MapPin size={14} weight="fill" color={ACC} aria-hidden="true" />{regionLabel(s.region)}</span>
+                <span style={{ fontWeight: full ? 700 : 400, color: full ? 'var(--color-alert)' : l.canJoin ? ACC : 'var(--color-neutral-400)' }}>{full ? 'Full' : l.canJoin ? 'Open' : l.status === 'upcoming' ? `Opens ${fmtDay(s.opens)}` : l.text}</span>
+              </span>
+              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px' }}>
+                <span style={{ font: '500 20px/1.15 var(--font-heading)', letterSpacing: '-.02em' }}>{s.name}</span>
+                <span style={{ flex: 'none', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                  {x.regular != null && !full ? <s style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{money(x.regular)}</s> : null}
+                  <span style={{ font: '500 26px/1 var(--font-heading)', letterSpacing: '-.03em', color: full ? 'var(--color-neutral-400)' : ACC }}>{money(x.cost)}</span>
+                </span>
+              </span>
+              <span style={{ fontSize: '13px', color: 'var(--color-neutral-300)' }}>{[s.ages, s.dates].filter(Boolean).join(' · ')}</span>
+              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+                <span style={{ color: 'var(--color-accent-300)' }}>{x.ends && !full ? `Early bird until ${fmtDay(x.ends)}` : ''}</span>
+                <span style={{ color: ACC }}>{full ? 'Details →' : 'Sign up →'}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

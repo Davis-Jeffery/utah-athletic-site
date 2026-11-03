@@ -3,7 +3,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { ClockIcon } from '@sanity/icons/Clock';
 import { SunIcon } from '@sanity/icons/Sun';
-import { AGE_OPTIONS, REGION_OPTIONS, TIME_OPTIONS, fmtTime, link, str } from './helpers';
+import { AGE_OPTIONS, REGION_OPTIONS, TIME_OPTIONS, earlyBird, fmtTime, link, str } from './helpers';
 
 const label = (opts: { title: string; value: unknown }[], v: unknown) => opts.find((o) => o.value === v)?.title ?? '';
 const date = (name: string, title: string, description?: string, after?: [string, string]) =>
@@ -42,7 +42,9 @@ function sessionType(o: { name: string; title: string; program: string; icon: ty
           return typeof min === 'number' && typeof max === 'number' && max < min ? 'Must be the same as or older than the youngest.' : true;
         }),
       }),
-      defineField({ name: 'cost', title: 'Cost ($)', type: 'number', validation: (r) => r.required().min(0) }),
+      defineField({ name: 'cost', title: o.classes ? 'Cost ($)' : 'Regular price ($)', type: 'number', validation: (r) => r.required().min(0) }),
+      // Early bird: Recreation only (Futures charges its one price at checkout).
+      ...(o.classes ? [] : earlyBird()),
       date('registrationOpens', 'Registration opens'),
       date('registrationCloses', 'Registration closes', undefined, ['registrationOpens', 'open date']),
       date('start', o.classes ? 'First class' : 'Season starts'),

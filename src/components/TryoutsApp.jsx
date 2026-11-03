@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { MapPin, CalendarBlank, Clock, Backpack, CalendarX, UserCircle, Check } from '@phosphor-icons/react';
 import { ORDER, REGION_ORDER } from '../data/site';
 import { orderOf } from '../../studio/shared/sections';
-import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money } from '../lib/schedule';
+import { fmtDate, tryoutsFor, readRegion, rememberRegion, sessionsFor, sessionLabel, money, priceOn, fmtDay } from '../lib/schedule';
 import { ACC, Field, ClassList, FormGuard, useSubmit, useToday } from './ui.jsx';
 
 const LEVELS = [['', 'All levels'], ...ORDER.map((k) => [k, null])];
@@ -178,7 +178,7 @@ export default function TryoutsApp({ data }) {
                           <span style={{ fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent-300)' }}>{s.place ? `${s.place} · ` : ''}{s.ages}</span>
                         </span>
                         <span style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'var(--color-neutral-300)' }}>
-                          <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />{s.dates} · {money(s.cost)}</span>
+                          <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CalendarBlank color={ACC} aria-hidden="true" />{s.dates} · {(({ cost, regular, ends }) => ends ? `${money(cost)} early bird until ${fmtDay(ends)}, then ${money(regular)}` : money(cost))(priceOn(s, today))}</span>
                           <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'var(--color-neutral-300)' }}><MapPin color={ACC} aria-hidden="true" />{s.venueName}</a>
                           <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><Clock color={ACC} aria-hidden="true" />{l.text}</span>
                         </span>

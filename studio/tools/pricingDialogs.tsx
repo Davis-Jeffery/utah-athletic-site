@@ -13,7 +13,7 @@ export const REGIONS = ['north', 'south', 'west'] as const;
 export type RegionKey = (typeof REGIONS)[number];
 export type AgeTab = { _key: string; minAge: number; maxAge: number; note?: string; prices?: Partial<Record<RegionKey, number>>; included?: unknown[]; notIncluded?: unknown[] };
 export type Session = {
-  _id: string; _type: 'recSession' | 'futuresSession'; name: string; region: RegionKey; start: string; end: string; cost: number;
+  _id: string; _type: 'recSession' | 'futuresSession'; name: string; region: RegionKey; start: string; end: string; cost: number; earlyCost?: number; earlyEnds?: string;
   venue?: string; minAge?: number; maxAge?: number; registrationOpens?: string; registrationCloses?: string; registerUrl?: string; capacity?: number; status?: string;
   classes?: { _key?: string; date: string; startTime: string; endTime: string; note?: string }[];
 };
@@ -168,7 +168,7 @@ export function AgeGroupForm({ program, tab, regions, drafted, unit, onClose, on
 
 // ---------- Recreation (or another program): edit one region fee row ----------
 
-export type Fee = { _key: string; ages: string; cost: number; note?: string };
+export type Fee = { _key: string; ages: string; cost: number; earlyCost?: number; earlyEnds?: string; note?: string };
 
 export function FeeForm({ program, region, regionLabel, fee, drafted, unit, onClose, onDone }: {
   program: { _id: string; name: string }; region: RegionKey; regionLabel: string; fee: Fee; drafted: boolean; unit?: string; onClose: () => void; onDone: () => void;
@@ -177,18 +177,21 @@ export function FeeForm({ program, region, regionLabel, fee, drafted, unit, onCl
   const toast = useToast();
   const [ages, setAges] = useState(fee.ages);
   const [cost, setCost] = useState(String(fee.cost ?? ''));
+  const [early, setEarly] = useState(fee.earlyCost != null ? String(fee.earlyCost) : '');
+  const [earlyEnds, setEarlyEnds] = useState(fee.earlyEnds ?? '');
   const [note, setNote] = useState(fee.note ?? '');
   const [busy, setBusy] = useState(false);
   const problems = [
     ...(!ages.trim() ? ['Enter the age group, e.g. "U9 to U12" or "All ages".'] : []),
     ...(ages.includes('—') || note.includes('—') ? ['No em dashes. Use a period, comma or colon instead.'] : []),
     ...(!(cost.trim() && Number(cost) >= 0) ? ['Enter a price.'] : []),
+    ...earlyProblems(cost, early, earlyEnds),
   ];
   const save = async () => {
     setBusy(true);
     try {
       const tx = client.transaction();
-      const row = { _key: fee._key, _type: 'fee', ages: ages.trim(), cost: Number(cost), ...(note.trim() ? { note: note.trim() } : {}) };
+      const row = { _key: fee._key, _type: 'fee', ages: ages.trim(), cost: Number(cost), ...(early.trim() ? { earlyCost: Number(early), earlyEnds } : {}), ...(note.trim() ? { note: note.trim() } : {}) };
       for (const id of ids(program._id, drafted)) tx.patch(id, (p) => p.set({ [`${region}.fees[_key=="${fee._key}"]`]: row }));
       await tx.commit({ visibility: 'sync' });
       toast.push({ status: 'success', title: 'Saved', description: 'The website updates in a few minutes.' });
@@ -204,12 +207,33 @@ export function FeeForm({ program, region, regionLabel, fee, drafted, unit, onCl
       <Box padding={4}>
         <Stack gap={4}>
           <Field label="Age group" hint={'e.g. "U9 to U12" or "All ages".'}><TextInput value={ages} onChange={(e) => setAges(e.currentTarget.value)} /></Field>
-          <Field label="Price ($)" hint={unit ? `Billed ${unit}.` : undefined}><TextInput inputMode="decimal" value={cost} onChange={(e) => setCost(e.currentTarget.value)} /></Field>
+          <Field label="Regular price ($)" hint={unit ? `Billed ${unit}.` : undefined}><TextInput inputMode="decimal" value={cost} onChange={(e) => setCost(e.currentTarget.value)} /></Field>
+          <EarlyFields early={early} ends={earlyEnds} onEarly={setEarly} onEnds={setEarlyEnds} />
           <Field label="Note (optional)" hint={'e.g. "Tooele and Stansbury Park".'}><TextInput value={note} onChange={(e) => setNote(e.currentTarget.value)} /></Field>
           <Problems list={problems} />
         </Stack>
       </Box>
     </Dialog>
+  );
+}
+
+// ---------- Early bird (Recreation fees and sessions) ----------
+
+// Problems with an early bird price: both fields or neither, and less than the regular price.
+function earlyProblems(cost: string, early: string, ends: string) {
+  if (!early.trim() && !ends) return [];
+  if (!early.trim()) return ['Enter the early bird price, or clear its end date.'];
+  if (!(Number(early) >= 0)) return ['The early bird price isn\'t a price.'];
+  if (!ends) return ['Pick the last day of the early bird price.'];
+  return Number(early) >= Number(cost) ? ['The early bird price must be less than the regular price.'] : [];
+}
+
+function EarlyFields({ early, ends, onEarly, onEnds }: { early: string; ends: string; onEarly: (v: string) => void; onEnds: (v: string) => void }) {
+  return (
+    <Cols>
+      <Field label="Early bird price ($, optional)" hint="Shown with the regular price struck through."><TextInput inputMode="decimal" value={early} onChange={(e) => onEarly(e.currentTarget.value)} /></Field>
+      <Field label="Early bird ends" hint="Its last day. The regular price shows after."><TextInput type="date" value={ends} onChange={(e) => onEnds(e.currentTarget.value)} /></Field>
+    </Cols>
   );
 }
 
@@ -235,7 +259,7 @@ export function SessionForm({ kind, from, editing, drafted, regions, venues, onC
   const first = base?.classes?.[0];
   const [f, setF] = useState({
     name: editing?.name ?? '', region: base?.region ?? '', venue: base?.venue ?? '', minAge: base?.minAge != null ? String(base.minAge) : '', maxAge: base?.maxAge != null ? String(base.maxAge) : '',
-    cost: base?.cost != null ? String(base.cost) : '', registrationOpens: editing?.registrationOpens ?? '', registrationCloses: editing?.registrationCloses ?? '',
+    cost: base?.cost != null ? String(base.cost) : '', earlyCost: base?.earlyCost != null ? String(base.earlyCost) : '', earlyEnds: editing?.earlyEnds ?? '', registrationOpens: editing?.registrationOpens ?? '', registrationCloses: editing?.registrationCloses ?? '',
     start: editing?.start ?? '', end: editing?.end ?? '', status: editing?.status ?? 'auto',
     registerUrl: base?.registerUrl ?? '', capacity: base?.capacity != null ? String(base.capacity) : '',
     // Futures "add weekly classes": day and times (copied from the first class of the session it copies) and a date range.
@@ -270,6 +294,7 @@ export function SessionForm({ kind, from, editing, drafted, regions, venues, onC
     ...(!f.region ? ['Pick a region.'] : []),
     ...(!f.venue ? ['Pick a venue.'] : []),
     ...(!(f.cost.trim() && Number(f.cost) >= 0) ? ['Enter a price.'] : []),
+    ...(futures ? [] : earlyProblems(f.cost, f.earlyCost, f.earlyEnds)),
     ...(!f.registrationOpens || !f.registrationCloses ? ['Fill in when registration opens and closes.'] : []),
     ...(f.registrationOpens && f.registrationCloses && f.registrationCloses < f.registrationOpens ? ['Registration must close on or after it opens.'] : []),
     ...(futures
@@ -297,12 +322,13 @@ export function SessionForm({ kind, from, editing, drafted, regions, venues, onC
         cost: Number(f.cost), registrationOpens: f.registrationOpens, registrationCloses: f.registrationCloses, start, end, status: f.status,
         ...(f.minAge ? { minAge: Number(f.minAge), maxAge: Number(f.maxAge) } : {}),
         ...(!futures && f.registerUrl.trim() ? { registerUrl: f.registerUrl.trim() } : {}),
+        ...(!futures && f.earlyCost.trim() ? { earlyCost: Number(f.earlyCost), earlyEnds: f.earlyEnds } : {}),
         ...(futures && f.capacity.trim() ? { capacity: Number(f.capacity) } : {}),
         ...(futures ? { classes: sorted.map(({ _key, date, startTime, endTime, note }) => ({ _key, _type: 'class', date, startTime, endTime, ...(note.trim() ? { note: note.trim() } : {}) })) } : {}),
       };
       if (editing) {
         // Optional fields left empty are cleared.
-        const cleared = [...(f.minAge ? [] : ['minAge', 'maxAge']), ...(futures ? (f.capacity.trim() ? [] : ['capacity']) : (f.registerUrl.trim() ? [] : ['registerUrl']))];
+        const cleared = [...(f.minAge ? [] : ['minAge', 'maxAge']), ...(futures ? (f.capacity.trim() ? [] : ['capacity']) : [...(f.registerUrl.trim() ? [] : ['registerUrl']), ...(f.earlyCost.trim() ? [] : ['earlyCost', 'earlyEnds'])])];
         const tx = client.transaction();
         for (const id of ids(editing._id, drafted)) tx.patch(id, (p) => p.set(fields).unset(cleared));
         await tx.commit({ visibility: 'sync' });
@@ -333,10 +359,11 @@ export function SessionForm({ kind, from, editing, drafted, regions, venues, onC
             <Field label="Venue" hint="Not listed? Add it under Venues first."><Select value={f.venue} onChange={set('venue')}><option value="">Pick</option>{venues.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select></Field>
           </Cols>
           <Cols>
-            <Field label="Price ($)"><TextInput inputMode="decimal" value={f.cost} onChange={set('cost')} /></Field>
+            <Field label={futures ? 'Price ($)' : 'Regular price ($)'}><TextInput inputMode="decimal" value={f.cost} onChange={set('cost')} /></Field>
             <Field label="Youngest">{ageSelect('minAge')}</Field>
             <Field label="Oldest">{ageSelect('maxAge')}</Field>
           </Cols>
+          {futures ? null : <EarlyFields early={f.earlyCost} ends={f.earlyEnds} onEarly={(v) => setF((x) => ({ ...x, earlyCost: v }))} onEnds={(v) => setF((x) => ({ ...x, earlyEnds: v }))} />}
           <Cols>
             <Field label="Registration opens"><TextInput type="date" value={f.registrationOpens} onChange={set('registrationOpens')} /></Field>
             <Field label="Registration closes"><TextInput type="date" value={f.registrationCloses} onChange={set('registrationCloses')} /></Field>

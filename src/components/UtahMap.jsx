@@ -15,7 +15,8 @@ import '../styles/utah-map.css';
 const W = 800, H = 640;
 let uid = 0;
 
-export default function UtahMap({ program = 'academy', hubs = [] }) {
+export default function UtahMap({ program = 'academy', hubs = [], counties = [] }) {
+  const shaded = counties.length ? counties : SERVICE_COUNTIES;
   const svgRef = useRef(null);
   const api = useRef({});
   const [ids] = useState(() => { uid += 1; return { glow: `uamGlow${uid}`, clip: `uamSvc${uid}`, list: `uamCities${uid}` }; });
@@ -27,16 +28,18 @@ export default function UtahMap({ program = 'academy', hubs = [] }) {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
 
-  // Assign every city to its nearest hub (in projected space, as the design does).
+  // Assign every city to the hub that lists it (Towns it serves), else its nearest hub (in projected space, as the design does).
   const proj = geoMercator().fitExtent([[60, 40], [W - 60, H - 40]], GEO.utah);
   const sp = sites.map((s) => proj(s.ll));
   const cities = CITIES.map(([name, lon, lat]) => {
     const p = proj([lon, lat]);
+    const listed = sites.find((s) => s.serves?.includes(name));
+    if (listed) return { name, ll: [lon, lat], site: listed };
     let bi = 0, bd = Infinity;
     sp.forEach((q, i) => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < bd) { bd = d; bi = i; } });
     return { name, ll: [lon, lat], site: sites[bi] };
   });
-  sites.forEach((s) => { s.serves = cities.filter((c) => c.site.id === s.id).map((c) => c.name); });
+  sites.forEach((s) => { s.listed = !!s.serves?.length; s.serves = s.listed ? s.serves : cities.filter((c) => c.site.id === s.id).map((c) => c.name); });
 
   useEffect(() => {
     const svg = select(svgRef.current);
@@ -52,7 +55,7 @@ export default function UtahMap({ program = 'academy', hubs = [] }) {
     world.append('g').selectAll('path').data(GEO.neighbors).join('path')
       .attr('d', path).attr('fill', '#14161b').attr('stroke', 'rgba(233,233,237,.05)').attr('vector-effect', 'non-scaling-stroke');
     world.append('path').datum(GEO.utah).attr('d', path).attr('fill', '#1d2027');
-    const service = GEO.counties.filter((f) => SERVICE_COUNTIES.includes(f.id));
+    const service = GEO.counties.filter((f) => shaded.includes(f.id));
     const clip = defs.append('clipPath').attr('id', ids.clip);
     service.forEach((f) => clip.append('path').attr('d', path(f)));
     const vor = sites.length > 1 ? Delaunay.from(sp).voronoi([-400, -400, W + 400, H + 400]) : null;
@@ -196,8 +199,9 @@ export default function UtahMap({ program = 'academy', hubs = [] }) {
             </div>
           </div>
           {sites.map((s) => {
-            const shown = s.serves.filter((n) => !s.city.includes(n)).slice(0, 5);
-            const more = s.serves.length - shown.length - (s.serves.some((n) => s.city.includes(n)) ? 1 : 0);
+            // A pin's own list shows in full; the nearest towns show five and a count.
+            const shown = s.listed ? s.serves : s.serves.filter((n) => !s.city.includes(n)).slice(0, 5);
+            const more = s.listed ? 0 : s.serves.length - shown.length - (s.serves.some((n) => s.city.includes(n)) ? 1 : 0);
             return (
               <button key={s.id} className={`uamap-site${active === s.id ? ' on' : ''}`}
                 onClick={() => api.current.focusSite(s.id)} onMouseEnter={() => setHover(s.id)} onMouseLeave={() => setHover(null)}>

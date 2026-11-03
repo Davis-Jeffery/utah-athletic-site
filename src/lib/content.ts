@@ -139,9 +139,9 @@ async function build() {
     const tabs = hide ? [] : p.ageTabs.flatMap((t) => (t.prices[k] == null ? [] : [{
       key: t._key, label: fmtAges(t.minAge, t.maxAge), min: t.minAge, max: t.maxAge, cost: t.prices[k]!, note: t.note, included: inRegion(t.included, k), notIncluded: inRegion(t.notIncluded, k),
     }]));
-    // `price`: the lowest price a family pays in this region ("from" when prices differ). From the
-    // age tabs, else the region's Fees by age group, else its sessions (Rec, Futures). Null when
-    // no price is posted yet.
+    // `price`: the prices a family might pay in this region ({ items }; pages show the lowest on the
+    // visitor's date, with any early bird, via lowestPrice in schedule.ts). From the age tabs, else the
+    // region's Fees by age group, else its sessions (Rec, Futures). Null when no price is posted yet.
     const price = hide ? null : p.ageTabs.length ? (tabs.length ? priceOf(tabs) : null) : fees.length ? priceOf(fees)
       : p.kind === 'season' ? sessionPrice(p.key, k) : null;
     // Ages shown on the region's page: the region's own, else the age groups offered here, else the program's.
@@ -162,23 +162,22 @@ async function build() {
       return {
         id: idOf(s._id), program: s.program, region: s.region, name: s.name,
         ages: s.minAge != null && s.maxAge != null ? fmtAges(s.minAge, s.maxAge) : p.ages,
-        cost: s.cost, venueName: v.name, mapUrl: v.mapUrl,
+        cost: s.cost, earlyCost: 'earlyCost' in s ? s.earlyCost ?? null : null, earlyEnds: 'earlyEnds' in s ? s.earlyEnds ?? null : null,
+        venueName: v.name, mapUrl: v.mapUrl,
         opens: s.registrationOpens, closes: s.registrationCloses, start: s.start, end: s.end, dates: fmtRange(s.start, s.end),
-        // Futures registers on the site (Stripe); Recreation uses its own link or the program's Ollie link.
-        status: s.status, url: s.program === 'futures' ? `/futures/register/?session=${idOf(s._id)}` : s.registerUrl ?? p.registerUrl,
+        // Futures registers on the site (Stripe); Recreation uses the session's link, else its region's, else the program's Ollie link.
+        status: s.status, url: s.program === 'futures' ? `/futures/register/?session=${idOf(s._id)}` : s.registerUrl ?? p[s.region].registerUrl ?? p.registerUrl,
         classes: [...s.classes].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
           .map((x) => ({ date: x.date, time: fmtTimeRange(x.startTime, x.endTime), note: x.note })),
       };
     })
     .sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name));
 
-  // Prices for programs priced by session: the lowest price among sessions still running when the
-  // site was built ("from" when they differ), for the program and for each region.
-  const priceOf = (list: { cost: number }[]) => {
-    if (!list.length) return null;
-    const costs = list.map((x) => x.cost);
-    return { cost: Math.min(...costs), from: new Set(costs).size > 1 };
-  };
+  // A set of prices ({ items }), each with any early bird price and end date; null for none. For
+  // programs priced by session, the sessions still running when the site was built.
+  type PriceItem = { cost: number; earlyCost?: number | null; earlyEnds?: string | null };
+  const priceOf = (list: PriceItem[]) =>
+    list.length ? { items: list.map((x) => ({ cost: x.cost, earlyCost: x.earlyCost ?? null, earlyEnds: x.earlyEnds ?? null })) } : null;
   const sessionPrice = (program: string, region?: string) =>
     priceOf(sessions.filter((s) => s.program === program && (!region || s.region === region) && s.end >= builtOn));
 
@@ -191,14 +190,13 @@ async function build() {
     photos: { who: img(p.photos.who, W.section)!, cta: img(p.photos.cta, W.section)!, core: img(p.photos.core, W.section)! },
     tagline: p.tagline, forHead: p.forHead, intro: p.intro,
     leagues: p.leagues.map(({ logo, ...l }) => ({ ...l, logo: img(logo, W.logo, 80) })),
-    // Session programs: the lowest current session price, falling back to the program's own cost.
-    // The lowest price across running regions ("from" when prices differ), falling back to the program's own cost.
-    ...(() => {
+    // The prices across running regions (the overview shows the lowest, "From" when they differ),
+    // falling back to the program's own cost.
+    price: (() => {
+      if (NO_PRICE_LIST.includes(p.key)) return null;
       const keys = (['north', 'south', 'west'] as const).filter((k) => p[k].status === 'active');
-      const prices = keys.map((k) => regionFor(p, k).price).filter((x): x is { cost: number; from: boolean } => !!x);
-      const low = prices.length ? Math.min(...prices.map((x) => x.cost)) : null;
-      if (NO_PRICE_LIST.includes(p.key)) return { cost: null, costFrom: false };
-      return { cost: low ?? p.cost ?? null, costFrom: low != null && (prices.some((x) => x.from) || new Set(prices.map((x) => x.cost)).size > 1) };
+      const items = keys.flatMap((k) => regionFor(p, k).price?.items ?? []);
+      return items.length ? { items } : p.cost != null ? priceOf([{ cost: p.cost }]) : null;
     })(),
     ...(NO_PRICE_LIST.includes(p.key) ? { unit: null, costNote: '', includes: [] } : { unit: p.unit, costNote: p.costNote, includes: p.includes }),
     commit: p.commit, commitNote: p.commitNote,
@@ -237,8 +235,10 @@ async function build() {
       // A place found in the Studio, else the town picked from the list.
       const town = CITIES.find(([name]) => name === h.town);
       const ll: [number, number] | null = h.place?.location ? [h.place.location.lng, h.place.location.lat] : town ? [town[1], town[2]] : null;
-      return ll ? [{ id: h._key, label: h.label, city: h.shownAs || h.place?.name || h.town || '', ll, side: h.side === 'left' ? -1 : 1 }] : [];
+      return ll ? [{ id: h._key, label: h.label, city: h.shownAs || h.place?.name || h.town || '', ll, side: h.side === 'left' ? -1 : 1, serves: h.serves }] : [];
     }),
+    // Counties shaded on the map; empty uses the Wasatch Front (SERVICE_COUNTIES in src/data/locations.ts).
+    mapCounties: p.mapCounties,
     formats: p.formats?.divisions.length ? p.formats : null,
     seo: seoOf(p.seo, {
       title: `${p.name}: ${p.kicker} Youth Soccer in Utah | Utah Athletic`,
@@ -416,7 +416,7 @@ async function build() {
         ga4: ok(m.ga4, /^G-[A-Z0-9]{4,20}$/), pixel: ok(m.metaPixel, /^\d{10,20}$/), ads: ok(m.googleAds, /^AW-\d{6,15}$/), gtm: ok(m.gtm, /^GTM-[A-Z0-9]{4,12}$/),
         labels: { futures: label(m.adsLabels?.futures), trial: label(m.adsLabels?.trial), interest: label(m.adsLabels?.interest), contact: label(m.adsLabels?.contact), ollie: label(m.adsLabels?.ollie) },
         // Sites a "Register" click leaves for (Ollie): every outside registration link in the content.
-        registerHosts: [...new Set([...c.program.map((p) => p.registerUrl), ...c.recSession.map((s) => s.registerUrl), ...c.tryoutSession.map((t) => t.registerUrl)]
+        registerHosts: [...new Set([...c.program.flatMap((p) => [p.registerUrl, p.north.registerUrl, p.south.registerUrl, p.west.registerUrl]), ...c.recSession.map((s) => s.registerUrl), ...c.tryoutSession.map((t) => t.registerUrl)]
           .filter((u): u is string => !!u && /^https?:/.test(u)).map((u) => new URL(u).hostname))],
       };
       return out.ga4 || out.pixel || out.ads || out.gtm ? out : null;

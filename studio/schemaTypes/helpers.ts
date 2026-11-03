@@ -130,3 +130,23 @@ export const pageLayout = (name: string, kind: PageKind, hideField: string, o: {
     components: { input: SectionLayoutInput as never },
     options: { kind, hideField } as object,
   });
+
+/**
+ * Early bird price and the day it ends (Recreation fees and sessions), next to a `cost` field on the same
+ * object. The site shows the early bird price through that day, then the regular price. Both or neither.
+ */
+export const earlyBird = () => [
+  defineField({
+    name: 'earlyCost', title: 'Early bird price ($)', type: 'number',
+    description: 'Optional. Shown with the regular price struck through until the early bird ends.',
+    validation: (r) => r.min(0).custom((v, ctx: any) => {
+      if (v == null) return ctx.parent?.earlyEnds ? 'Add the early bird price, or clear the end date.' : true;
+      return typeof ctx.parent?.cost === 'number' && v >= ctx.parent.cost ? 'Must be less than the regular price.' : true;
+    }),
+  }),
+  defineField({
+    name: 'earlyEnds', title: 'Early bird ends', type: 'date', options: { dateFormat: 'MMM D, YYYY' },
+    description: 'The last day of the early bird price.',
+    validation: (r) => r.custom((v, ctx: any) => (v == null && ctx.parent?.earlyCost != null ? 'Pick the last day of the early bird price.' : true)),
+  }),
+];

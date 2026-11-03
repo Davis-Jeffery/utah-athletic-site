@@ -44,7 +44,7 @@ const people = z.array(z.object({ person: ref, title: z.string().optional() })).
 const staff = z.object({ _id: z.string(), name: z.string(), title: z.string(), bio: z.string().optional(), email: z.string().email().optional(), headshot: image.optional() });
 const regionStatus = z.object({
   status: z.enum(['active', 'soon', 'none']), hub: z.string().optional(), season: z.string().optional(),
-  ages: z.string().optional(), fees: z.array(z.object({ ages: z.string(), cost: z.number(), note: z.string().optional() })).default([]),
+  ages: z.string().optional(), registerUrl: webUrl.optional(), fees: z.array(z.object({ ages: z.string(), cost: z.number(), earlyCost: z.number().optional(), earlyEnds: isoDate.optional(), note: z.string().optional() })).default([]),
   leaders: people, coaches: people,
 });
 const session = z.object({ time: z.string(), label: z.string(), kind: z.enum(['training', 'match']) });
@@ -77,10 +77,11 @@ const program = z.object({
   includedIntro: opt, included: feeItems, notIncluded: feeItems, ageTabs: z.array(ageTab).default([]),
   hide, hideRegion: hide, sectionOrder: order, regionSectionOrder: order,
   leadershipHeading: opt, leadershipIntro: opt, seo,
-  mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: opt, place, shownAs: opt, side: z.enum(['left', 'right']).default('right') })).default([]),
+  mapHubs: z.array(z.object({ _key: z.string(), label: z.string(), town: opt, place, shownAs: opt, serves: z.array(z.string()).default([]), side: z.enum(['left', 'right']).default('right') })).default([]),
+  mapCounties: z.array(z.string()).default([]),
   formats: z.object({
     intro: opt, combining: opt, rules: z.array(z.string()).default([]),
-    divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), roster: opt, referees: opt })).default([]),
+    divisions: z.array(z.object({ division: z.string(), format: z.string(), keepers: z.boolean().default(false), field: opt, goals: opt, ball: z.number().optional(), length: opt, roster: opt, referees: opt })).default([]),
   }).optional(),
   img: image,
   photos: z.object({ who: image, cta: image, core: image }),
@@ -109,7 +110,7 @@ const sessionBase = {
   _id: z.string(), name: z.string(), region: z.enum(['north', 'south', 'west']), venue: ref, minAge: z.number().optional(), maxAge: z.number().optional(),
   cost: z.number(), registrationOpens: isoDate, registrationCloses: isoDate, start: isoDate, end: isoDate, registerUrl: webUrl.optional(),
 };
-const recSession = z.object({ ...sessionBase, status: z.enum(['auto', 'open', 'closed', 'full']).default('auto') });
+const recSession = z.object({ ...sessionBase, earlyCost: z.number().optional(), earlyEnds: isoDate.optional(), status: z.enum(['auto', 'open', 'closed', 'full']).default('auto') });
 const futuresSession = z.object({
   ...sessionBase, capacity: z.number().optional(), status: z.enum(['auto', 'open', 'inseason', 'closed', 'full']).default('auto'),
   classes: z.array(z.object({ date: isoDate, startTime: hhmm, endTime: hhmm, note: z.string().optional() })).default([]),
