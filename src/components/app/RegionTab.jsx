@@ -22,7 +22,8 @@ export default function RegionTab({ program: p, regionId, data, today, onRegion 
   // saved, Futures puts its sign-up first, since it registers online. Hidden sections and ones with
   // nothing to show drop out; section numbers follow the sections shown.
   // Recreation's Sign up section carries what's included, so it has no Fees section.
-  const has = { coach: showCoaches, fee: !isAcademy && p.id !== 'rec' };
+  // Recreation and Futures show their fees on the session cards and what's included in Sign up, so no Fees section.
+  const has = { coach: showCoaches, fee: !isAcademy && p.kind !== 'season' };
   const shown = orderOf('region', p.regionOrder?.length ? p.regionOrder : p.id === 'futures' ? ['try', 'lead', 'coach', 'fee', 'contact'] : [])
     .filter((k) => has[k] !== false && !p.hideRegion.includes(k));
   const num = (s) => String(shown.indexOf(s) + 1).padStart(2, '0');
@@ -254,65 +255,50 @@ function LeadCard({ lead }) {
 
 // 03 · Tryouts: posted dates on the left, the trial application or registration form on the right.
 function Tryouts({ p, rm, data, today, n }) {
-  // Recreation signs up on each region's own registration site: its own section, no form.
-  if (p.id === 'rec') return <RecSignUp p={p} rm={rm} data={data} today={today} n={n} />;
-  const season = p.kind === 'season';
-  const trial = !season && p.enrollment !== 'tryouts';
-  const list = season ? sessionsFor(data, p.id, rm.id, today) : [];
-  const rows = season
-    ? list.map((s) => {
-      const l = sessionLabel(s, today);
-      return { key: s.id, title: `${s.name} · ${s.ages}`, when: `${s.dates} · ${sessionPriceText(s, today)}${l.canJoin ? ` · ${l.text}` : ''}`, where: s.venueName, mapUrl: s.mapUrl, cta: p.id === 'futures' ? 'Register' : 'Sign up', href: s.url, closed: !l.canJoin, status: l.text, classes: s.classes, pick: s.name };
-    })
-    : tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: t.name, when: `${t.when} · ${t.ages} · ${t.players}`, where: t.next.venueName, mapUrl: t.next.mapUrl, cta: 'See days and times', href: `/tryouts/?region=${rm.id}&level=${p.id}`, pick: t.name }));
-  // Nothing posted yet: the register-interest form takes the place of sign-up.
-  const notify = season && !rows.length;
-  // Futures has no form beside its sessions: each session's button opens the registration page.
-  const wide = p.id === 'futures' && !notify;
-  const rd = p.regions[rm.id];
-  const head = trial ? 'Player trial application' : season ? `Sign up in ${rm.label}` : `Next tryouts in ${rm.label}`;
+  // Recreation and Futures: session cards (price, Sign up or Register, Full) with what's included beside them.
+  if (p.kind === 'season') return <SeasonSignUp p={p} rm={rm} data={data} today={today} n={n} />;
+  const trial = p.enrollment !== 'tryouts';
+  const rows = tryoutsFor(data, { program: p.id, region: rm.id }, today).map((t) => ({ key: t.id, title: t.name, when: `${t.when} · ${t.ages} · ${t.players}`, where: t.next.venueName, mapUrl: t.next.mapUrl, cta: 'See days and times', href: `/tryouts/?region=${rm.id}&level=${p.id}`, pick: t.name }));
+  const head = trial ? 'Player trial application' : `Next tryouts in ${rm.label}`;
   const copy = trial
     ? `Tryout registration opens ${p.registrationOpens}. Until then, apply for a private trial with ${rm.label} staff. We review every application.`
     : p.joinCopy;
   return (
-    <section id="sec-rtry" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: wide ? '1fr' : 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
+    <section id="sec-rtry" style={{ padding: '48px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: '48px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-        <Kicker>{n} · {season ? 'Sign up' : 'Tryouts'}</Kicker>
+        <Kicker>{n} · Tryouts</Kicker>
         <h2 style={{ margin: 0, font: '500 clamp(38px,4.4vw,64px)/1 var(--font-heading)', letterSpacing: '-.04em' }}>{head}</h2>
         <p style={{ margin: 0, maxWidth: '460px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{copy}</p>
         {rows.length ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: wide ? 'none' : '520px' }}>
-            <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>{season ? 'Season sign-up' : 'Posted tryout dates'}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '520px' }}>
+            <span style={{ fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-neutral-500)' }}>Posted tryout dates</span>
             {rows.slice(0, 4).map((r) => (
-              <div key={r.key} id={season ? `session-${r.key}` : undefined} style={{ scrollMarginTop: '150px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 14px', padding: '12px 14px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
+              <div key={r.key} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 14px', padding: '12px 14px', borderRadius: '10px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
                 <span style={{ flex: '1 1 140px', display: 'flex', flexDirection: 'column', gap: '3px' }}><span style={{ font: '500 15px/1.1 var(--font-heading)' }}>{r.title}</span><span style={{ fontSize: '12px', color: 'var(--color-neutral-400)' }}>{r.when}</span></span>
                 <a href={r.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ flex: '1 1 160px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-neutral-300)' }}><MapPin color="#78b7b3" aria-hidden="true" />{r.where}</a>
-                {r.closed
-                  ? <span style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', boxShadow: 'inset 0 0 0 1px var(--color-divider)', color: 'var(--color-neutral-400)', font: '500 13px/1 var(--font-body)' }}>{r.status}</span>
-                  : <a href={r.href || p.registerUrl} {...(isExternal(r.href || p.registerUrl) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 13px/1 var(--font-body)' }}>{r.cta} →</a>}
-                {r.classes?.length ? <ClassList classes={r.classes} /> : null}
+                <a href={r.href} className="hv-t14" style={{ flex: 'none', display: 'flex', alignItems: 'center', minHeight: '44px', padding: '0 14px', borderRadius: '8px', border: '1px solid #78b7b3', color: '#b5e1dd', font: '500 13px/1 var(--font-body)' }}>{r.cta} →</a>
               </div>
             ))}
-            <a href={`/tryouts/?region=${rm.id}&level=${p.id}`} style={{ paddingTop: '4px', fontSize: '13px', color: 'var(--color-accent-300)' }}>All {rm.label} {season ? 'sessions' : 'tryouts & dates'} →</a>
+            <a href={`/tryouts/?region=${rm.id}&level=${p.id}`} style={{ paddingTop: '4px', fontSize: '13px', color: 'var(--color-accent-300)' }}>All {rm.label} tryouts & dates →</a>
           </div>
-        ) : season ? <p style={{ margin: 0, fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rm.label} {p.name} sessions will be posted here soon.</p> : null}
+        ) : null}
       </div>
-      {wide ? null : (
-        <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
-          {notify ? <InterestForm p={p} rm={rm} to={rd.leaders.find((l) => l.email) || { email: data.settings.mainEmail }} title={`${rm.label} ${p.name}`} />
-            : <TrialForm p={p} rm={rm} />}
-        </div>
-      )}
+      <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', alignSelf: 'start' }}>
+        {/* Trial programs take an application; tryout-enrollment programs a request for the posted tryouts. */}
+        {trial ? <TrialForm p={p} rm={rm} /> : <RegisterForm p={p} rm={rm} choices={rows.map((r) => r.pick)} />}
+      </div>
     </section>
   );
 }
 
-// Recreation's Sign up section: every session still to come in the region (price, status and a Sign up
-// button to the registration site, or Full), else a Register button to the region's site; what's
-// included beside it; questions go to the contact page.
-function RecSignUp({ p, rm, data, today, n }) {
+// Recreation and Futures Sign up: every session still to come in the region (the price large, status, and
+// Sign up to Recreation's registration site or Register on Futures' own page, or a red Full), with what's
+// included beside it. With nothing posted, Recreation links to the region's registration site and Futures
+// shows the register-interest form. Questions go to the contact page.
+function SeasonSignUp({ p, rm, data, today, n }) {
   const rd = p.regions[rm.id];
   const list = sessionsFor(data, p.id, rm.id, today);
+  const rec = p.id === 'rec';
   const url = rd.registerUrl || p.registerUrl;
   const included = p.includes.length > 0 || !!p.costNote;
   return (
@@ -323,8 +309,15 @@ function RecSignUp({ p, rm, data, today, n }) {
         {p.joinCopy ? <p style={{ margin: 0, maxWidth: '520px', fontSize: '16px', lineHeight: 1.6, color: 'var(--color-neutral-400)' }}>{p.joinCopy}</p> : null}
         {list.length ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
-            {list.map((s) => <RecSession key={s.id} s={s} today={today} />)}
+            {list.map((s) => <SessionCard key={s.id} s={s} today={today} cta={rec ? 'Sign up' : 'Register'} />)}
           </div>
+        ) : !rec ? (
+          <>
+            <p style={{ margin: 0, fontSize: '15px', color: 'var(--color-neutral-400)' }}>{rm.label} {p.name} sessions will be posted here soon.</p>
+            <div style={{ borderRadius: '14px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+              <InterestForm p={p} rm={rm} to={rd.leaders.find((l) => l.email) || { email: data.settings.mainEmail }} title={`${rm.label} ${p.name}`} />
+            </div>
+          </>
         ) : <a href={url} {...(isExternal(url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-lift-sm" style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '10px', minHeight: '52px', padding: '0 24px', borderRadius: '10px', background: 'var(--color-accent)', color: 'var(--color-bg)', font: '600 16px/1 var(--font-body)', transition: 'transform .2s,box-shadow .2s' }}>Register in {rm.label} <ArrowUpRight aria-hidden="true" /></a>}
         <a href={`/contact/?region=${rm.id}&program=${p.id}`} className="hv-link" style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', minHeight: '44px', fontSize: '14px', color: 'var(--color-neutral-300)', textDecoration: 'underline', textDecorationColor: 'var(--color-neutral-600)', textUnderlineOffset: '4px' }}>Questions? Contact the {rm.label} leaders →</a>
       </div>
@@ -341,9 +334,9 @@ function RecSignUp({ p, rm, data, today, n }) {
   );
 }
 
-// One Recreation session: name, ages, dates and place; the price large (early bird with the regular price
-// struck through); Sign up to the registration site while open, a red Full when the session is full.
-function RecSession({ s, today }) {
+// One session: name, ages, dates and place; the price large (early bird with the regular price struck
+// through); the sign-up button while open, a red Full when the session is full; Futures' classes under it.
+function SessionCard({ s, today, cta }) {
   const l = sessionLabel(s, today), x = priceOn(s, today);
   const full = l.status === 'full';
   return (
@@ -354,7 +347,7 @@ function RecSession({ s, today }) {
         <a href={s.mapUrl} target="_blank" rel="noopener" className="hv-link" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--color-neutral-400)' }}><MapPin color="#78b7b3" aria-hidden="true" />{s.venueName}</a>
         <span style={{ fontSize: '13px', color: full ? 'var(--color-alert)' : 'var(--color-accent-300)' }}>{full ? 'This session is full' : l.text}</span>
       </div>
-      <div style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+      <div className="ua-sess-price" style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
         <span style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
           {x.regular != null ? <s style={{ fontSize: '18px', color: 'var(--color-neutral-500)', fontVariantNumeric: 'tabular-nums' }}>{money(x.regular)}</s> : null}
           <span style={{ font: '500 clamp(36px,3.4vw,48px)/1 var(--font-heading)', letterSpacing: '-.04em', color: full ? 'var(--color-neutral-400)' : 'var(--color-accent)', fontVariantNumeric: 'tabular-nums' }}>{money(x.cost)}</span>
@@ -363,9 +356,10 @@ function RecSession({ s, today }) {
         {full
           ? <span style={{ display: 'inline-flex', alignItems: 'center', minHeight: '46px', padding: '0 20px', borderRadius: '9px', background: 'var(--color-alert)', color: '#fff', font: '700 14px/1 var(--font-body)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Full</span>
           : l.canJoin
-            ? <a href={s.url} {...(isExternal(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-lift-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minHeight: '46px', padding: '0 20px', borderRadius: '9px', background: 'var(--color-accent)', color: 'var(--color-bg)', font: '600 15px/1 var(--font-body)', transition: 'transform .2s,box-shadow .2s' }}>Sign up <ArrowUpRight aria-hidden="true" /></a>
+            ? <a href={s.url} {...(isExternal(s.url) ? { target: '_blank', rel: 'noopener' } : {})} className="hv-lift-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minHeight: '46px', padding: '0 20px', borderRadius: '9px', background: 'var(--color-accent)', color: 'var(--color-bg)', font: '600 15px/1 var(--font-body)', transition: 'transform .2s,box-shadow .2s' }}>{cta} {isExternal(s.url) ? <ArrowUpRight aria-hidden="true" /> : '→'}</a>
             : null}
       </div>
+      {s.classes?.length ? <div style={{ flex: '1 1 100%' }}><ClassList classes={s.classes} /></div> : null}
     </div>
   );
 }
@@ -387,6 +381,35 @@ function TrialForm({ p, rm }) {
       <Field label="Highlight video link"><input className="ua-input" name="video" type="url" placeholder="Optional · YouTube, Veo, Hudl" /></Field>
       <FormGuard error={f.error} />
       <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : 'Submit trial application'}</SubmitButton>
+    </form>
+  );
+}
+
+function RegisterForm({ p, rm, choices }) {
+  const [pick, setPick] = useState(0);
+  const choice = choices[pick] || choices[0];
+  const f = useSubmit({ form: 'register', program: p.id, region: rm.id, session: choice ?? '' });
+  if (f.sent) return <Sent head="Request received." copy={`The ${rm.label} ${p.name} team will email you${choice ? ` about ${choice}` : ''} with next steps.`} again="Submit another" onAgain={f.reset} />;
+  return (
+    <form onSubmit={f.onSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {choices.length ? (
+        <fieldset style={{ border: 0, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <legend style={{ padding: 0, marginBottom: '10px', fontSize: '12px', color: 'var(--color-neutral-400)' }}>{p.sessionLabel}</legend>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '8px' }}>
+            {choices.slice(0, 6).map((c, i) => (
+              <button key={c} type="button" aria-pressed={pick === i} onClick={() => setPick(i)} style={{ all: 'unset', cursor: 'pointer', padding: '13px', borderRadius: '8px', background: pick === i ? 'rgba(120,183,179,.1)' : 'var(--color-bg)', boxShadow: `inset 0 0 0 1px ${pick === i ? '#78b7b3' : 'var(--color-divider)'}`, font: '500 15px/1.2 var(--font-heading)', color: pick === i ? 'var(--color-accent-300)' : 'var(--color-text)', transition: 'all .2s' }}>{c}</button>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
+        <Field label="Player name"><input className="ua-input" name="player" required placeholder="First and last" autoComplete="off" /></Field>
+        <Field label="Age group"><select className="ua-input" name="age">{p.ageGroups.map((y) => <option key={y}>{y}</option>)}</select></Field>
+        <Field label="Parent email"><input className="ua-input" name="email" required type="email" placeholder="you@email.com" autoComplete="email" /></Field>
+        <Field label="Current club"><input className="ua-input" name="club" placeholder="Optional" /></Field>
+      </div>
+      <FormGuard error={f.error} />
+      <SubmitButton busy={f.busy}>{f.busy ? 'Sending…' : <>{p.cta}{choice ? ` · ${choice}` : ''}</>}</SubmitButton>
     </form>
   );
 }
@@ -431,8 +454,3 @@ function EarlyTag({ text, end }) {
   return <span style={{ alignSelf: end ? 'flex-end' : 'flex-start', padding: '5px 10px', borderRadius: '999px', background: 'rgba(120,183,179,.14)', color: 'var(--color-accent-300)', fontSize: '12px', fontWeight: 500 }}>{text}</span>;
 }
 
-// "$140 early bird until Mar 1, then $165", or the regular price.
-function sessionPriceText(s, today) {
-  const x = priceOn(s, today);
-  return x.ends ? `${money(x.cost)} early bird until ${fmtDay(x.ends)}, then ${money(x.regular)}` : money(x.cost);
-}
