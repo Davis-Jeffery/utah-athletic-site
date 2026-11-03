@@ -126,8 +126,6 @@ const event = z.object({
   _id: z.string(), name: z.string(), tagline: z.string(), page: z.enum(['link', 'hosted']).default('link'),
   url: webUrl.optional(), slug: z.object({ current: z.string().regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers and dashes') }).optional(),
   format: opt, ages: opt, sessions: z.array(eventSession).default([]),
-  // Before sessions, the dates and place were on the event itself; read as its one session until it's resaved.
-  start: isoDate.optional(), end: isoDate.optional(), regOpen: isoDate.optional(), regClose: isoDate.optional(), location: opt, place,
   logo: image.optional(), brand: z.object({ bg: hex, bg2: hex, ink: hex, accent: hex, accent2: hex.optional() }),
   // Hosted page (Page and Rules tabs).
   hide, sectionOrder: order, seo,
@@ -144,7 +142,7 @@ const event = z.object({
 }).superRefine((e, ctx) => {
   if (e.page === 'hosted' && !e.slug) ctx.addIssue({ code: 'custom', path: ['slug'], message: 'A hosted page needs a web address' });
   if (e.page === 'link' && !e.url) ctx.addIssue({ code: 'custom', path: ['url'], message: 'Add the event website, or host its page here' });
-  if (!e.sessions.length && !(e.start && e.end && e.regOpen && e.regClose && e.location)) ctx.addIssue({ code: 'custom', path: ['sessions'], message: 'Add a session' });
+  if (!e.sessions.length) ctx.addIssue({ code: 'custom', path: ['sessions'], message: 'Add a session' });
 });
 const pillar = z.object({ tag: z.string(), deep: z.string(), focus: z.array(z.string()).default([]) });
 const heading = { heading: z.string(), headingAccent: opt };

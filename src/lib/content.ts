@@ -311,20 +311,18 @@ async function build() {
   // Tournaments: what cards and the contact form need (`events`, every page), and for hosted events
   // their page content (`eventPages`, only the event pages load it; see loadEventPages).
   const events = c.event.map((ev) => {
-    // Events saved before sessions existed keep their dates on the event: read them as one session.
-    const raw = ev.sessions.length ? ev.sessions : [{ _key: 'main', start: ev.start!, end: ev.end!, regOpen: ev.regOpen!, regClose: ev.regClose!, location: ev.location!, place: ev.place, full: false, fees: [] as { label: string; price: number; note?: string }[] }];
     const page = ev.page === 'hosted' && ev.slug ? `/events/${ev.slug.current}/` : null;
     return {
       id: idOf(ev._id), name: ev.name, tagline: ev.tagline, brand: ev.brand, logo: img(ev.logo, W.section, 80),
       // The card opens the hosted page, else the event's own site.
       href: page ?? ev.url!, hosted: !!page, slug: ev.slug?.current ?? null,
-      sessions: raw.map((s) => ({
-        key: s._key, label: ('label' in s && s.label) || s.start.slice(0, 4), start: s.start, end: s.end, regOpen: s.regOpen, regClose: s.regClose, full: s.full,
-        dates: fmtRange(s.start, s.end), location: s.location, format: ('format' in s && s.format) || ev.format, ages: ('ages' in s && s.ages) || ev.ages,
+      sessions: ev.sessions.map((s) => ({
+        key: s._key, label: s.label || s.start.slice(0, 4), start: s.start, end: s.end, regOpen: s.regOpen, regClose: s.regClose, full: s.full,
+        dates: fmtRange(s.start, s.end), location: s.location, format: s.format || ev.format, ages: s.ages || ev.ages,
         // Directions: to the place found in the Studio, else a search for the Location text.
         mapUrl: directions(s.place?.location ? s.place : { address: s.location }).href, geo: s.place?.location ?? null,
-        fees: s.fees, note: ('note' in s && s.note) || null,
-        registerUrl: ('registerUrl' in s && s.registerUrl) || null, scheduleUrl: ('scheduleUrl' in s && s.scheduleUrl) || null, resultsUrl: ('resultsUrl' in s && s.resultsUrl) || null,
+        fees: s.fees, note: s.note || null,
+        registerUrl: s.registerUrl || null, scheduleUrl: s.scheduleUrl || null, resultsUrl: s.resultsUrl || null,
       })),
     };
   });

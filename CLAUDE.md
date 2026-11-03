@@ -74,5 +74,5 @@ Marketing site for Utah Athletic Soccer Club (utathletic.com). Astro, static out
 - Photos: program heroes for Club, Rec and Futures are still Unsplash-derived; section photos use club photography (`collage-*`). The ECNL badge source is low-res; get a vector.
 - Rec page: formats for U5 to U9 are defined; U10+ still to be decided.
 - Map hubs use nearest-hub zones. Replace with the club's official city-to-hub assignment when available, and pass the matched hub into the join forms.
-- Events moved their dates into `sessions` on 2026-10-29 (`.sanity-import/event-sessions-and-copa.mjs`, which also set up Copa Athletic as the first hosted page). Once this is live, run it with `--cleanup` to clear the old top-level dates, then drop the fallback for them in `sanity.ts` and `content.ts`.
+- Events moved their dates into `sessions` on 2026-10-29 (`.sanity-import/event-sessions-and-copa.mjs`, which also set up Copa Athletic as the first hosted page). The site no longer reads the old top-level dates; once this is live, run it with `--cleanup` to clear them from Sanity.
 - Header links Staff and News from the old design were dropped; add them back to `NAV` in `src/data/site.ts` when those pages exist.
