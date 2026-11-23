@@ -11,7 +11,7 @@ export default function RecFormats({ formats: f, kicker }) {
   const any = (k) => f.divisions.some((d) => d[k]);
   const cols = [
     ['Division', (d) => d.division, { color: 'var(--color-accent)', fontWeight: 500 }],
-    ['Format', (d) => `${d.format}${d.keepers ? ' + keeper' : ', no keepers'}`],
+    ['Format', (d) => `${d.format}${d.keepers ? ' with keeper' : ', no keeper'}`],
     ...(any('field') ? [['Field (ft)', (d) => d.field]] : []),
     ...(any('goals') ? [['Goals (ft)', (d) => d.goals]] : []),
     ...(any('ball') ? [['Ball', (d) => (d.ball ? `Size ${d.ball}` : '')]] : []),
